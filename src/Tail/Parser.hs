@@ -73,7 +73,11 @@ expr = opExpr
 valueExpr :: Parser Exp
 valueExpr = (liftM D $ neg (lexeme float))
         <|> (liftM I $ neg (lexeme decimal))
+        <|> arrayValue
   where neg p = try (withPrefix (char '~') p (\_ y -> -y))
+
+arrayValue :: Parser Exp
+arrayValue = liftM Vc $ brackets (sepBy expr comma)
 
 letExpr :: Parser Exp
 letExpr =
