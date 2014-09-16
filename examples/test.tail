@@ -1,0 +1,2 @@
+let v0:Sh(30) = iotaSh(30) in
+i2d(reduce(addi,0,each(fn v1:[int]0 => addi(5,v1),v0)))

@@ -1,0 +1,1 @@
+i2d(reduce(addi,0,each(fn v0:[int]0 => addi(v0,1000),[300,20])))

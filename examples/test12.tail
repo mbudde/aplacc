@@ -1,0 +1,3 @@
+let v1:[double]2 = reshape([3,2],snoc(each(i2d,iotaSh(5)),0.20)) in
+let v2:[double]2 = transp(v1) in
+reduce(muld,1.00,reduce(maxd,~inf,v2))

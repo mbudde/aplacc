@@ -1,0 +1,4 @@
+let v0:[int]2 = reshape([3,2],iotaSh(5)) in
+let v1:[int]2 = transp(v0) in
+let v6:[int]2 = prod(addi,muli,0,v0,v1) in
+i2d(reduce(muli,1,reduce(addi,0,v6)))

@@ -1,0 +1,3 @@
+let v0:Sh(52) = catSh(iotaSh(30),iotaSh(22)) in
+let v2:[int]1 = cat([1,2,23,3,4,5,344,6,7,7,5],each(fn v1:[int]0 => addi(5,v1),v0)) in
+i2d(reduce(fn v4:[int]0 => fn v5:[int]0 => maxi(v5,v4),0,drop(3,each(fn v3:[int]0 => addi(5,v3),v2))))
