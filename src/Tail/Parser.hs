@@ -123,9 +123,11 @@ arrayType :: Parser Type
 arrayType = liftM2 ArrT (brackets basicType) rank
 
 shapeType :: Parser Type
-shapeType =
-  do symbol "Sh"
-     liftM ShT (parens rank)
+shapeType = shape "Sh" ShT
+        <|> shape "Si" SiT
+        <|> shape "Vi" ViT
+        <?> "shape type"
+  where shape name con = try (symbol name) >> liftM con (parens rank)
 
 rank :: Parser Rank
 rank = (liftM R (lexeme decimal))
