@@ -148,9 +148,9 @@ parseString parser str =
     Left e  -> error $ show e
     Right r -> r
 
-parseFile :: String -> IO ()
+parseFile :: String -> IO Program
 parseFile file =
   do str <- readFile file
      case parse program file str of
        Left e  -> error $ show e
-       Right r -> putStrLn $ show r
+       Right r -> return r

@@ -19,6 +19,7 @@ executable aplacc
   build-depends:     base >= 4.5.0,
                      parsec == 3.1.*,
                      accelerate,
-                     pretty == 1.*
+                     pretty == 1.*,
+                     haskell-src-exts >= 1.15.0
   if flag(static)
     ghc-options:     -static -optc-static -optl-static -optl-pthread
