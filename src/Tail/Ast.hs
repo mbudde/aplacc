@@ -38,3 +38,5 @@ data Exp
   | Fn Ident Type Exp -- Type
   | Vc [Exp] -- Type
   deriving (Show)
+
+type Program = Exp

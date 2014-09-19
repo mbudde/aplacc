@@ -52,12 +52,12 @@ withPrefix pre p f =
        Just x' -> f x' y
        Nothing -> y
 
-program :: Parser [Exp]
+program :: Parser Program
 program =
   do whitespace
-     exprs <- many expr
+     prog <- expr
      eof
-     return exprs
+     return prog
 
 -----------------
 -- Expression
