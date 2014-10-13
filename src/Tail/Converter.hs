@@ -10,7 +10,7 @@ import Tail.Parser (parseFile)
 
 convertFile :: String -> IO ()
 convertFile file = do ast <- parseFile file
-                      putStrLn $ prettyPrint $ convertProgram ast 
+                      putStrLn $ prettyPrint $ convertProgram ast
 
 prettyPrintProgram :: T.Program -> String
 prettyPrintProgram = prettyPrint . convertProgram
@@ -18,27 +18,43 @@ prettyPrintProgram = prettyPrint . convertProgram
 convertProgram :: T.Program -> Module
 convertProgram p =
   Module noLoc (ModuleName "Main") [] Nothing Nothing imports [progSig, prog, main]
-  where imports = [ ImportDecl { importLoc       = noLoc
-                               , importModule    = ModuleName "Data.Array.Accelerate"
-                               , importQualified = True
-                               , importSrc       = False
-                               , importPkg       = Nothing
-                               , importAs        = Just $ ModuleName "Acc"
-                               , importSpecs     = Nothing }
-                  , ImportDecl { importLoc       = noLoc
-                               , importModule    = ModuleName "Data.Array.Accelerate.Interpreter"
-                               , importQualified = False
-                               , importSrc       = False
-                               , importPkg       = Nothing
-                               , importAs        = Nothing
-                               , importSpecs     = Nothing }
-                  , ImportDecl { importLoc       = noLoc
-                               , importModule    = ModuleName "Tail.Primitives"
-                               , importQualified = False
-                               , importSrc       = False
-                               , importPkg       = Nothing
-                               , importAs        = Nothing
-                               , importSpecs     = Nothing }]
+  where imports =
+          [ ImportDecl { importLoc       = noLoc
+                       , importModule    = ModuleName "Prelude"
+                       , importQualified = True
+                       , importSrc       = False
+                       , importPkg       = Nothing
+                       , importAs        = Just $ ModuleName "P"
+                       , importSpecs     = Nothing }
+          , ImportDecl { importLoc       = noLoc
+                       , importModule    = ModuleName "Prelude"
+                       , importQualified = False
+                       , importSrc       = False
+                       , importPkg       = Nothing
+                       , importAs        = Nothing
+                       , importSpecs     = Just (False, map (IAbs . Symbol) ["+", "-", "*", "/"]) }
+          , ImportDecl { importLoc       = noLoc
+                       , importModule    = ModuleName "Data.Array.Accelerate"
+                       , importQualified = True
+                       , importSrc       = False
+                       , importPkg       = Nothing
+                       , importAs        = Just $ ModuleName "Acc"
+                       , importSpecs     = Nothing }
+          , ImportDecl { importLoc       = noLoc
+                       , importModule    = ModuleName "Data.Array.Accelerate.Interpreter"
+                       , importQualified = True
+                       , importSrc       = False
+                       , importPkg       = Nothing
+                       , importAs        = Just $ ModuleName "Backend"
+                       , importSpecs     = Nothing }
+          , ImportDecl { importLoc       = noLoc
+                       , importModule    = ModuleName "Tail.Primitives"
+                       , importQualified = False
+                       , importSrc       = False
+                       , importPkg       = Nothing
+                       , importAs        = Nothing
+                       , importSpecs     = Nothing }
+          ]
         -- Assume result is always scalar double for now
         progSig = TypeSig noLoc [Ident "program"] $ acc (scalar double)
         prog = FunBind $
@@ -47,19 +63,22 @@ convertProgram p =
         main = FunBind $
           [Match noLoc (Ident "main") [] Nothing
                  (UnGuardedRhs $ mainBody) (BDecls [])]
-        mainBody = App (Var $ UnQual $ Ident "print") $
-          App (Var $ UnQual $ Ident "run") (Var $ UnQual $ Ident "program")
+        mainBody = App (Var $ qualPrelude $ Ident "print") $
+          App (Var $ Qual (ModuleName "Backend") $ Ident "run") (Var $ UnQual $ Ident "program")
 
 qualAcc :: Name -> QName
 qualAcc name = Qual (ModuleName "Acc") name
+
+qualPrelude :: Name -> QName
+qualPrelude name = Qual (ModuleName "P") name
 
 acc    = TyApp $ TyCon $ qualAcc $ Ident "Acc"
 scalar = TyApp $ TyCon $ qualAcc $ Ident "Scalar"
 vector = TyApp $ TyCon $ qualAcc $ Ident "Vector"
 array d = TyApp (TyApp (TyCon $ qualAcc $ Ident "Array") d)
 dim n  = TyCon $ qualAcc $ Ident $ "DIM" ++ show n
-int    = TyCon $ UnQual $ Ident "Int"
-double = TyCon $ UnQual $ Ident "Double"
+int    = TyCon $ qualPrelude $ Ident "Int"
+double = TyCon $ qualPrelude $ Ident "Double"
 
 {- qualTailPrim :: Name -> QName -}
 {- qualTailPrim name = Qual (ModuleName "Acc") name -}
@@ -68,13 +87,18 @@ accVar :: String -> Exp
 accVar name = Var $ qualAcc $ Ident name
 
 convertName :: String -> QName
-convertName "addi" = UnQual $ Symbol "+"
-convertName "maxi" = UnQual $ Ident "max"
+convertName "addi" = qualPrelude $ Symbol "+"
+convertName "addd" = qualPrelude $ Symbol "+"
+convertName "muli" = qualPrelude $ Symbol "*"
+convertName "muld" = qualPrelude $ Symbol "*"
+convertName "maxi" = qualPrelude $ Ident "max"
+convertName "maxd" = qualPrelude $ Ident "max"
 convertName s = UnQual $ Ident s
 
 
 convertExp :: T.Exp -> Exp
 convertExp (T.Var name) = Var $ convertName name
+convertExp (T.I i) | i < 0 = NegApp $ Lit $ Int (-i)
 convertExp (T.I i) = Lit $ Int i
 convertExp (T.D d) = Lit $ Frac $ toRational d
 convertExp (T.Let ident typ e1 e2) =
@@ -87,7 +111,9 @@ convertExp (T.Let ident typ e1 e2) =
 convertExp (T.Op name es) = convertOp name es
 convertExp (T.Vc es) =
   App (accVar "use") $
-    foldl App (accVar "fromList") [snocList $ length es, List $ map convertExp es]
+    ExpTypeSig noLoc
+      (foldl App (accVar "fromList") [snocList $ length es, List $ map convertExp es])
+      (vector int)
 convertExp (T.Fn ident typ e) =
   Lambda noLoc [PVar $ Ident ident] (convertExp e)
 
@@ -96,14 +122,10 @@ snocList n = convertInfixAppExp (QVarOp $ qualAcc $ Symbol ":.")
                                 [ Var $ qualAcc $ Ident "Z"
                                 , Lit $ Int $ toInteger n]
 
-convertOp "addi"   = convertInfixApp (QVarOp $ UnQual $ Symbol "+")
-convertOp "cat"    = convertInfixApp (QVarOp $ qualAcc $ Symbol "++")
-convertOp "reduce" = convertApp (accVar "fold")
-convertOp "each"   = convertApp (accVar "map")
-convertOp "drop"   = convertApp (accVar "drop")
-convertOp "catSh"  = convertOp "cat"
-convertOp "iotaSh" = convertOp "iota"
-convertOp name     = convertApp (Var $ convertName name)
+infixOperators = [ "addi", "addd", "muli", "muld" ]
+
+convertOp op | op `elem` infixOperators =  convertInfixApp $ QVarOp $ convertName op
+convertOp name = convertApp (Var $ convertName name)
 
 convertApp :: Exp -> [T.Exp] -> Exp
 convertApp fun args = foldl App fun $ map convertExp args
