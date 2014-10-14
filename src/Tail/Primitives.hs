@@ -75,3 +75,9 @@ cat, catSh :: forall sh e. (Slice sh, Shape sh, Elt e)
     -> Acc (Array (sh :. Int) e)
 cat = (Acc.++)
 catSh = cat
+
+reshape :: (Shape ix, Shape ix', Elt e)
+        => Exp ix
+        -> Acc (Array ix' e)
+        -> Acc (Array ix e)
+reshape = Acc.reshape

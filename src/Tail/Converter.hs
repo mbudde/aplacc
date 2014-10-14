@@ -112,33 +112,38 @@ convertExp (T.Op name es) = convertOp name es
 convertExp (T.Vc es) =
   App (accVar "use") $
     ExpTypeSig noLoc
-      (foldl App (accVar "fromList") [snocList $ length es, List $ map convertExp es])
+      (foldl App (accVar "fromList") [snocList [length es], List $ map convertExp es])
       (vector int)
 convertExp (T.Fn ident typ e) =
   Lambda noLoc [PVar $ Ident ident] (convertExp e)
 
-snocList :: Int -> Exp
-snocList n = convertInfixAppExp (QVarOp $ qualAcc $ Symbol ":.")
-                                [ Var $ qualAcc $ Ident "Z"
-                                , Lit $ Int $ toInteger n]
+snocList :: (Integral a) => [a] -> Exp
+snocList ns = convertInfixApp (QVarOp $ qualAcc $ Symbol ":.") $
+                [ Var $ qualAcc $ Ident "Z" ] ++ map (\n -> Lit $ Int $ toInteger n) ns
 
 infixOperators = [ "addi", "addd", "muli", "muld" ]
 
-convertOp op | op `elem` infixOperators =  convertInfixApp $ QVarOp $ convertName op
-convertOp name = convertApp (Var $ convertName name)
+convertOp op args | op `elem` infixOperators = convertInfixApp (QVarOp $ convertName op) (convertArgs op args)
+convertOp name args = convertApp (Var $ convertName name) (convertArgs name args)
 
-convertApp :: Exp -> [T.Exp] -> Exp
-convertApp fun args = foldl App fun $ map convertExp args
+convertApp :: Exp -> [Exp] -> Exp
+convertApp fun args = foldl App fun args
 
-convertInfixAppExp :: QOp -> [Exp] -> Exp
-convertInfixAppExp fun (x1:x2:xs) = foldl (\e1 e2 -> InfixApp e1 fun e2)
-                                          (InfixApp x1 fun x2) xs
-convertInfixAppExp (QVarOp name) [] = Var name
-convertInfixAppExp (QConOp name) [] = Con name
-convertInfixAppExp _ _ = error "Cant convert infix operation with 1 argument"
+convertInfixApp :: QOp -> [Exp] -> Exp
+convertInfixApp fun (x1:x2:xs) =
+  foldl (\e1 e2 -> InfixApp e1 fun e2)
+        (InfixApp x1 fun x2) xs
+convertInfixApp (QVarOp name) [] = Var name
+convertInfixApp (QConOp name) [] = Con name
+convertInfixApp _ _ = error "Cant convert infix operation with 1 argument"
 
-convertInfixApp :: QOp -> [T.Exp] -> Exp
-convertInfixApp fun xs = convertInfixAppExp fun $ map convertExp xs
+convertArgs :: String -> [T.Exp] -> [Exp]
+convertArgs "reshape" (list:rest) = convertShape list : map convertExp rest
+convertArgs _ args = map convertExp args
+
+convertShape :: T.Exp -> Exp
+convertShape (T.Vc es) = snocList $ map (\(T.I n) -> n) es
+convertShape t = error $ "is not a shape: " ++ show t
 
 convertType :: T.Type -> Type
 convertType (T.ArrT btyp (T.R n)) = array (dim n) (convertBType btyp)
