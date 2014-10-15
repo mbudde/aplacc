@@ -89,6 +89,8 @@ accVar name = Var $ qualAcc $ Ident name
 convertName :: String -> QName
 convertName "addi" = qualPrelude $ Symbol "+"
 convertName "addd" = qualPrelude $ Symbol "+"
+convertName "subi" = qualPrelude $ Symbol "-"
+convertName "subd" = qualPrelude $ Symbol "-"
 convertName "muli" = qualPrelude $ Symbol "*"
 convertName "muld" = qualPrelude $ Symbol "*"
 convertName "maxi" = qualPrelude $ Ident "max"

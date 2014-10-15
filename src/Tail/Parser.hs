@@ -70,6 +70,7 @@ expr = opExpr
    <|> (liftM Var t_identifier)
    <?> "expression"
 
+-- TODO: parse inf and ~inf
 valueExpr :: Parser Exp
 valueExpr = (liftM D $ neg (lexeme float))
         <|> (liftM I $ neg (lexeme decimal))
