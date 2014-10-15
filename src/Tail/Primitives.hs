@@ -6,15 +6,30 @@ module Tail.Primitives where
 import Data.Array.Accelerate as Acc
 
 
-iota, iotaSh :: Int -> Acc (Vector Int)
-iota n = Acc.use $ Acc.fromList (Z :. n) [1..]
-iotaSh = iota
-
-
 i2d :: (Elt a, Elt b, IsIntegral a, IsNum b)
     => Acc (Scalar a) -> Acc (Scalar b)
 i2d = unit . Acc.fromIntegral . the
 
+{- i2d :: (Elt a, Elt b, IsIntegral a, IsNum b) -}
+    {- => Exp a -> Exp b -}
+{- i2d = Acc.fromIntegral -}
+
+zilde :: Elt e => Acc (Vector e)
+zilde = Acc.use (Acc.fromList (Z :. 0) [])
+
+iota, iotaSh :: Int -> Acc (Vector Int)
+iota n = Acc.use $ Acc.fromList (Z :. n) [1..]
+iotaSh = iota
+
+add :: (Elt e, IsNum e)
+    => Acc (Scalar e) -> Acc (Scalar e) -> Acc (Scalar e)
+add a b = Acc.unit (Acc.the a + Acc.the b)
+
+each :: (Shape ix, Elt a, Elt b)
+     => (Exp a -> Exp b)
+     -> Acc (Array ix a)
+     -> Acc (Array ix b)
+each = Acc.map
 
 reduce :: (Shape ix, Elt a)
        => (Exp a -> Exp a -> Exp a)
@@ -23,13 +38,30 @@ reduce :: (Shape ix, Elt a)
        -> Acc (Array ix a)
 reduce = Acc.fold
 
+shape = undefined
+shapeSh = undefined
+{- shape :: (Shape ix, Elt e) => Acc (Array ix e) -> Acc (Vector Int) -}
+{- shape arr = Acc.use $ Acc.fromList (Z :. length shList) shList -}
+  {- where shList = toShapeList $ Acc.shape arr -}
+        {- toShapeList (Exp Z) = [] -}
+        {- toShapeList sh = toShapeList (Acc.indexTail sh) Prelude.++ [Acc.indexHead] -}
 
-each :: (Shape ix, Elt a, Elt b)
-     => (Exp a -> Exp b)
-     -> Acc (Array ix a)
-     -> Acc (Array ix b)
-each = Acc.map
+reshape0 = undefined
 
+reshape :: (Shape ix, Shape ix', Elt e)
+        => Exp ix
+        -> Acc (Array ix' e)
+        -> Acc (Array ix e)
+reshape = Acc.reshape
+
+reverse = undefined
+
+rotate = undefined
+rotateSh = undefined
+
+transp = undefined
+
+transp2 = undefined
 
 take, drop, takeSh, dropSh
      :: (Slice sh, Shape sh, Elt a)
@@ -48,6 +80,36 @@ drop n arr =
   in backpermute sh' idx arr
 dropSh = Tail.Primitives.drop
 
+first = undefined
+firstSh = undefined
+
+zipWith = undefined
+
+cat, catSh :: forall sh e. (Slice sh, Shape sh, Elt e)
+    => Acc (Array (sh :. Int) e)
+    -> Acc (Array (sh :. Int) e)
+    -> Acc (Array (sh :. Int) e)
+cat = (Acc.++)
+catSh = cat
+
+cons = undefined
+consSh = undefined
+
+{- snoc :: (Elt e, Shape sh)
+     => Acc (Array (sh :. Int) e)
+     -> Acc (Array  sh         e)
+     -> Acc (Array (sh :. Int) e) -}
+{- snoc :: forall sh e. (Elt e, Shape sh)
+     => Acc (Vector e)
+     -> Acc (Scalar e)
+     -> Acc (Vector e)
+snoc xs ys
+  = let sh1 :. n      = unlift (shape xs)      :: Exp sh :. Exp Int
+        sh2           = shape ys               :: Exp sh
+    in
+    generate (lift (sh1)) -}
+snoc = undefined
+snocSh = snoc
 
 sum :: (Elt e, IsNum e)
     => (Exp e -> Exp e -> Exp e)
@@ -58,26 +120,3 @@ sum g a b =
   let sh1 = Acc.unindex1 $ Acc.shape a
       sh2 = Acc.unindex1 $ Acc.shape b
   in if sh1 == sh2 then Acc.zipWith (+) a b else zilde
-
-
-add :: (Elt e, IsNum e)
-    => Acc (Scalar e) -> Acc (Scalar e) -> Acc (Scalar e)
-add a b = Acc.unit (Acc.the a + Acc.the b)
-
-
-zilde :: Elt e => Acc (Vector e)
-zilde = Acc.use (Acc.fromList (Z :. 0) [])
-
-
-cat, catSh :: forall sh e. (Slice sh, Shape sh, Elt e)
-    => Acc (Array (sh :. Int) e)
-    -> Acc (Array (sh :. Int) e)
-    -> Acc (Array (sh :. Int) e)
-cat = (Acc.++)
-catSh = cat
-
-reshape :: (Shape ix, Shape ix', Elt e)
-        => Exp ix
-        -> Acc (Array ix' e)
-        -> Acc (Array ix e)
-reshape = Acc.reshape

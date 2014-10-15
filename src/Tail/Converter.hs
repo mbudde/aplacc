@@ -142,7 +142,7 @@ convertArgs "reshape" (list:rest) = convertShape list : map convertExp rest
 convertArgs _ args = map convertExp args
 
 convertShape :: T.Exp -> Exp
-convertShape (T.Vc es) = snocList $ map (\(T.I n) -> n) es
+convertShape (T.Vc es) = convertApp (Var $ qualAcc $ Ident "constant") [snocList $ map (\(T.I n) -> n) es]
 convertShape t = error $ "is not a shape: " ++ show t
 
 convertType :: T.Type -> Type
