@@ -4,8 +4,8 @@ type Ident = String
 
 data Rank
   = R Integer
-  | Rv String
-  | Radd Rank Rank
+  -- | Rv String          Unsupported
+  -- | Radd Rank Rank     Unsupported
   deriving (Show)
 
 data BType = IntT | DoubleT | Btyv Ident

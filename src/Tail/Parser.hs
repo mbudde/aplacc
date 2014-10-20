@@ -133,7 +133,7 @@ shapeType = shape "Sh" ShT
 
 rank :: Parser Rank
 rank = (liftM R (lexeme decimal))
-   <|> (liftM Rv t_identifier)
+   -- <|> (liftM Rv t_identifier)  Unsupported
    <?> "rank"
 
 basicType :: Parser BType
