@@ -22,7 +22,7 @@ tailDef = Token.LanguageDef {
               , Token.opStart          = oneOf ""
               , Token.opLetter         = oneOf ""
               , Token.reservedOpNames  = []
-              , Token.reservedNames    = [ "let", "in", "int", "double", "fn" ]
+              , Token.reservedNames    = [ "let", "in", "int", "double", "fn", "inf" ]
               , Token.caseSensitive    = True
   }
 
@@ -64,21 +64,22 @@ program =
 
 expr :: Parser Exp
 expr = opExpr
-   <|> valueExpr
+   <|> arrayExpr
    <|> letExpr
    <|> fnExpr
-   <|> (liftM Var t_identifier)
+   <|> valueExpr
    <?> "expression"
 
--- TODO: parse inf and ~inf
 valueExpr :: Parser Exp
-valueExpr = (liftM D $ neg (lexeme float))
-        <|> (liftM I $ neg (lexeme decimal))
-        <|> arrayValue
-  where neg p = try (withPrefix (char '~') p (\_ y -> -y))
+valueExpr = try (liftM D $ lexeme float)
+         <|> (liftM I $ lexeme decimal)
+         <|> try (reserved "inf" >> return Inf)
+         <|> (char '~' >> liftM Neg valueExpr)
+         <|> (liftM Var t_identifier)
+         <?> "number or identifier"
 
-arrayValue :: Parser Exp
-arrayValue = liftM Vc $ brackets (sepBy expr comma)
+arrayExpr :: Parser Exp
+arrayExpr = liftM Vc $ brackets (sepBy valueExpr comma)
 
 letExpr :: Parser Exp
 letExpr =

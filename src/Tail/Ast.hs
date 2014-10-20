@@ -33,6 +33,8 @@ data Exp
   = Var Ident
   | I Integer
   | D Double
+  | Inf
+  | Neg Exp
   | Let Ident Type Exp Exp -- Type, calculate while parsing?
   | Op String [Exp] -- Type
   | Fn Ident Type Exp -- Type
