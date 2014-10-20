@@ -8,7 +8,8 @@ data Rank
   -- | Radd Rank Rank     Unsupported
   deriving (Show)
 
-data BType = IntT | DoubleT | Btyv Ident
+data BType = IntT | DoubleT
+           -- | Btyv Ident     Unsupported
   deriving (Show)
 
 data Type
@@ -35,10 +36,10 @@ data Exp
   | D Double
   | Inf
   | Neg Exp
-  | Let Ident Type Exp Exp -- Type, calculate while parsing?
-  | Op String [Exp] -- Type
-  | Fn Ident Type Exp -- Type
-  | Vc [Exp] -- Type
+  | Let Ident Type Exp Exp
+  | Op String [Exp]
+  | Fn Ident Type Exp
+  | Vc [Exp]
   deriving (Show)
 
 type Program = Exp
