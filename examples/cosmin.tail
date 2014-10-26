@@ -4,7 +4,7 @@ let v2:Sh(2) = [200,300] in
 let v3:Sh(2) = [300,200] in
 let v4:[int]2 = reshape(v2,iota(muli(v0,v1))) in
 let v5:[int]2 = transp(v4) in
-let v9:[int]2 = sum(addi,v5,each(fn v6:[int]0 => muli(10,v6),reshape(v3,iotaSh(v0)))) in
+let v9:[int]2 = zipWith(addi,v5,each(fn v6:[int]0 => muli(10,v6),reshape(v3,iotaSh(v0)))) in
 let v12:[int]1 = reduce(addi,0,reshape(v3,v9)) in
 let v15:[int]0 = reduce(addi,0,v12) in
 i2d(v15)
