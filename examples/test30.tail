@@ -1,5 +1,5 @@
-let v0:[int]2 = reshape([3,2],iotaSh(5)) in
-let v1:[int]2 = transp(v0) in
+let v0:[int]2 = reshape{[int],[1,2]}([3,2],iotaSh(5)) in
+let v1:[int]2 = transp{[int],[2]}(v0) in
 let v6:[int]2 = prod(addi,muli,0,v0,v1) in
-let v11:[int]0 = reduce(muli,1,reduce(addi,0,v6)) in
+let v11:[int]0 = reduce{[int],[0]}(muli,1,reduce{[int],[1]}(addi,0,v6)) in
 i2d(v11)

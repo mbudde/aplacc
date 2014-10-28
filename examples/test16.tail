@@ -1,5 +1,5 @@
 let v0:Sh(2) = [10,30] in
-let v1:[int]2 = reshape(v0,iotaSh(49)) in
-let v2:[int]2 = snoc(transp(v1),iotaSh(30)) in
+let v1:[int]2 = reshape{[int],[1,2]}(v0,iotaSh(49)) in
+let v2:[int]2 = snoc{[int],[1]}(transp{[int],[2]}(v1),iotaSh(30)) in
 let v7:[int]2 = prod(addi,muli,0,v1,v2) in
-i2d(reduce(addi,0,reduce(addi,0,v7)))
+i2d(reduce{[int],[0]}(addi,0,reduce{[int],[1]}(addi,0,v7)))
