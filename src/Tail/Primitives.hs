@@ -1,18 +1,22 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+
 
 module Tail.Primitives where
 
 import Data.Array.Accelerate as Acc
+import Data.Array.Accelerate.Array.Sugar (shapeToList)
 
-
-i2d :: (Elt a, Elt b, IsIntegral a, IsNum b)
-    => Acc (Scalar a) -> Acc (Scalar b)
-i2d = unit . Acc.fromIntegral . the
 
 {- i2d :: (Elt a, Elt b, IsIntegral a, IsNum b) -}
-    {- => Exp a -> Exp b -}
-{- i2d = Acc.fromIntegral -}
+    {- => Acc (Scalar a) -> Acc (Scalar b) -}
+{- i2d = unit . Acc.fromIntegral . the -}
+
+i2d :: (Elt a, Elt b, IsIntegral a, IsNum b)
+    => Exp a -> Exp b
+i2d = Acc.fromIntegral
 
 zilde :: Elt e => Acc (Vector e)
 zilde = Acc.use (Acc.fromList (Z :. 0) [])
@@ -38,13 +42,29 @@ reduce :: (Shape ix, Elt a)
        -> Acc (Array ix a)
 reduce = Acc.fold
 
-shape = undefined
-shapeSh = undefined
-{- shape :: (Shape ix, Elt e) => Acc (Array ix e) -> Acc (Vector Int) -}
-{- shape arr = Acc.use $ Acc.fromList (Z :. length shList) shList -}
-  {- where shList = toShapeList $ Acc.shape arr -}
-        {- toShapeList (Exp Z) = [] -}
-        {- toShapeList sh = toShapeList (Acc.indexTail sh) Prelude.++ [Acc.indexHead] -}
+{- shape = undefined -}
+{- shapeSh = undefined -}
+{- shape :: forall ix e. (Shape ix, Elt e) => Acc (Array ix e) -> Acc (Vector Int) -}
+{- shape arr = -}
+  {- let shapeList = shapeToList $ (unlift $ Acc.shape arr :: ix) -}
+  {- in Acc.use $ Acc.fromList (Z :. length shapeList) shapeList -}
+
+class IndexShape sh where
+  indexSh :: sh -> Exp Int -> Exp Int
+
+instance IndexShape Z where
+  indexSh Z _ = constant 0
+
+instance IndexShape sh => IndexShape (sh :. Int) where
+  indexSh (a :. i) 0 = constant i
+  indexSh (a :. i) n = indexSh a (n-1)
+
+shape, shapeSh :: forall sh e. (Shape sh, Elt e, IndexShape (Exp sh))
+               => Acc (Array sh e) -> Acc (Vector Int)
+shape arr =
+  let sh = Acc.shape arr
+  in Acc.generate (lift $ Z :. (shapeSize sh)) (indexSh sh . indexHead)
+shapeSh = shape
 
 reshape0 = undefined
 

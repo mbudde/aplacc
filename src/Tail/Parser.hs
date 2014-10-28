@@ -34,6 +34,7 @@ reservedOp = Token.reservedOp lexer
 stringlit  = Token.stringLiteral lexer
 parens     = Token.parens     lexer
 brackets   = Token.brackets   lexer
+braces     = Token.braces     lexer
 integer    = Token.integer    lexer
 semi       = Token.semi       lexer
 comma      = Token.comma      lexer
@@ -91,11 +92,19 @@ letExpr =
      e2 <- expr
      return $ Let ident typ e1 e2
 
+instanceDecl :: Parser InstDecl
+instanceDecl = braces $
+  do btyps <- brackets $ sepBy basicType comma
+     comma
+     ranks <- brackets $ sepBy (lexeme decimal) comma
+     return (btyps, ranks)
+
 opExpr :: Parser Exp
 opExpr =
-  do ident <- try $ do { i <- t_identifier; lookAhead $ char '('; return i }
+  do ident <- try $ do { i <- t_identifier; lookAhead $ oneOf "({"; return i }
+     instDecl <- optionMaybe instanceDecl
      args <- parens $ sepBy expr comma
-     return $ Op ident args
+     return $ Op ident instDecl args
 
 fnExpr :: Parser Exp
 fnExpr =

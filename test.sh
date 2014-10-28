@@ -20,7 +20,10 @@ while [ $# != 0 ]; do
     shift
 done
 
-cabal build
+if ! cabal build; then
+    echo -e "\033[31;1m>>> Build failed\033[0m"
+    exit 1
+fi
 
 
 if [ $verbose ]; then

@@ -9,8 +9,8 @@ data Rank
   deriving (Show)
 
 data BType = IntT | DoubleT
-           -- | Btyv Ident     Unsupported
-  deriving (Show)
+           | Btyv Ident
+  deriving (Show, Eq)
 
 data Type
   = ArrT BType Rank
@@ -30,6 +30,8 @@ double = scalar DoubleT
 data Shape = Sh [Integer]
   deriving (Show)
 
+type InstDecl = ([BType], [Integer])
+
 data Exp
   = Var Ident
   | I Integer
@@ -37,7 +39,7 @@ data Exp
   | Inf
   | Neg Exp
   | Let Ident Type Exp Exp
-  | Op String [Exp]
+  | Op Ident (Maybe InstDecl) [Exp]
   | Fn Ident Type Exp
   | Vc [Exp]
   deriving (Show)
