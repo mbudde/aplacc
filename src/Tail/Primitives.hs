@@ -25,10 +25,6 @@ iota, iotaSh :: Int -> Acc (Vector Int)
 iota n = Acc.use $ Acc.fromList (Z :. n) [1..]
 iotaSh = iota
 
-add :: (Elt e, IsNum e)
-    => Acc (Scalar e) -> Acc (Scalar e) -> Acc (Scalar e)
-add a b = Acc.unit (Acc.the a + Acc.the b)
-
 each :: (Shape ix, Elt a, Elt b)
      => (Exp a -> Exp b)
      -> Acc (Array ix a)
@@ -112,9 +108,14 @@ cat, catSh :: forall sh e. (Slice sh, Shape sh, Elt e)
 cat = (Acc.++)
 catSh = cat
 
-cons, consSh :: (Elt e) => e -> Acc (Vector e) -> Acc (Vector e)
-cons e arr = Acc.use (fromList (Z :. 1) [e]) Acc.++ arr
-consSh = cons
+cons :: (Shape sh, Elt e)
+     => Acc (Array sh e)
+     -> Acc (Array (sh :. Int) e)
+     -> Acc (Array (sh :. Int) e)
+cons = undefined
+
+consSh :: (Elt e) => e -> Acc (Vector e) -> Acc (Vector e)
+consSh e arr = Acc.use (fromList (Z :. 1) [e]) Acc.++ arr
 
 {- snoc :: (Elt e, Shape sh)
      => Acc (Array (sh :. Int) e)
