@@ -22,32 +22,30 @@ name (A.Symbol n) = Symbol n
 
 qname :: A.QName -> QName
 qname (A.UnQual n)     = UnQual $ name n
+qname (A.Prelude (A.Symbol "+")) = UnQual $ Symbol "+"
+qname (A.Prelude (A.Symbol "-")) = UnQual $ Symbol "-"
+qname (A.Prelude (A.Symbol "*")) = UnQual $ Symbol "*"
+qname (A.Prelude (A.Symbol "/")) = UnQual $ Symbol "/"
 qname (A.Prelude n)    = Qual (ModuleName "P") $ name n
-qname (A.Accelerate n) = Qual (ModuleName "Acc") $ name n
-qname (A.Primitive n)  = UnQual $ name n
+qname (A.Accelerate n) = UnQual $ name n
+qname (A.Primitive n)  = Qual (ModuleName "Prim") $ name n
 
 infixOp :: A.QName -> QOp
-infixOp (A.UnQual n)     = QVarOp $ UnQual $ name n
-infixOp (A.Prelude n)    = QVarOp $ Qual (ModuleName "P") $ name n
-infixOp (A.Accelerate n) = QVarOp $ Qual (ModuleName "Acc") $ name n
-infixOp (A.Primitive n)  = QVarOp $ UnQual $ name n
+infixOp = QVarOp . qname
 
-acc    = TyApp $ TyCon $ qualAcc $ Ident "Acc"
-exp    = TyApp $ TyCon $ qualAcc $ Ident "Exp"
-scalar = TyApp $ TyCon $ qualAcc $ Ident "Scalar"
-vector = TyApp $ TyCon $ qualAcc $ Ident "Vector"
-array d = TyApp (TyApp (TyCon $ qualAcc $ Ident "Array") d)
-dim n  = TyCon $ qualAcc $ Ident $ "DIM" ++ show n
-int    = TyCon $ qualPrelude $ Ident "Int"
-double = TyCon $ qualPrelude $ Ident "Double"
-
-accVar :: String -> Exp
-accVar name = Var $ qualAcc $ Ident name
+acc    = TyApp $ TyCon $ qname $ A.Accelerate $ A.Ident "Acc"
+exp    = TyApp $ TyCon $ qname $ A.Accelerate $ A.Ident "Exp"
+scalar = TyApp $ TyCon $ qname $ A.Accelerate $ A.Ident "Scalar"
+vector = TyApp $ TyCon $ qname $ A.Accelerate $ A.Ident "Vector"
+array d = TyApp (TyApp (TyCon $ qname $ A.Accelerate $ A.Ident "Array") d)
+dim n  = TyCon $ qname $ A.Accelerate $ A.Ident $ "DIM" ++ show n
+int    = TyCon $ qname $ A.Prelude $ A.Ident "Int"
+double = TyCon $ qname $ A.Prelude $ A.Ident "Double"
 
 snocList :: (Integral a) => [a] -> Exp
 snocList ns =
-  foldl (\e e' -> InfixApp e (QVarOp $ qualAcc $ Symbol ":.") e')
-        (Var $ qualAcc $ Ident "Z")
+  foldl (\e e' -> InfixApp e (infixOp $ A.Accelerate $ A.Symbol ":.") e')
+        (Var $ qname $ A.Accelerate $ A.Ident "Z")
         (map (\n -> Lit $ Int $ toInteger n) ns)
 
 outputProgram :: A.Program -> Module
@@ -70,10 +68,10 @@ outputProgram p =
                        , importSpecs     = Just (False, map (IAbs . Symbol) ["+", "-", "*", "/"]) }
           , ImportDecl { importLoc       = noLoc
                        , importModule    = ModuleName "Data.Array.Accelerate"
-                       , importQualified = True
+                       , importQualified = False
                        , importSrc       = False
                        , importPkg       = Nothing
-                       , importAs        = Just $ ModuleName "Acc"
+                       , importAs        = Nothing
                        , importSpecs     = Nothing }
           , ImportDecl { importLoc       = noLoc
                        , importModule    = ModuleName "Data.Array.Accelerate.Interpreter"
@@ -84,10 +82,10 @@ outputProgram p =
                        , importSpecs     = Nothing }
           , ImportDecl { importLoc       = noLoc
                        , importModule    = ModuleName "Tail.Primitives"
-                       , importQualified = False
+                       , importQualified = True
                        , importSrc       = False
                        , importPkg       = Nothing
-                       , importAs        = Nothing
+                       , importAs        = Just $ ModuleName "Prim"
                        , importSpecs     = Nothing }
           ]
         -- Assume result is always scalar double for now
@@ -116,16 +114,19 @@ outputExp (A.InfixApp n (e1:e2:es)) =
 outputExp (A.InfixApp n []) = error "invalid infix application"
 outputExp (A.App n es) = foldl App (Var $ qname n) (map outputExp es)
 outputExp (A.Let ident typ e1 e2) =
-  let e1' = ExpTypeSig noLoc (outputExp e1) (outputType typ) in
-  Let (BDecls [ PatBind noLoc (PVar $ Ident ident) Nothing
-                        (UnGuardedRhs $ e1') (BDecls []) ])
-      (outputExp e2)
+  let e1' = case e1 of
+              (A.TypSig _ _) -> outputExp e1
+              _              -> ExpTypeSig noLoc (outputExp e1) (outputType typ)
+  in Let (BDecls [ PatBind noLoc (PVar $ Ident ident) Nothing
+                           (UnGuardedRhs $ e1') (BDecls []) ])
+         (outputExp e2)
 outputExp (A.Fn ident _ e) =
   Lambda noLoc [PVar $ Ident ident] (outputExp e)
 
 outputType :: A.Type -> Type
 outputType (A.Exp btyp) = exp (outputBType btyp)
 outputType (A.Acc r btyp) = acc $ array (dim r) (outputBType btyp)
+outputType (A.Plain btyp) = outputBType btyp
 
 outputBType :: A.BType -> Type
 outputBType A.IntT = int

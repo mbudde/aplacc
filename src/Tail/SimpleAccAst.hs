@@ -8,6 +8,7 @@ import qualified Tail.Ast as T
 data Type
   = Exp T.BType         -- Exp t
   | Acc Integer T.BType -- Acc (Array n t)
+  | Plain T.BType
   deriving (Show, Eq)
 
 baseType :: Type -> T.BType
@@ -44,6 +45,7 @@ type Program = Exp
 
 the x  = App (Accelerate $ Ident "the") [x]
 unit x = App (Accelerate $ Ident "unit") [x]
+lift x = App (Accelerate $ Ident "lift") [x]
 i2d x  = App (Primitive  $ Ident "i2d") [x]
 fromList n x = App (Accelerate $ Ident "fromList") [Shape [fromIntegral n], x]
 use x  = App (Accelerate $ Ident "use") [x]

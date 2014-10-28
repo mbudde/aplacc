@@ -64,7 +64,7 @@ shape, shapeSh :: forall sh e. (Shape sh, Elt e, IndexShape (Exp sh))
 shape arr =
   let sh = Acc.shape arr
   in Acc.generate (lift $ Z :. (shapeSize sh)) (indexSh sh . indexHead)
-shapeSh = shape
+shapeSh = Tail.Primitives.shape
 
 reshape0 = undefined
 
@@ -112,8 +112,9 @@ cat, catSh :: forall sh e. (Slice sh, Shape sh, Elt e)
 cat = (Acc.++)
 catSh = cat
 
-cons = undefined
-consSh = undefined
+cons, consSh :: (Elt e) => e -> Acc (Vector e) -> Acc (Vector e)
+cons e arr = Acc.use (fromList (Z :. 1) [e]) Acc.++ arr
+consSh = cons
 
 {- snoc :: (Elt e, Shape sh)
      => Acc (Array (sh :. Int) e)

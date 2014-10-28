@@ -4,15 +4,15 @@ import Control.Monad.Reader
 import Data.Maybe (fromJust)
 import qualified Data.Map as Map
 
-import Tail.Ast as T
+import qualified Tail.Ast as T
 import Tail.SimpleAccAst as A
 import Tail.Parser (parseFile)
 
 
-type Env = Map.Map Ident A.Type
+type Env = Map.Map T.Ident A.Type
 
 emptyEnv :: Env
-emptyEnv = Map.fromList [("zilde", Acc 1 (Btyv "e"))]
+emptyEnv = Map.empty
 
 type Convert a = Reader Env a
 
@@ -44,6 +44,7 @@ typeCast (Acc r1 _) (Acc r2 (Btyv _)) = id
 typeCast t1 t2 = \e -> error $ "cannot type cast " ++ show e ++ " from " ++ show t1 ++ " to " ++ show t2
 
 convertExp :: T.Exp -> A.Type -> Convert A.Exp
+convertExp (T.Var "zilde") (Acc 1 _) = return $ A.Var $ Primitive $ Ident "zilde"
 convertExp (T.Var name) t = do
   env <- ask
   return $ case Map.lookup name env of
@@ -51,8 +52,8 @@ convertExp (T.Var name) t = do
     Just t2 | t == t2 -> A.Var $ UnQual $ Ident name
     Just t2           -> typeCast t2 t $ A.Var $ UnQual $ Ident name
 
-convertExp (T.I i) t = return $ typeCast (Exp IntT) t $ TypSig (A.I i) (Exp IntT)
-convertExp (T.D d) t = return $ typeCast (Exp DoubleT) t $ TypSig (A.D d) (Exp DoubleT)
+convertExp (T.I i) t = return $ typeCast (Exp IntT) t $ A.I i
+convertExp (T.D d) t = return $ typeCast (Exp DoubleT) t $ A.D d
 convertExp (T.Inf) _ = undefined
 
 convertExp (T.Neg e) (Exp t) = liftM A.Neg $ convertExp e (Exp t)
@@ -81,27 +82,41 @@ convertExp (T.Vc es) (Acc 1 t) = do
 convertExp e t = error $ show e ++ show t
 
 convertType :: T.Type -> A.Type
-convertType (ArrT t (R 0)) = Exp t
-convertType (ArrT t (R r)) = Acc r t
-convertType (ShT (R 1)) = Exp IntT
-convertType (ShT (R r)) = Acc 1 IntT
-convertType (SiT _) = Exp IntT
-convertType (ViT _) = Exp IntT
+convertType (T.ArrT t (T.R 0)) = Exp t
+convertType (T.ArrT t (T.R r)) = Acc r t
+convertType (T.ShT (T.R 1)) = Exp IntT
+convertType (T.ShT (T.R r)) = Acc 1 IntT
+convertType (T.SiT _) = Exp IntT
+convertType (T.ViT _) = Exp IntT
 convertType _ = error "convertType - not implemented"
 
-functions :: Map.Map String (Maybe InstDecl -> A.Type -> ([A.Exp] -> A.Exp, [T.Exp -> Convert A.Exp], A.Type))
+functions :: Map.Map String (Maybe T.InstDecl -> A.Type -> ([A.Exp] -> A.Exp, [T.Exp -> Convert A.Exp], A.Type))
 functions = Map.fromList
-  [ ( "addi",    \Nothing _ -> (symb "+", [expArg IntT, expArg IntT], Exp IntT) )
-  , ( "i2d",     \Nothing _ -> (prim "i2d", [expArg IntT], Exp DoubleT) )
-  , ( "reduce",  \(Just ([t], [r])) _ -> (prim "reduce", [funcArg $ Exp t, expArg t,accArg (r+1) t], Acc r t) )
-  , ( "each",    \(Just ([t1, t2], [r])) _ -> (prim "each", [funcArg $ Exp t1, accArg r t1], Acc r t2) )
-  , ( "catSh",   \Nothing _ -> (prim "catSh", [accArg 1 IntT, accArg 1 IntT], Acc 1 IntT) )
-  , ( "cat",     \(Just ([t], [r])) _ -> (prim "cat", [accArg r t, accArg r t], Acc r t) )
-  , ( "iotaSh",  \Nothing _ -> (prim "iotaSh", [expArg IntT], Acc 1 IntT) )
-  , ( "maxi",    \Nothing _ -> (prel "max", [expArg IntT, expArg IntT], Exp IntT) )
-  , ( "drop",    \(Just ([t], [r])) _ -> (prim "drop", [expArg t, accArg r t], Acc r t) )
-  , ( "zipWith", \(Just ([t1, t2, t3], [r])) _ -> (prim "zipWith", [funcArg $ Exp t1, accArg r t1, accArg r t2], Acc r t3) )
-  , ( "shape",   \(Just ([t], [r])) _ -> (prim "shape", [accArg r t], Acc 1 IntT) )
+  [ ( "addi",    \Nothing _                    -> (symb "+",        [expArg IntT, expArg IntT], Exp IntT) )
+  , ( "negi",    \Nothing _                    -> (\[a] -> A.Neg a, [expArg IntT], Exp IntT) )
+  , ( "subi",    \Nothing _                    -> (symb "-",        [expArg IntT, expArg IntT], Exp IntT) )
+  , ( "muli",    \Nothing _                    -> (symb "*",        [expArg IntT, expArg IntT], Exp IntT) )
+  , ( "mini",    \Nothing _                    -> (prel "min",      [expArg IntT, expArg IntT], Exp IntT) )
+  , ( "maxi",    \Nothing _                    -> (prel "max",      [expArg IntT, expArg IntT], Exp IntT) )
+  , ( "addd",    \Nothing _                    -> (symb "+",        [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
+  , ( "subd",    \Nothing _                    -> (symb "-",        [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
+  , ( "muld",    \Nothing _                    -> (symb "*",        [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
+  , ( "divd",    \Nothing _                    -> (symb "/",        [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
+  , ( "mind",    \Nothing _                    -> (prel "min",      [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
+  , ( "maxd",    \Nothing _                    -> (prel "max",      [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
+  , ( "i2d",     \Nothing _                    -> (prim "i2d",      [expArg IntT], Exp DoubleT) )
+  , ( "reduce",  \(Just ([t], [r])) _          -> (prim "reduce",   [funcArg $ Exp t, expArg t,accArg (r+1) t], Acc r t) )
+  , ( "each",    \(Just ([t1, t2], [r])) _     -> (prim "each",     [funcArg $ Exp t1, accArg r t1], Acc r t2) )
+  , ( "catSh",   \Nothing _                    -> (prim "catSh",    [accArg 1 IntT, accArg 1 IntT], Acc 1 IntT) )
+  , ( "cat",     \(Just ([t], [r])) _          -> (prim "cat",      [accArg r t, accArg r t], Acc r t) )
+  , ( "iotaSh",  \Nothing _                    -> (prim "iotaSh",   [expArg IntT], Acc 1 IntT) )
+  , ( "drop",    \(Just ([t], [r])) _          -> (prim "drop",     [expArg t, accArg r t], Acc r t) )
+  , ( "take",    \(Just ([t], [r])) _          -> (prim "take",     [expArg t, accArg r t], Acc r t) )
+  , ( "takeSh",  \Nothing _                    -> (prim "takeSh",   [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
+  , ( "zipWith", \(Just ([t1, t2, t3], [r])) _ -> (prim "zipWith",  [funcArg $ Exp t1, accArg r t1, accArg r t2], Acc r t3) )
+  , ( "shape",   \(Just ([t], [r])) _          -> (prim "shape",    [accArg r t], Acc 1 IntT) )
+  , ( "reshape", \(Just ([t], [r1, r2])) _     -> (prim "reshape",  [shapeArg, accArg r1 t], Acc r2 t) )
+  , ( "consSh",  \Nothing _                    -> (prim "consSh",   [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
   ]
   where symb = A.InfixApp . Prelude . Symbol
         prim = A.App . Primitive . Ident
@@ -116,6 +131,7 @@ convertOp name inst args t =
     Nothing -> error $ name ++ "{" ++ show inst ++ "} not implemented"
 
 funcArg :: A.Type -> T.Exp -> Convert A.Exp
+funcArg (Exp IntT) (T.Var "i2d") = return $ A.Var $ Primitive $ Ident "i2d"
 funcArg (Exp IntT) (T.Var "addi") = return $ A.Var $ Prelude $ Symbol "+"
 funcArg (Exp IntT) (T.Var "subi") = return $ A.Var $ Prelude $ Symbol "-"
 funcArg (Exp IntT) (T.Var "muli") = return $ A.Var $ Prelude $ Symbol "*"
@@ -124,6 +140,7 @@ funcArg (Exp IntT) (T.Var "maxi") = return $ A.Var $ Prelude $ Ident "max"
 funcArg (Exp DoubleT) (T.Var "addd") = return $ A.Var $ Prelude $ Symbol "+"
 funcArg (Exp DoubleT) (T.Var "subd") = return $ A.Var $ Prelude $ Symbol "-"
 funcArg (Exp DoubleT) (T.Var "muld") = return $ A.Var $ Prelude $ Symbol "*"
+funcArg (Exp DoubleT) (T.Var "divd") = return $ A.Var $ Prelude $ Symbol "/"
 funcArg (Exp DoubleT) (T.Var "mind") = error "mind not implemented"
 funcArg (Exp DoubleT) (T.Var "maxd") = error "mind not implemented"
 funcArg t e@(T.Fn{}) = convertExp e t
@@ -134,6 +151,12 @@ expArg t = flip convertExp (Exp t)
 
 accArg :: Integer -> A.BType -> T.Exp -> Convert A.Exp
 accArg n t = flip convertExp (Acc n t)
+
+shapeArg :: T.Exp -> Convert A.Exp
+shapeArg (T.Vc es) = return $ A.lift $ A.InfixApp (Accelerate $ Symbol ":.") ((Var $ Accelerate $ Ident "Z") : map toInt es)
+  where toInt (T.I i) = TypSig (A.I i) (Plain IntT)
+        toInt _ = error "shape must be list of ints"
+shapeArg e = error $ "shape argument " ++ show e ++ " not supported"
 
 convertArgs :: [T.Exp -> Convert A.Exp] -> [T.Exp] -> Convert [A.Exp]
 convertArgs fs es = sequence $ zipWith ($) fs es
