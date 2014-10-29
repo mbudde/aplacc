@@ -47,19 +47,23 @@ reduce = Acc.fold
 
 class IndexShape sh where
   indexSh :: sh -> Exp Int -> Exp Int
+  dimSh   :: sh -> Exp Int
 
-instance IndexShape Z where
-  indexSh Z _ = constant 0
+instance IndexShape (Exp Z) where
+  indexSh _ _ = constant 0
+  dimSh _ = constant 0
 
-instance IndexShape sh => IndexShape (sh :. Int) where
-  indexSh (a :. i) 0 = constant i
-  indexSh (a :. i) n = indexSh a (n-1)
+instance (Slice sh, IndexShape (Exp sh)) => IndexShape (Exp (sh :. Int)) where
+  indexSh e n = cond (n ==* 0) (indexHead e)
+                               (indexSh (indexTail e) (n-1))
+  dimSh e = 1 + dimSh (indexTail e)
 
-shape, shapeSh :: forall sh e. (Shape sh, Elt e, IndexShape (Exp sh))
+
+shape, shapeSh :: (Shape sh, Elt e, IndexShape (Exp sh))
                => Acc (Array sh e) -> Acc (Vector Int)
 shape arr =
   let sh = Acc.shape arr
-  in Acc.generate (lift $ Z :. (shapeSize sh)) (indexSh sh . indexHead)
+  in Acc.generate (lift $ Z :. (dimSh sh)) (indexSh sh . indexHead)
 shapeSh = Tail.Primitives.shape
 
 reshape0 = undefined
@@ -75,7 +79,8 @@ reverse = undefined
 rotate = undefined
 rotateSh = undefined
 
-transp = undefined
+transp :: (Elt e) => Acc (Array DIM2 e) -> Acc (Array DIM2 e)
+transp = Acc.transpose
 
 transp2 = undefined
 

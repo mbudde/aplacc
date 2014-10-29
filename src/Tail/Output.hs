@@ -10,6 +10,19 @@ import qualified Tail.SimpleAccAst as A
 
 prettyPrintProgram = prettyPrint . outputProgram
 
+instance Show A.Type where
+  show = prettyPrint . outputType
+
+instance Show A.Name where
+  show = prettyPrint . name
+
+instance Show A.QName where
+  show = prettyPrint . qname
+
+instance Show A.Exp where
+  show = prettyPrint . outputExp
+
+
 qualAcc :: Name -> QName
 qualAcc name = Qual (ModuleName "Acc") name
 

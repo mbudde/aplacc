@@ -9,23 +9,17 @@ data Type
   = Exp T.BType         -- Exp t
   | Acc Integer T.BType -- Acc (Array n t)
   | Plain T.BType
-  deriving (Show, Eq)
-
-baseType :: Type -> T.BType
-baseType (Exp t) = t
-baseType (Acc _ t) = t
+  deriving (Eq)
 
 data Name
   = Ident T.Ident
   | Symbol String
-  deriving (Show)
 
 data QName
   = UnQual Name
   | Prelude Name
   | Accelerate Name
   | Primitive Name
-  deriving (Show)
 
 data Exp
   = Var QName
@@ -39,13 +33,13 @@ data Exp
   | App QName [Exp]            -- op x1 x2 …
   | Let T.Ident Type Exp Exp    -- let x = e1 :: t in e2
   | Fn T.Ident Type Exp         -- \x -> e
-  deriving (Show)
 
 type Program = Exp
 
 the x  = App (Accelerate $ Ident "the") [x]
 unit x = App (Accelerate $ Ident "unit") [x]
 lift x = App (Accelerate $ Ident "lift") [x]
+unlift x = App (Accelerate $ Ident "unlift") [x]
 i2d x  = App (Primitive  $ Ident "i2d") [x]
 fromList n x = App (Accelerate $ Ident "fromList") [Shape [fromIntegral n], x]
 use x  = App (Accelerate $ Ident "use") [x]
