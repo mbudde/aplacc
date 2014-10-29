@@ -76,8 +76,17 @@ reshape = Acc.reshape
 
 reverse = undefined
 
-rotate = undefined
-rotateSh = undefined
+
+rotate :: (Shape sh, Slice sh, Elt e)
+       => Exp Int -> Acc (Array (sh :. Int) e) -> Acc (Array (sh :. Int) e)
+rotate n arr =
+  let sh = Acc.shape arr
+      m = Acc.indexHead sh
+      idx sh = lift $ Acc.indexTail sh :. (Acc.indexHead sh + n) `mod` m
+  in backpermute sh idx arr
+
+rotateSh :: (Elt e) => Exp Int -> Acc (Vector e) -> Acc (Vector e)
+rotateSh = Tail.Primitives.rotate
 
 transp :: (Elt e) => Acc (Array DIM2 e) -> Acc (Array DIM2 e)
 transp = Acc.transpose
@@ -104,7 +113,12 @@ dropSh = Tail.Primitives.drop
 first = undefined
 firstSh = undefined
 
-zipWith = undefined
+zipWith :: (Shape sh, Elt a, Elt b, Elt c)
+        => (Exp a -> Exp b -> Exp c)
+        -> Acc (Array sh a)
+        -> Acc (Array sh b)
+        -> Acc (Array sh c)
+zipWith = Acc.zipWith
 
 cat, catSh :: forall sh e. (Slice sh, Shape sh, Elt e)
     => Acc (Array (sh :. Int) e)
