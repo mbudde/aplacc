@@ -65,9 +65,10 @@ convertExp (T.I i) t = return $ typeCast (Plain IntT) t $ A.I i
 convertExp (T.D d) t = return $ typeCast (Plain DoubleT) t $ A.D d
 convertExp (T.Inf) _ = undefined
 
-convertExp (T.Neg e) (Exp t) = liftM A.Neg $ convertExp e (Exp t)
-convertExp (T.Neg e) (Acc 0 t) = liftM unit $ liftM A.Neg $ convertExp e (Exp t)
-convertExp (T.Neg _) _ = error "Cannot convert neg"
+convertExp (T.Neg e) t = do
+  let t' = Exp $ baseType t
+  e' <- convertExp e t'
+  return $ typeCast t' t $ A.Neg e'
 
 convertExp (T.Let x t1 e1 e2) t2 = do
   let t1' = convertType t1

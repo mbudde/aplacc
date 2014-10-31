@@ -11,6 +11,11 @@ data Type
   | Plain T.BType
   deriving (Eq)
 
+baseType :: Type -> T.BType
+baseType (Exp t) = t
+baseType (Acc _ t) = t
+baseType (Plain t) = t
+
 data Name
   = Ident T.Ident
   | Symbol String
