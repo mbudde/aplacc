@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 module Tail.Converter2 where
 
 import Control.Monad.Reader
