@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 module Tail.Converter2 where
 
 import Control.Monad.Reader
@@ -75,8 +76,12 @@ convertExp (T.Neg e) t = do
 convertExp (T.Let x t1 e1 e2) t2 = do
   let t1' = convertType t1
   e1' <- convertExp e1 t1'
-  e2' <- local (Map.insert x t1') $ convertExp e2 t2
-  return $ A.Let x t1' e1' e2'
+  -- If the e1 has been lifted to Exp then drop the lift and store as Plain
+  let (t3, e3) = cancelLift t1' e1'
+  e2' <- local (Map.insert x t3) $ convertExp e2 t2
+  return $ A.Let x t3 e3 e2'
+  where cancelLift (Exp t) (App (Accelerate (Ident "lift")) [e]) = (Plain t, e)
+        cancelLift t e = (t, e)
 
 convertExp (T.Op name instDecl args) t = do
   (e, t2) <- convertOp name instDecl args t
@@ -91,7 +96,7 @@ convertExp (T.Vc es) (Acc 1 t) = do
   es' <- mapM (flip convertExp (Plain t)) es
   return $ TypSig (use $ fromList (length es') (List es')) (Acc 1 t)
 
-convertExp e t = error $ show e ++ show t
+convertExp e t = error $ "failed to convert exp " ++ show e ++ " to type " ++ show t
 
 convertType :: T.Type -> A.Type
 convertType (T.ArrT t (T.R 0)) = Exp t
