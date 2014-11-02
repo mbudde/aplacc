@@ -37,7 +37,7 @@ typeCast :: A.Type -- from
 typeCast (Plain IntT) (Plain DoubleT) = A.fromInt
 typeCast (Plain t1)   (Plain t2)      | t1 == t2 = id
 typeCast (Plain t1)   (Exp t2)        = A.lift . flip TypSig (Plain t2) . typeCast (Plain t1) (Plain t2)
-typeCast (Plain t1)   (Acc r t2)      = typeCast (Exp t1) (Acc r t2)
+typeCast (Plain t1)   (Acc r t2)      = typeCast (Exp t2) (Acc r t2) . typeCast (Plain t1) (Exp t2)
 
 typeCast (Exp t1)    (Plain t2)       = unlift . typeCast (Exp t1) (Exp t2)
 typeCast (Exp IntT)  (Exp DoubleT)    = i2d
