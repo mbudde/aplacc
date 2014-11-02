@@ -25,6 +25,9 @@ iota, iotaSh :: Int -> Acc (Vector Int)
 iota n = Acc.use $ Acc.fromList (Z :. n) [1..]
 iotaSh = iota
 
+unitvec :: (Elt e) => Acc (Scalar e) -> Acc (Vector e)
+unitvec = Acc.reshape (lift $ Z :. (1 :: Int))
+
 each :: (Shape ix, Elt a, Elt b)
      => (Exp a -> Exp b)
      -> Acc (Array ix a)

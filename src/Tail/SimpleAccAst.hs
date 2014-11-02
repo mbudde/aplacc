@@ -49,4 +49,5 @@ i2d x  = App (Primitive  $ Ident "i2d") [x]
 fromList n x = App (Accelerate $ Ident "fromList") [Shape [fromIntegral n], x]
 use x  = App (Accelerate $ Ident "use") [x]
 fromInt x = App (Prelude $ Ident "fromIntegral") [x]
-
+unitvec x = App (Primitive $ Ident "unitvec") [x]
+first x = App (Primitive $ Ident "first") [x]

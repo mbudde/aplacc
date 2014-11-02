@@ -43,11 +43,15 @@ typeCast (Exp t1)    (Plain t2)       = unlift . typeCast (Exp t1) (Exp t2)
 typeCast (Exp IntT)  (Exp DoubleT)    = i2d
 typeCast (Exp t1)    (Exp t2)         | t1 == t2 = id
 typeCast (Exp t1)    (Acc 0 t2)       = unit . typeCast (Exp t1) (Exp t2)
+typeCast (Exp t1)    (Acc 1 t2)       = unitvec . typeCast (Exp t1) (Acc 0 t2)
 
 typeCast (Acc 0 t1)  (Plain t2)       = typeCast (Exp t1) (Exp t2) . the
 typeCast (Acc 0 t1)  (Exp t2)         = typeCast (Exp t1) (Exp t2) . the
+typeCast (Acc 1 t1)  (Exp t2)         = typeCast (Exp t1) (Exp t2) . first
 typeCast (Acc r1 t1) (Acc r2 t2)      | t1 == t2 && r1 == r2 = id
 typeCast (Acc 0 t1)  (Acc 0 t2)       = unit . typeCast (Exp t1) (Exp t2) . the
+typeCast (Acc 0 t1)  (Acc 1 t2)       = unitvec
+typeCast (Acc 1 t1)  (Acc 0 t2)       = typeCast (Exp t1) (Acc 0 t2) . first
 typeCast (Acc r1 (Btyv _)) (Acc r2 _) = id
 typeCast (Acc r1 _) (Acc r2 (Btyv _)) = id
 
