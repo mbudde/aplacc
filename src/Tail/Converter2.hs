@@ -131,6 +131,7 @@ functions = Map.fromList
   , ( "take",    \(Just ([t], [r]))          _ -> (prim "take",     [expArg t, accArg r t], Acc r t) )
   , ( "takeSh",  \Nothing                    t -> (prim "takeSh",   [expArg IntT, accArg 1 IntT], t) )
   , ( "shape",   \(Just ([t], [r]))          _ -> (prim "shape",    [accArg r t], Acc 1 IntT) )
+  , ( "shapeSh", \Nothing                    _ -> (prim "shapeSh",  [accArg 1 IntT], Exp IntT) )
   , ( "reshape", \(Just ([t], [r1, r2]))     _ -> (prim "reshape",  [shapeArg, accArg r1 t], Acc r2 t) )
   , ( "consSh",  \Nothing                    _ -> (prim "consSh",   [plainArg IntT, accArg 1 IntT], Acc 1 IntT) )
   --, ( "snoc",    \(Just ([t], [r]))          _ -> (prim "snoc",     [accArg (r+1) t, accArg r t], Acc (r+1) t) )

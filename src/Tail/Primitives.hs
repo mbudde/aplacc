@@ -59,12 +59,14 @@ instance (Slice sh, IndexShape (Exp sh)) => IndexShape (Exp (sh :. Int)) where
   dimSh e = 1 + dimSh (indexTail e)
 
 
-shape, shapeSh :: (Shape sh, Elt e, IndexShape (Exp sh))
-               => Acc (Array sh e) -> Acc (Vector Int)
+shape :: (Shape sh, Elt e, IndexShape (Exp sh))
+      => Acc (Array sh e) -> Acc (Vector Int)
 shape arr =
   let sh = Acc.shape arr
   in Acc.generate (lift $ Z :. (dimSh sh)) (indexSh sh . indexHead)
-shapeSh = Tail.Primitives.shape
+
+shapeSh :: Acc (Vector Int) -> Exp Int
+shapeSh arr = (Tail.Primitives.shape arr) Acc.!! 0
 
 reshape0 = undefined
 
