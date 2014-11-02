@@ -110,8 +110,11 @@ drop n arr =
   in backpermute sh' idx arr
 dropSh = Tail.Primitives.drop
 
-first = undefined
-firstSh = undefined
+first :: (Shape sh, Elt e) => Acc (Array sh e) -> Exp e
+first arr = arr Acc.!! 0
+
+firstSh :: Acc (Vector Int) -> Exp Int
+firstSh = Tail.Primitives.first
 
 zipWith :: (Shape sh, Elt a, Elt b, Elt c)
         => (Exp a -> Exp b -> Exp c)

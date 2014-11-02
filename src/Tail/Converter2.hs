@@ -140,6 +140,8 @@ functions = Map.fromList
   , ( "rotateSh",\Nothing                    _ -> (prim "rotateSh", [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
   , ( "transp",  \(Just ([t], [r]))          _ -> (prim "transp",   [accArg r t], Acc r t) )
   --, ( "transp2", \(Just ([t], [r]))          _ -> (prim "transp",   [shapeArg, accArg r t], Acc r t) )
+  , ( "first",   \(Just ([t], [r]))          _ -> (prim "first",    [accArg r t], Exp t) )
+  , ( "firstSh", \Nothing                    _ -> (prim "firstSh",  [accArg 1 IntT], Exp IntT) )
   ]
   where symb = A.InfixApp . Prelude . Symbol
         prim = A.App . Primitive . Ident
