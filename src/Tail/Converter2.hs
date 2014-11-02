@@ -125,7 +125,7 @@ functions = Map.fromList
   , ( "maxd",    \Nothing                    _ -> (prel "max",      [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
   , ( "i2d",     \Nothing                    _ -> (prim "i2d",      [expArg IntT], Exp DoubleT) )
   , ( "each",    \(Just ([t1, t2], [r]))     _ -> (prim "each",     [funcArg $ Exp t1, accArg r t1], Acc r t2) )
-  , ( "reduce",  \(Just ([t], [r]))          _ -> (prim "reduce",   [funcArg $ Exp t, expArg t,accArg (r+1) t], Acc r t) )
+  , ( "reduce",  \(Just ([t], [r]))          _ -> (prim "reduce",   [funcArg $ Exp t, expArg t, accArg (r+1) t], Acc r t) )
   , ( "cat",     \(Just ([t], [r]))          _ -> (prim "cat",      [accArg r t, accArg r t], Acc r t) )
   , ( "catSh",   \Nothing                    _ -> (prim "catSh",    [accArg 1 IntT, accArg 1 IntT], Acc 1 IntT) )
   , ( "iota",    \(Just ([t], []))           _ -> (prim "iota",     [plainArg t], Acc 1 t) )
