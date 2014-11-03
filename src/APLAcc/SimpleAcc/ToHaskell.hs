@@ -1,4 +1,7 @@
-module APLAcc.SimpleAcc.ToHaskell (toHs) where
+module APLAcc.SimpleAcc.ToHaskell (
+  toHs,
+  OutputOpts(..), defaultOpts,
+) where
 
 import Prelude hiding (exp)
 
@@ -8,9 +11,12 @@ import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import qualified APLAcc.SimpleAcc.AST as A
 
+data OutputOpts = ToHsOpts { toCUDA :: Bool }
 
-toHs :: A.Program -> String
-toHs = prettyPrint . outputProgram
+defaultOpts = ToHsOpts { toCUDA = False }
+
+toHs :: OutputOpts -> A.Program -> String
+toHs opts = prettyPrint . outputProgram opts
 
 instance Show A.Type where
   show = prettyPrint . outputType
@@ -63,10 +69,13 @@ snocList ns =
         (Var $ qname $ A.Accelerate $ A.Ident "Z")
         (map (Lit . Int . toInteger) ns)
 
-outputProgram :: A.Program -> Module
-outputProgram p =
+outputProgram :: OutputOpts -> A.Program -> Module
+outputProgram opts p =
   Module noLoc (ModuleName "Main") [] Nothing Nothing imports [progSig, prog, main]
-  where imports =
+  where backend = if toCUDA opts
+                  then "Data.Array.Accelerate.CUDA"
+                  else "Data.Array.Accelerate.Interpreter"
+        imports =
           [ ImportDecl { importLoc       = noLoc
                        , importModule    = ModuleName "Prelude"
                        , importQualified = True
@@ -92,7 +101,7 @@ outputProgram p =
                        , importAs        = Nothing
                        , importSpecs     = Nothing }
           , ImportDecl { importLoc       = noLoc
-                       , importModule    = ModuleName "Data.Array.Accelerate.Interpreter"
+                       , importModule    = ModuleName backend
                        , importQualified = True
                        , importSrc       = False
                        , importSafe      = False
