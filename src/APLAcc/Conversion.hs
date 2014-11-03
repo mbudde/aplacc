@@ -1,11 +1,11 @@
 module APLAcc.Conversion (convertProgram) where
 
 import Control.Monad.Reader
-import Data.Maybe (fromJust)
 import qualified Data.Map as Map
 
 import qualified APLAcc.TAIL.AST as T
-import APLAcc.SimpleAcc.AST as A
+import qualified APLAcc.SimpleAcc.AST as A
+import APLAcc.SimpleAcc.AST (Type(..), BType(..), Name(..), QName(..))
 import APLAcc.SimpleAcc.ToHaskell () -- Show instances for SimpleAcc.AST
 
 
@@ -26,22 +26,22 @@ typeCast :: A.Type -- from
          -> A.Exp -> A.Exp
 typeCast (Plain IntT) (Plain DoubleT) = A.fromInt
 typeCast (Plain t1)   (Plain t2)      | t1 == t2 = id
-typeCast (Plain t1)   (Exp t2)        = A.lift . flip TypSig (Plain t2) . typeCast (Plain t1) (Plain t2)
+typeCast (Plain t1)   (Exp t2)        = A.lift . flip A.TypSig (Plain t2) . typeCast (Plain t1) (Plain t2)
 typeCast (Plain t1)   (Acc r t2)      = typeCast (Exp t2) (Acc r t2) . typeCast (Plain t1) (Exp t2)
 
-typeCast (Exp t1)    (Plain t2)       = unlift . typeCast (Exp t1) (Exp t2)
-typeCast (Exp IntT)  (Exp DoubleT)    = i2d
+typeCast (Exp t1)    (Plain t2)       = A.unlift . typeCast (Exp t1) (Exp t2)
+typeCast (Exp IntT)  (Exp DoubleT)    = A.i2d
 typeCast (Exp t1)    (Exp t2)         | t1 == t2 = id
-typeCast (Exp t1)    (Acc 0 t2)       = unit . typeCast (Exp t1) (Exp t2)
-typeCast (Exp t1)    (Acc 1 t2)       = unitvec . typeCast (Exp t1) (Acc 0 t2)
+typeCast (Exp t1)    (Acc 0 t2)       = A.unit . typeCast (Exp t1) (Exp t2)
+typeCast (Exp t1)    (Acc 1 t2)       = A.unitvec . typeCast (Exp t1) (Acc 0 t2)
 
-typeCast (Acc 0 t1)  (Plain t2)       = typeCast (Exp t1) (Exp t2) . the
-typeCast (Acc 0 t1)  (Exp t2)         = typeCast (Exp t1) (Exp t2) . the
-typeCast (Acc 1 t1)  (Exp t2)         = typeCast (Exp t1) (Exp t2) . first
+typeCast (Acc 0 t1)  (Plain t2)       = typeCast (Exp t1) (Exp t2) . A.the
+typeCast (Acc 0 t1)  (Exp t2)         = typeCast (Exp t1) (Exp t2) . A.the
+typeCast (Acc 1 t1)  (Exp t2)         = typeCast (Exp t1) (Exp t2) . A.first
 typeCast (Acc r1 t1) (Acc r2 t2)      | t1 == t2 && r1 == r2 = id
-typeCast (Acc 0 t1)  (Acc 0 t2)       = unit . typeCast (Exp t1) (Exp t2) . the
-typeCast (Acc 0 t1)  (Acc 1 t2)       = unitvec
-typeCast (Acc 1 t1)  (Acc 0 t2)       = typeCast (Exp t1) (Acc 0 t2) . first
+typeCast (Acc 0 t1)  (Acc 0 t2)       = A.unit . typeCast (Exp t1) (Exp t2) . A.the
+typeCast (Acc 0 t1)  (Acc 1 t2)       = A.unitvec
+typeCast (Acc 1 t1)  (Acc 0 t2)       = typeCast (Exp t1) (Acc 0 t2) . A.first
 typeCast (Acc r1 (Btyv _)) (Acc r2 _) = id
 typeCast (Acc r1 _) (Acc r2 (Btyv _)) = id
 
@@ -62,7 +62,7 @@ convertExp (T.D d) t = return $ typeCast (Plain DoubleT) t $ A.D d
 convertExp (T.Inf) _ = undefined
 
 convertExp (T.Neg e) t = do
-  let t' = Exp $ baseType t
+  let t' = Exp $ A.baseType t
   e' <- convertExp e t'
   return $ typeCast t' t $ A.Neg e'
 
@@ -73,7 +73,7 @@ convertExp (T.Let x t1 e1 e2) t2 = do
   let (t3, e3) = cancelLift t1' e1'
   e2' <- local (Map.insert x t3) $ convertExp e2 t2
   return $ A.Let x t3 e3 e2'
-  where cancelLift (Exp t) (App (Accelerate (Ident "lift")) [e]) = (Plain t, e)
+  where cancelLift (Exp t) (A.App (Accelerate (Ident "lift")) [e]) = (Plain t, e)
         cancelLift t e = (t, e)
 
 convertExp (T.Op name instDecl args) t = do
@@ -87,7 +87,7 @@ convertExp (T.Fn x t1 e) t2 = do
 
 convertExp (T.Vc es) (Acc 1 t) = do
   es' <- mapM (`convertExp` Plain t) es
-  return $ TypSig (use $ fromList (length es') (List es')) (Acc 1 t)
+  return $ A.TypSig (A.use $ A.fromList (length es') (A.List es')) (Acc 1 t)
 
 convertExp e t = error $ "failed to convert exp " ++ show e ++ " to type " ++ show t
 
@@ -153,8 +153,8 @@ functions = Map.fromList
 
         shapeArg :: T.Exp -> Convert A.Exp
         shapeArg (T.Vc es) =
-          return $ A.lift $ A.InfixApp (Accelerate $ Symbol ":.") ((Var $ Accelerate $ Ident "Z") : map toInt es)
-          where toInt (T.I i) = TypSig (A.I i) (Plain IntT)
+          return $ A.lift $ A.InfixApp (Accelerate $ Symbol ":.") ((A.Var $ Accelerate $ Ident "Z") : map toInt es)
+          where toInt (T.I i) = A.TypSig (A.I i) (Plain IntT)
                 toInt _ = error "shape must be list of ints"
         shapeArg e = error $ "shape argument " ++ show e ++ " not supported"
 
