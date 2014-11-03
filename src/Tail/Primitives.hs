@@ -77,7 +77,9 @@ reshape :: (Shape ix, Shape ix', Elt e)
         => Exp ix
         -> Acc (Array ix' e)
         -> Acc (Array ix e)
-reshape = Acc.reshape
+reshape sh arr = backpermute sh (fromIndex sh' . flip mod m . toIndex sh) arr
+  where m = Acc.size arr
+        sh'= Acc.shape arr
 
 reverse = undefined
 
