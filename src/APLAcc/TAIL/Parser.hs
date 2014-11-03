@@ -1,4 +1,4 @@
-module APLAcc.TAIL.Parser where
+module APLAcc.TAIL.Parser (parseFile) where
 
 import Control.Monad (liftM, liftM2)
 import Data.Char (isSpace)
@@ -10,6 +10,14 @@ import Text.Parsec.Pos
 import qualified Text.Parsec.Token as Token
 
 import APLAcc.TAIL.AST
+
+
+parseFile :: String -> IO Program
+parseFile file =
+  do str <- readFile file
+     case parse program file str of
+       Left e  -> error $ show e
+       Right r -> return r
 
 
 tailDef = Token.LanguageDef {
@@ -157,9 +165,3 @@ parseString parser str =
     Left e  -> error $ show e
     Right r -> r
 
-parseFile :: String -> IO Program
-parseFile file =
-  do str <- readFile file
-     case parse program file str of
-       Left e  -> error $ show e
-       Right r -> return r

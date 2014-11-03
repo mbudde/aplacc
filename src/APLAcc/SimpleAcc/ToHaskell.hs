@@ -1,5 +1,4 @@
-module APLAcc.SimpleAcc.ToHaskell
-  ( toHs ) where
+module APLAcc.SimpleAcc.ToHaskell (toHs) where
 
 import Prelude hiding (exp)
 
@@ -97,7 +96,7 @@ outputProgram p =
                        , importAs        = Just $ ModuleName "Backend"
                        , importSpecs     = Nothing }
           , ImportDecl { importLoc       = noLoc
-                       , importModule    = ModuleName "Tail.Primitives"
+                       , importModule    = ModuleName "APLAcc.Primitives"
                        , importQualified = True
                        , importSrc       = False
                        , importPkg       = Nothing

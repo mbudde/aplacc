@@ -1,7 +1,7 @@
-module APLAcc.SimpleAcc.AST
-  ( module APLAcc.SimpleAcc.AST
-  , T.BType(..)  -- reexport
-  ) where
+module APLAcc.SimpleAcc.AST (
+  module APLAcc.SimpleAcc.AST,
+  T.BType(..)  -- reexport
+) where
 
 import qualified APLAcc.TAIL.AST as T
 

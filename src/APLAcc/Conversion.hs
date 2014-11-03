@@ -1,5 +1,4 @@
-module APLAcc.Conversion
-  ( convertProgram ) where
+module APLAcc.Conversion (convertProgram) where
 
 import Control.Monad.Reader
 import Data.Maybe (fromJust)
