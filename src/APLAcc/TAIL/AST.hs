@@ -1,4 +1,4 @@
-module Tail.Ast where
+module APLAcc.TAIL.AST where
 
 type Ident = String
 

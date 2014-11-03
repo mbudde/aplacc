@@ -1,4 +1,4 @@
-module Tail.Parser where
+module APLAcc.TAIL.Parser where
 
 import Control.Monad (liftM, liftM2)
 import Data.Char (isSpace)
@@ -9,7 +9,7 @@ import Text.Parsec.Expr
 import Text.Parsec.Pos
 import qualified Text.Parsec.Token as Token
 
-import Tail.Ast
+import APLAcc.TAIL.AST
 
 
 tailDef = Token.LanguageDef {

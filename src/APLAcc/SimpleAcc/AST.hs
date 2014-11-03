@@ -1,9 +1,9 @@
-module Tail.SimpleAccAst
-  ( module Tail.SimpleAccAst
-  , T.BType(..)
+module APLAcc.SimpleAcc.AST
+  ( module APLAcc.SimpleAcc.AST
+  , T.BType(..)  -- reexport
   ) where
 
-import qualified Tail.Ast as T
+import qualified APLAcc.TAIL.AST as T
 
 data Type
   = Exp T.BType         -- Exp t

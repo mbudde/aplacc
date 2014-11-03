@@ -13,8 +13,12 @@ flag static
 
 executable aplacc
   main-is:           Main.hs
-  other-modules:     Tail.Ast
-                     Tail.Parser
+  other-modules:     APLAcc.Conversion
+                     APLAcc.Primitives
+                     APLAcc.TAIL.AST
+                     APLAcc.TAIL.Parser
+                     APLAcc.SimpleAcc.AST
+                     APLAcc.SimpleAcc.ToHaskell
   hs-source-dirs:    src
   build-depends:     base >= 4.5.0,
                      containers,

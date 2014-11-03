@@ -1,13 +1,13 @@
-module Tail.Converter2 where
+module APLAcc.Conversion
+  ( convertProgram ) where
 
 import Control.Monad.Reader
 import Data.Maybe (fromJust)
 import qualified Data.Map as Map
 
-import qualified Tail.Ast as T
-import Tail.SimpleAccAst as A
-import Tail.Parser (parseFile)
-import qualified Tail.Output
+import qualified APLAcc.TAIL.AST as T
+import APLAcc.SimpleAcc.AST as A
+import APLAcc.SimpleAcc.ToHaskell () -- Show instances for SimpleAcc.AST
 
 
 type Env = Map.Map T.Ident A.Type
@@ -18,10 +18,6 @@ emptyEnv = Map.empty
 type Convert a = Reader Env a
 
 runConvert = runReader
-
-convertFile :: String -> IO ()
-convertFile file = do ast <- parseFile file
-                      putStrLn $ show $ convertProgram ast
 
 convertProgram :: T.Program -> A.Program
 convertProgram p = runConvert (convertExp p (Acc 0 DoubleT)) emptyEnv

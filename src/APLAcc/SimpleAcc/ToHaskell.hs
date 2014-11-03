@@ -1,4 +1,5 @@
-module Tail.Output where
+module APLAcc.SimpleAcc.ToHaskell
+  ( toHs ) where
 
 import Prelude hiding (exp)
 
@@ -6,9 +7,11 @@ import Language.Haskell.Exts.Syntax as Hs
 import Language.Haskell.Exts.SrcLoc (noLoc)
 import Language.Haskell.Exts.Pretty (prettyPrint)
 
-import qualified Tail.SimpleAccAst as A
+import qualified APLAcc.SimpleAcc.AST as A
 
-prettyPrintProgram = prettyPrint . outputProgram
+
+toHs :: A.Program -> String
+toHs = prettyPrint . outputProgram
 
 instance Show A.Type where
   show = prettyPrint . outputType
