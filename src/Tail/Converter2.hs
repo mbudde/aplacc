@@ -19,11 +19,6 @@ type Convert a = Reader Env a
 
 runConvert = runReader
 
-whenT :: T.BType -> T.BType -> (a -> a) -> Convert a -> Convert a
-whenT t1 t2 f m | t1 == t2 = liftM f m
-whenT _  _  _ m = m
-
-
 convertFile :: String -> IO ()
 convertFile file = do ast <- parseFile file
                       putStrLn $ show $ convertProgram ast
