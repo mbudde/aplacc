@@ -1,6 +1,5 @@
 #!/bin/bash
 
-aplacc_args=
 verbose=
 write_output=
 files=()
@@ -9,8 +8,6 @@ while [ $# != 0 ]; do
     case "$1" in
         -v)
             verbose=1 ;;
-        -c|--cuda)
-            aplacc_args="$aplacc_args --cuda" ;;
         -w)
             write_output=1 ;;
         --)
@@ -43,7 +40,7 @@ for f in "${files[@]}"; do
         cat "$f"
         echo -e "\033[33m>>> [$f] Running aplacc\033[0m"
     fi
-    hsoutput=$(./dist/build/aplacc/aplacc $aplacc_args "$f")
+    hsoutput=$(./dist/build/aplacc/aplacc "$f")
     if [ $? != 0 ]; then
         echo -e "\033[31;1m<<< [$f] aplacc failed\033[0m"
         continue
