@@ -98,7 +98,8 @@ rotateSh = Tail.Primitives.rotate
 transp :: (Elt e) => Acc (Array DIM2 e) -> Acc (Array DIM2 e)
 transp = Acc.transpose
 
-transp2 = undefined
+transp2 :: (Shape sh, Elt e) => Acc (Vector Int) -> Acc (Array sh e) -> Acc (Array sh e)
+transp2 dimIdx arr = undefined
 
 take, drop, takeSh, dropSh
      :: (Slice sh, Shape sh, Elt a)
