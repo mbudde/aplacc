@@ -36,7 +36,7 @@ tailDef = Token.LanguageDef {
 
 lexer = Token.makeTokenParser tailDef
 
-t_identifier = Token.identifier lexer
+identifier = Token.identifier lexer
 reserved   = Token.reserved   lexer
 reservedOp = Token.reservedOp lexer
 stringlit  = Token.stringLiteral lexer
@@ -81,10 +81,10 @@ expr = opExpr
 
 valueExpr :: Parser Exp
 valueExpr = try (liftM D $ lexeme float)
-         <|> (liftM I $ lexeme decimal)
+         <|> liftM I (lexeme decimal)
          <|> try (reserved "inf" >> return Inf)
          <|> (char '~' >> liftM Neg valueExpr)
-         <|> (liftM Var t_identifier)
+         <|> liftM Var identifier
          <?> "number or identifier"
 
 arrayExpr :: Parser Exp
@@ -109,7 +109,7 @@ instanceDecl = braces $
 
 opExpr :: Parser Exp
 opExpr =
-  do ident <- try $ do { i <- t_identifier; lookAhead $ oneOf "({"; return i }
+  do ident <- try $ do { i <- identifier; lookAhead $ oneOf "({"; return i }
      instDecl <- optionMaybe instanceDecl
      args <- parens $ sepBy expr comma
      return $ Op ident instDecl args
@@ -124,7 +124,7 @@ fnExpr =
 
 typedIdent :: Parser (Ident, Type)
 typedIdent =
-  do ident <- t_identifier
+  do ident <- identifier
      colon
      typ <- typeExpr
      return (ident, typ)
@@ -147,8 +147,8 @@ shapeType = shape "Sh" ShT
   where shape name con = try (symbol name) >> liftM con (parens rank)
 
 rank :: Parser Rank
-rank = (liftM R (lexeme decimal))
-   -- <|> (liftM Rv t_identifier)  Unsupported
+rank = liftM R (lexeme decimal)
+   -- <|> (liftM Rv identifier)  Unsupported
    <?> "rank"
 
 basicType :: Parser BType

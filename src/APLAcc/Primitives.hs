@@ -78,10 +78,10 @@ shape :: (Shape sh, Elt e, IndexShape (Exp sh))
       => Acc (Array sh e) -> Acc (Vector Int)
 shape arr =
   let sh = Acc.shape arr
-  in Acc.generate (Acc.lift $ Z :. (dimSh sh)) (indexSh sh . Acc.indexHead)
+  in Acc.generate (Acc.lift $ Z :. dimSh sh) (indexSh sh . Acc.indexHead)
 
 shapeSh :: Acc (Vector Int) -> Exp Int
-shapeSh arr = (shape arr) Acc.!! 0
+shapeSh arr = shape arr Acc.!! 0
 
 reshape0 = undefined
 

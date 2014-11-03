@@ -86,7 +86,7 @@ convertExp (T.Fn x t1 e) t2 = do
   return $ A.Fn x t1' e'
 
 convertExp (T.Vc es) (Acc 1 t) = do
-  es' <- mapM (flip convertExp (Plain t)) es
+  es' <- mapM (`convertExp` Plain t) es
   return $ TypSig (use $ fromList (length es') (List es')) (Acc 1 t)
 
 convertExp e t = error $ "failed to convert exp " ++ show e ++ " to type " ++ show t
@@ -185,4 +185,4 @@ convertOp name inst args t =
 
 
 convertArgs :: [T.Exp -> Convert A.Exp] -> [T.Exp] -> Convert [A.Exp]
-convertArgs fs es = sequence $ zipWith ($) fs es
+convertArgs = zipWithM ($)

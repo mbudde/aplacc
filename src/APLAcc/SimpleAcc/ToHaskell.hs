@@ -26,10 +26,10 @@ instance Show A.Exp where
 
 
 qualAcc :: Name -> QName
-qualAcc name = Qual (ModuleName "Acc") name
+qualAcc = Qual (ModuleName "Acc")
 
 qualPrelude :: Name -> QName
-qualPrelude name = Qual (ModuleName "P") name
+qualPrelude = Qual (ModuleName "P")
 
 name :: A.Name -> Name
 name (A.Ident n) = Ident n
@@ -61,7 +61,7 @@ snocList :: (Integral a) => [a] -> Exp
 snocList ns =
   foldl (\e e' -> InfixApp e (infixOp $ A.Accelerate $ A.Symbol ":.") e')
         (Var $ qname $ A.Accelerate $ A.Ident "Z")
-        (map (\n -> Lit $ Int $ toInteger n) ns)
+        (map (Lit . Int . toInteger) ns)
 
 outputProgram :: A.Program -> Module
 outputProgram p =
@@ -105,12 +105,12 @@ outputProgram p =
           ]
         -- Assume result is always scalar double for now
         progSig = TypeSig noLoc [Ident "program"] $ acc (scalar double)
-        prog = FunBind $
+        prog = FunBind
           [Match noLoc (Ident "program") [] Nothing
                  (UnGuardedRhs $ outputExp p) (BDecls [])]
-        main = FunBind $
+        main = FunBind
           [Match noLoc (Ident "main") [] Nothing
-                 (UnGuardedRhs $ mainBody) (BDecls [])]
+                 (UnGuardedRhs mainBody) (BDecls [])]
         mainBody = App (Var $ qualPrelude $ Ident "print") $
           App (Var $ Qual (ModuleName "Backend") $ Ident "run") (Var $ UnQual $ Ident "program")
 
@@ -133,7 +133,7 @@ outputExp (A.Let ident typ e1 e2) =
               (A.TypSig _ _) -> outputExp e1
               _              -> ExpTypeSig noLoc (outputExp e1) (outputType typ)
   in Let (BDecls [ PatBind noLoc (PVar $ Ident ident) Nothing
-                           (UnGuardedRhs $ e1') (BDecls []) ])
+                           (UnGuardedRhs e1') (BDecls []) ])
          (outputExp e2)
 outputExp (A.Fn ident _ e) =
   Lambda noLoc [PVar $ Ident ident] (outputExp e)
