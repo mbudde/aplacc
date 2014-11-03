@@ -71,6 +71,7 @@ outputProgram p =
                        , importModule    = ModuleName "Prelude"
                        , importQualified = True
                        , importSrc       = False
+                       , importSafe      = False
                        , importPkg       = Nothing
                        , importAs        = Just $ ModuleName "P"
                        , importSpecs     = Nothing }
@@ -78,6 +79,7 @@ outputProgram p =
                        , importModule    = ModuleName "Prelude"
                        , importQualified = False
                        , importSrc       = False
+                       , importSafe      = False
                        , importPkg       = Nothing
                        , importAs        = Nothing
                        , importSpecs     = Just (False, map (IAbs . Symbol) ["+", "-", "*", "/"]) }
@@ -85,6 +87,7 @@ outputProgram p =
                        , importModule    = ModuleName "Data.Array.Accelerate"
                        , importQualified = False
                        , importSrc       = False
+                       , importSafe      = False
                        , importPkg       = Nothing
                        , importAs        = Nothing
                        , importSpecs     = Nothing }
@@ -92,6 +95,7 @@ outputProgram p =
                        , importModule    = ModuleName "Data.Array.Accelerate.Interpreter"
                        , importQualified = True
                        , importSrc       = False
+                       , importSafe      = False
                        , importPkg       = Nothing
                        , importAs        = Just $ ModuleName "Backend"
                        , importSpecs     = Nothing }
@@ -99,6 +103,7 @@ outputProgram p =
                        , importModule    = ModuleName "APLAcc.Primitives"
                        , importQualified = True
                        , importSrc       = False
+                       , importSafe      = False
                        , importPkg       = Nothing
                        , importAs        = Just $ ModuleName "Prim"
                        , importSpecs     = Nothing }
@@ -132,8 +137,7 @@ outputExp (A.Let ident typ e1 e2) =
   let e1' = case e1 of
               (A.TypSig _ _) -> outputExp e1
               _              -> ExpTypeSig noLoc (outputExp e1) (outputType typ)
-  in Let (BDecls [ PatBind noLoc (PVar $ Ident ident) Nothing
-                           (UnGuardedRhs e1') (BDecls []) ])
+  in Let (BDecls [ PatBind noLoc (PVar $ Ident ident) (UnGuardedRhs e1') (BDecls []) ])
          (outputExp e2)
 outputExp (A.Fn ident _ e) =
   Lambda noLoc [PVar $ Ident ident] (outputExp e)
