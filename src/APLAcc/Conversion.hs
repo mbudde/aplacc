@@ -24,20 +24,17 @@ convertProgram p = runConvert (convertExp p (Acc 0 DoubleT)) emptyEnv
 typeCast :: A.Type -- from
          -> A.Type -- to
          -> A.Exp -> A.Exp
-typeCast (Plain IntT) (Plain DoubleT) = A.fromInt
-typeCast (Plain t1)   (Exp t2)        = A.lift . flip A.TypSig (Plain t2) . typeCast (Plain t1) (Plain t2)
-typeCast (Plain t1)   (Acc r t2)      = typeCast (Exp t2) (Acc r t2) . typeCast (Plain t1) (Exp t2)
+typeCast (Plain t1)   (Exp t2)        | t1 == t2 = A.lift . flip A.TypSig (Plain t1)
+typeCast (Plain t1)   (Acc r t2)      | t1 == t2 = typeCast (Exp t1) (Acc r t1) . typeCast (Plain t1) (Exp t1)
 
-typeCast (Exp t1)    (Plain t2)       = A.unlift . typeCast (Exp t1) (Exp t2)
-typeCast (Exp IntT)  (Exp DoubleT)    = A.i2d
+typeCast (Exp t1)    (Plain t2)       | t1 == t2 = A.unlift
 typeCast (Exp t1)    (Acc 0 t2)       = A.unit . typeCast (Exp t1) (Exp t2)
 typeCast (Exp t1)    (Acc 1 t2)       = A.unitvec . typeCast (Exp t1) (Acc 0 t2)
 
 typeCast (Acc 0 t1)  (Plain t2)       = typeCast (Exp t1) (Plain t2) . A.the
-typeCast (Acc 0 t1)  (Exp t2)         = typeCast (Exp t1) (Exp t2) . A.the
-typeCast (Acc 1 t1)  (Exp t2)         = typeCast (Exp t1) (Exp t2) . A.first
-typeCast (Acc 0 t1)  (Acc 0 t2)       = A.unit . typeCast (Exp t1) (Exp t2) . A.the
-typeCast (Acc 0 t1)  (Acc 1 t2)       = A.unitvec
+typeCast (Acc 0 t1)  (Exp t2)         | t1 == t2 = A.the
+typeCast (Acc 1 t1)  (Exp t2)         | t1 == t2 = A.first
+typeCast (Acc 0 t1)  (Acc 1 t2)       | t1 == t2 = A.unitvec
 typeCast (Acc 1 t1)  (Acc 0 t2)       = typeCast (Exp t1) (Acc 0 t2) . A.first
 typeCast (Acc r1 (Btyv _)) (Acc r2 _) = id
 typeCast (Acc r1 _) (Acc r2 (Btyv _)) = id
