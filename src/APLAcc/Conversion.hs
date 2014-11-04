@@ -36,8 +36,6 @@ typeCast (Acc 0 t1)  (Exp t2)         | t1 == t2 = A.the
 typeCast (Acc 1 t1)  (Exp t2)         | t1 == t2 = A.first
 typeCast (Acc 0 t1)  (Acc 1 t2)       | t1 == t2 = A.unitvec
 typeCast (Acc 1 t1)  (Acc 0 t2)       = typeCast (Exp t1) (Acc 0 t2) . A.first
-typeCast (Acc r1 (Btyv _)) (Acc r2 _) = id
-typeCast (Acc r1 _) (Acc r2 (Btyv _)) = id
 
 typeCast t1 t2 | t1 == t2 = id
 
