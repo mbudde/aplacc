@@ -1,5 +1,6 @@
 #!/bin/bash
 
+toplevel=$(dirname $0)
 verbose=
 write_output=
 files=()
@@ -20,11 +21,12 @@ while [ $# != 0 ]; do
     shift
 done
 
+pushd $toplevel
 if ! cabal build; then
     echo -e "\033[31;1m<<< Build failed\033[0m"
     exit 1
 fi
-
+popd
 
 output=
 if [ $verbose ]; then
@@ -40,7 +42,7 @@ for f in "${files[@]}"; do
         cat "$f"
         echo -e "\033[33m>>> [$f] Running aplacc\033[0m"
     fi
-    hsoutput=$(./dist/build/aplacc/aplacc "$f")
+    hsoutput=$($toplevel/dist/build/aplacc/aplacc "$f")
     if [ $? != 0 ]; then
         echo -e "\033[31;1m<<< [$f] aplacc failed\033[0m"
         continue
@@ -49,7 +51,7 @@ for f in "${files[@]}"; do
         echo "$hsoutput" > $output
     fi
     echo -e "\033[33m>>> [$f] Running ghc \033[0m"
-    echo "$hsoutput" | runghc -isrc
+    echo "$hsoutput" | runghc "-i$toplevel/src"
     if [ $? = 0 ]; then
         echo -e "\033[32m<<< [$f] Success\033[0m"
     else
