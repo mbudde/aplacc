@@ -47,9 +47,8 @@ convertExp (T.Var "zilde") (Acc 1 _) = return $ A.Var $ Primitive $ Ident "zilde
 convertExp (T.Var name) t = do
   env <- ask
   return $ case Map.lookup name env of
-    Nothing           -> error $ name ++ " not found in env"
-    Just t2 | t == t2 -> A.Var $ UnQual $ Ident name
-    Just t2           -> typeCast t2 t $ A.Var $ UnQual $ Ident name
+    Nothing -> error $ name ++ " not found in env"
+    Just t2 -> typeCast t2 t $ A.Var $ UnQual $ Ident name
 
 convertExp (T.I i) t = return $ typeCast (Plain IntT) t $ A.I i
 convertExp (T.D d) t = return $ typeCast (Plain DoubleT) t $ A.D d
