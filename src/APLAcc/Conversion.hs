@@ -24,7 +24,7 @@ convertProgram p = runConvert (convertExp p (Acc 0 DoubleT)) emptyEnv
 typeCast :: A.Type -- from
          -> A.Type -- to
          -> A.Exp -> A.Exp
-typeCast (Plain t1)   (Exp t2)        | t1 == t2 = A.lift . flip A.TypSig (Plain t1)
+typeCast (Plain t1)   (Exp t2)        | t1 == t2 = A.constant . flip A.TypSig (Plain t1)
 typeCast (Plain t1)   (Acc r t2)      | t1 == t2 = typeCast (Exp t1) (Acc r t1) . typeCast (Plain t1) (Exp t1)
 
 typeCast (Exp t1)    (Plain t2)       | t1 == t2 = A.unlift
@@ -69,7 +69,7 @@ convertExp (T.Let x t1 e1 e2) t2 = do
   let (t3, e3) = cancelLift t1' e1'
   e2' <- local (Map.insert x t3) $ convertExp e2 t2
   return $ A.Let x t3 e3 e2'
-  where cancelLift (Exp t) (A.App (Accelerate (Ident "lift")) [e]) = (Plain t, e)
+  where cancelLift (Exp t) (A.App (Accelerate (Ident "constant")) [e]) = (Plain t, e)
         cancelLift t e = (t, e)
 
 convertExp (T.Op name instDecl args) t = do

@@ -43,6 +43,7 @@ type Program = Exp
 
 the x  = App (Accelerate $ Ident "the") [x]
 unit x = App (Accelerate $ Ident "unit") [x]
+constant x = App (Accelerate $ Ident "constant") [x]
 lift x = App (Accelerate $ Ident "lift") [x]
 unlift x = App (Accelerate $ Ident "unlift") [x]
 i2d x  = App (Primitive  $ Ident "i2d") [x]
