@@ -25,25 +25,24 @@ typeCast :: A.Type -- from
          -> A.Type -- to
          -> A.Exp -> A.Exp
 typeCast (Plain IntT) (Plain DoubleT) = A.fromInt
-typeCast (Plain t1)   (Plain t2)      | t1 == t2 = id
 typeCast (Plain t1)   (Exp t2)        = A.lift . flip A.TypSig (Plain t2) . typeCast (Plain t1) (Plain t2)
 typeCast (Plain t1)   (Acc r t2)      = typeCast (Exp t2) (Acc r t2) . typeCast (Plain t1) (Exp t2)
 
 typeCast (Exp t1)    (Plain t2)       = A.unlift . typeCast (Exp t1) (Exp t2)
 typeCast (Exp IntT)  (Exp DoubleT)    = A.i2d
-typeCast (Exp t1)    (Exp t2)         | t1 == t2 = id
 typeCast (Exp t1)    (Acc 0 t2)       = A.unit . typeCast (Exp t1) (Exp t2)
 typeCast (Exp t1)    (Acc 1 t2)       = A.unitvec . typeCast (Exp t1) (Acc 0 t2)
 
-typeCast (Acc 0 t1)  (Plain t2)       = typeCast (Exp t1) (Exp t2) . A.the
+typeCast (Acc 0 t1)  (Plain t2)       = typeCast (Exp t1) (Plain t2) . A.the
 typeCast (Acc 0 t1)  (Exp t2)         = typeCast (Exp t1) (Exp t2) . A.the
 typeCast (Acc 1 t1)  (Exp t2)         = typeCast (Exp t1) (Exp t2) . A.first
-typeCast (Acc r1 t1) (Acc r2 t2)      | t1 == t2 && r1 == r2 = id
 typeCast (Acc 0 t1)  (Acc 0 t2)       = A.unit . typeCast (Exp t1) (Exp t2) . A.the
 typeCast (Acc 0 t1)  (Acc 1 t2)       = A.unitvec
 typeCast (Acc 1 t1)  (Acc 0 t2)       = typeCast (Exp t1) (Acc 0 t2) . A.first
 typeCast (Acc r1 (Btyv _)) (Acc r2 _) = id
 typeCast (Acc r1 _) (Acc r2 (Btyv _)) = id
+
+typeCast t1 t2 | t1 == t2 = id
 
 typeCast t1 t2 = \e -> error $ "cannot type cast " ++ show e ++ " from " ++ show t1 ++ " to " ++ show t2
 
@@ -95,7 +94,7 @@ convertType :: T.Type -> A.Type
 convertType (T.ArrT t (T.R 0)) = Exp t
 convertType (T.ArrT t (T.R r)) = Acc r t
 convertType (T.ShT _) = Acc 1 IntT
-convertType (T.SiT _) = Plain IntT
+convertType (T.SiT _) = Exp IntT
 convertType (T.ViT _) = Acc 1 IntT
 convertType _ = error "convertType - not implemented"
 
