@@ -27,7 +27,6 @@ typeCast :: A.Type -- from
 typeCast (Plain t1)   (Exp t2)        | t1 == t2 = A.constant . flip A.TypSig (Plain t1)
 typeCast (Plain t1)   (Acc r t2)      | t1 == t2 = typeCast (Exp t1) (Acc r t1) . typeCast (Plain t1) (Exp t1)
 
-typeCast (Exp t1)    (Plain t2)       | t1 == t2 = A.unlift
 typeCast (Exp t1)    (Acc 0 t2)       = A.unit . typeCast (Exp t1) (Exp t2)
 typeCast (Exp t1)    (Acc 1 t2)       = A.unitvec . typeCast (Exp t1) (Acc 0 t2)
 
@@ -38,8 +37,12 @@ typeCast (Acc 0 t1)  (Acc 1 t2)       | t1 == t2 = A.unitvec
 typeCast (Acc 1 t1)  (Acc 0 t2)       = typeCast (Exp t1) (Acc 0 t2) . A.first
 
 typeCast t1 t2 | t1 == t2 = id
-
 typeCast t1 t2 = \e -> error $ "cannot type cast " ++ show e ++ " from " ++ show t1 ++ " to " ++ show t2
+
+
+cancelLift :: A.Type -> A.Exp -> (A.Type, A.Exp)
+cancelLift (Exp t1) (A.App (Accelerate (Ident "constant")) [A.TypSig e (Plain t2)]) | t1 == t2 = (Plain t1, e)
+cancelLift t e = (t, e)
 
 
 convertExp :: T.Exp -> A.Type -> Convert A.Exp
@@ -57,7 +60,8 @@ convertExp (T.Inf) _ = undefined
 convertExp (T.Neg e) t = do
   let t' = Exp $ A.baseType t
   e' <- convertExp e t'
-  return $ typeCast t' t $ A.Neg e'
+  let (t2, e2) = cancelLift t' e'
+  return $ typeCast t2 t $ A.Neg e2
 
 convertExp (T.Let x t1 e1 e2) t2 = do
   let t1' = convertType t1
@@ -66,8 +70,6 @@ convertExp (T.Let x t1 e1 e2) t2 = do
   let (t3, e3) = cancelLift t1' e1'
   e2' <- local (Map.insert x t3) $ convertExp e2 t2
   return $ A.Let x t3 e3 e2'
-  where cancelLift (Exp t) (A.App (Accelerate (Ident "constant")) [e]) = (Plain t, e)
-        cancelLift t e = (t, e)
 
 convertExp (T.Op name instDecl args) t = do
   (e, t2) <- convertOp name instDecl args t
