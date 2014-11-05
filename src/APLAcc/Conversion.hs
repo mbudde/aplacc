@@ -96,19 +96,20 @@ convertType _ = error "convertType - not implemented"
 
 functions :: Map.Map String (Maybe T.InstDecl -> A.Type -> ([A.Exp] -> A.Exp, [T.Exp -> Convert A.Exp], A.Type))
 functions = Map.fromList
-  [ ( "addi",    \Nothing                    _ -> (symb "+",        [expArg IntT, expArg IntT], Exp IntT) )
-  , ( "negi",    \Nothing                    _ -> (\[a] -> A.Neg a, [expArg IntT], Exp IntT) )
-  , ( "subi",    \Nothing                    _ -> (symb "-",        [expArg IntT, expArg IntT], Exp IntT) )
-  , ( "muli",    \Nothing                    _ -> (symb "*",        [expArg IntT, expArg IntT], Exp IntT) )
-  , ( "mini",    \Nothing                    _ -> (prel "min",      [expArg IntT, expArg IntT], Exp IntT) )
-  , ( "maxi",    \Nothing                    _ -> (prel "max",      [expArg IntT, expArg IntT], Exp IntT) )
-  , ( "addd",    \Nothing                    _ -> (symb "+",        [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
-  , ( "subd",    \Nothing                    _ -> (symb "-",        [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
-  , ( "muld",    \Nothing                    _ -> (symb "*",        [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
-  , ( "divd",    \Nothing                    _ -> (symb "/",        [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
-  , ( "mind",    \Nothing                    _ -> (prel "min",      [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
-  , ( "maxd",    \Nothing                    _ -> (prel "max",      [expArg DoubleT, expArg DoubleT], Exp DoubleT) )
-  , ( "i2d",     \Nothing                    _ -> (prim "i2d",      [expArg IntT], Exp DoubleT) )
+  [ ( "addi",    \Nothing                    t -> binOp (symb "+")   IntT    t )
+  , ( "subi",    \Nothing                    t -> binOp (symb "-")   IntT    t )
+  , ( "muli",    \Nothing                    t -> binOp (symb "*")   IntT    t )
+  , ( "mini",    \Nothing                    t -> binOp (prel "min") IntT    t )
+  , ( "maxi",    \Nothing                    t -> binOp (prel "max") IntT    t )
+  , ( "addd",    \Nothing                    t -> binOp (symb "+")   DoubleT t )
+  , ( "subd",    \Nothing                    t -> binOp (symb "-")   DoubleT t )
+  , ( "muld",    \Nothing                    t -> binOp (symb "*")   DoubleT t )
+  , ( "divd",    \Nothing                    t -> binOp (symb "/")   DoubleT t )
+  , ( "mind",    \Nothing                    t -> binOp (prel "min") DoubleT t )
+  , ( "maxd",    \Nothing                    t -> binOp (prel "max") DoubleT t )
+  , ( "i2d",     \Nothing                    t -> unaryOp (prim "i2d")      IntT    DoubleT t )
+  , ( "negi",    \Nothing                    t -> unaryOp (\[a] -> A.Neg a) IntT    IntT    t )
+  , ( "negd",    \Nothing                    t -> unaryOp (\[a] -> A.Neg a) DoubleT DoubleT t )
   , ( "each",    \(Just ([t1, t2], [r]))     _ -> (prim "each",     [funcArg $ Exp t1, accArg r t1], Acc r t2) )
   , ( "reduce",  \(Just ([t], [r]))          _ -> (prim "reduce",   [funcArg $ Exp t, expArg t, accArg (r+1) t], Acc r t) )
   , ( "cat",     \(Just ([t], [r]))          _ -> (prim "cat",      [accArg r t, accArg r t], Acc r t) )
@@ -136,6 +137,12 @@ functions = Map.fromList
   where symb = A.InfixApp . Prelude . Symbol
         prim = A.App . Primitive . Ident
         prel = A.App . Prelude . Ident
+
+        unaryOp f bty retbty (Plain _) = (f, [plainArg bty], Plain retbty)
+        unaryOp f bty retbty _         = (f, [expArg bty],   Exp retbty)
+
+        binOp f bty (Plain _) = (f, [plainArg bty, plainArg bty], Plain bty)
+        binOp f bty _         = (f, [expArg bty,   expArg bty],   Exp bty)
 
         plainArg :: A.BType -> T.Exp -> Convert A.Exp
         plainArg t = flip convertExp (Plain t)
