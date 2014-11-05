@@ -114,7 +114,7 @@ functions = Map.fromList
   , ( "reduce",  \(Just ([t], [r]))          _ -> (prim "reduce",   [funcArg $ Exp t, expArg t, accArg (r+1) t], Acc r t) )
   , ( "cat",     \(Just ([t], [r]))          _ -> (prim "cat",      [accArg r t, accArg r t], Acc r t) )
   , ( "catSh",   \Nothing                    _ -> (prim "catSh",    [accArg 1 IntT, accArg 1 IntT], Acc 1 IntT) )
-  , ( "iota",    \(Just ([t], []))           _ -> (prim "iota",     [plainArg t], Acc 1 t) )
+  , ( "iota",    \Nothing                    _ -> (prim "iota",     [plainArg IntT], Acc 1 IntT) )
   , ( "iotaSh",  \Nothing                    _ -> (prim "iotaSh",   [plainArg IntT], Acc 1 IntT) )
   , ( "drop",    \(Just ([t], [r]))          _ -> (prim "drop",     [expArg t, accArg r t], Acc r t) )
   , ( "dropSh",  \Nothing                    _ -> (prim "dropSh",   [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
