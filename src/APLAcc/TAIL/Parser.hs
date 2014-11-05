@@ -1,5 +1,6 @@
 module APLAcc.TAIL.Parser (parseFile) where
 
+import System.IO (Handle, hGetContents)
 import Control.Monad (liftM, liftM2)
 import Data.Char (isSpace)
 import Data.Either (partitionEithers)
@@ -12,10 +13,10 @@ import qualified Text.Parsec.Token as Token
 import APLAcc.TAIL.AST
 
 
-parseFile :: String -> IO Program
-parseFile file =
-  do str <- readFile file
-     case parse program file str of
+parseFile :: Handle -> String -> IO Program
+parseFile handle filename =
+  do str <- hGetContents handle
+     case parse program filename str of
        Left e  -> error $ show e
        Right r -> return r
 
