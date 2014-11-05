@@ -41,7 +41,7 @@ zilde :: Elt e => Acc (Vector e)
 zilde = Acc.use (Acc.fromList (Z :. 0) [])
 
 iota, iotaSh :: Int -> Acc (Vector Int)
-iota n = Acc.use $ Acc.fromList (Z :. n) [1..]
+iota n = Acc.enumFromN (Acc.index1 $ Acc.lift n) 1
 iotaSh = iota
 
 unitvec :: (Elt e) => Acc (Scalar e) -> Acc (Vector e)
@@ -150,17 +150,30 @@ cat, catSh :: forall sh e. (Slice sh, Shape sh, Elt e)
 cat = (Acc.++)
 catSh = cat
 
-cons :: (Shape sh, Elt e)
+extend :: (Shape sh, Slice sh, Elt e) => Acc (Array sh e) -> Acc (Array (sh :. Int) e)
+extend arr =
+  let sh  = Acc.shape arr
+      sh' = Acc.lift $ sh :. (1 :: Int)
+      idx = Acc.lift . Acc.indexTail
+  in Acc.backpermute sh' idx arr
+
+cons :: (Shape sh, Slice sh, Elt e)
      => Acc (Array sh e)
      -> Acc (Array (sh :. Int) e)
      -> Acc (Array (sh :. Int) e)
-cons = undefined
+cons a1 a2 = extend a1 Acc.++ a2
 
-consSh :: (Elt e) => e -> Acc (Vector e) -> Acc (Vector e)
-consSh e arr = Acc.use (Acc.fromList (Z :. 1) [e]) Acc.++ arr
+consSh :: Exp Int -> Acc (Vector Int) -> Acc (Vector Int)
+consSh e = cons (Acc.unit e)
 
-snoc = undefined
-snocSh = snoc
+snoc :: (Shape sh, Slice sh, Elt e)
+     => Acc (Array (sh :. Int) e)
+     -> Acc (Array sh e)
+     -> Acc (Array (sh :. Int) e)
+snoc a1 a2 = a1 Acc.++ extend a2
+
+snocSh :: Acc (Vector Int) -> Exp Int -> Acc (Vector Int)
+snocSh arr e = snoc arr (Acc.unit e)
 
 sum :: (Elt e, Acc.IsNum e)
     => (Exp e -> Exp e -> Exp e)
