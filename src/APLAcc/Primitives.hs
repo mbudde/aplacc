@@ -4,6 +4,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module APLAcc.Primitives (
+  infinity,
   i2d,
   zilde,
   iota, iotaSh,
@@ -32,6 +33,9 @@ import Data.Array.Accelerate (Acc, Exp, Elt, Shape, Slice,
                               Z(..), (:.)(..), Vector, Scalar, Array)
 import Data.Array.Accelerate.Array.Sugar (shapeToList)
 
+
+infinity :: Double
+infinity = 1/0
 
 i2d :: (Elt a, Elt b, Acc.IsIntegral a, Acc.IsNum b)
     => Exp a -> Exp b

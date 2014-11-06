@@ -55,7 +55,7 @@ convertExp (T.Var name) t = do
 
 convertExp (T.I i) t = return $ typeCast (Plain IntT) t $ A.I i
 convertExp (T.D d) t = return $ typeCast (Plain DoubleT) t $ A.D d
-convertExp (T.Inf) _ = undefined
+convertExp (T.Inf) t = return $ typeCast (Plain DoubleT) t $ A.Var $ Primitive $ Ident "infinity"
 
 convertExp (T.Neg e) t = do
   let t' = Exp $ A.baseType t
