@@ -131,7 +131,7 @@ takeSh = take
 
 drop n arr =
   let sh  = Acc.shape arr
-      sh' = Acc.lift $ Acc.indexTail sh :. Acc.indexHead sh - n
+      sh' = Acc.lift $ Acc.indexTail sh :. max 0 (Acc.indexHead sh - n)
       idx sh = Acc.lift $ Acc.indexTail sh :. Acc.indexHead sh + n
   in Acc.backpermute sh' idx arr
 dropSh = drop
