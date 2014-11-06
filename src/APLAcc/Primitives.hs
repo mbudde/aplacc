@@ -49,8 +49,7 @@ zilde :: Elt e => Acc (Vector e)
 zilde = Acc.use (Acc.fromList (Z :. 0) [])
 
 iota :: (Elt e, Acc.IsNum e) => Exp Int -> Acc (Vector e)
-iota n = Acc.acond (n Acc.<* 0) (error "negative argument to iota")
-                                (Acc.enumFromN (Acc.index1 n) 1)
+iota n = Acc.enumFromN (Acc.index1 n) 1
 
 iotaSh :: Exp Int -> Acc (Vector Int)
 iotaSh = iota
