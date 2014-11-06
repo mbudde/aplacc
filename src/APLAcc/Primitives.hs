@@ -6,6 +6,7 @@
 module APLAcc.Primitives (
   infinity,
   i2d,
+  residue,
   zilde,
   iota, iotaSh,
   unitvec,
@@ -40,6 +41,9 @@ infinity = 1/0
 i2d :: (Elt a, Elt b, Acc.IsIntegral a, Acc.IsNum b)
     => Exp a -> Exp b
 i2d = Acc.fromIntegral
+
+residue :: (Elt a, Acc.IsIntegral a) => Exp a -> Exp a -> Exp a
+residue a b = Acc.cond (a Acc.==* 0) b (b `mod` a)
 
 zilde :: Elt e => Acc (Vector e)
 zilde = Acc.use (Acc.fromList (Z :. 0) [])
