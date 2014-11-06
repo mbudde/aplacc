@@ -96,9 +96,15 @@ reshape :: (Shape ix, Shape ix', Elt e)
         -> Exp e
         -> Acc (Array ix' e)
         -> Acc (Array ix e)
-reshape sh el arr = Acc.acond (Acc.size arr Acc.==* 0) (Acc.fill sh el) (reshape0 sh arr)
+reshape sh el arr = Acc.acond (Acc.null arr) (Acc.fill sh el) (reshape0 sh arr)
 
-reverse = undefined
+
+reverse :: (Shape sh, Slice sh, Elt e)
+        => Acc (Array (sh :. Int) e)
+        -> Acc (Array (sh :. Int) e)
+reverse arr = Acc.backpermute (Acc.shape arr) idx arr
+  where m = Acc.indexHead $ Acc.shape arr
+        idx sh = Acc.lift $ Acc.indexTail sh :. m - Acc.indexHead sh - 1
 
 
 rotate :: (Shape sh, Slice sh, Elt e)
