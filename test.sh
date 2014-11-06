@@ -11,6 +11,8 @@ while [ $# != 0 ]; do
             verbose=1 ;;
         -w)
             write_output=1 ;;
+        -a|--all)
+            files=($toplevel/tests/working/*.tail $toplevel/tests/failing/*.tail) ;;
         --)
             shift
             files+=("$@")
