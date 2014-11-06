@@ -48,8 +48,10 @@ residue a b = Acc.cond (a Acc.==* 0) b (b `mod` a)
 zilde :: Elt e => Acc (Vector e)
 zilde = Acc.use (Acc.fromList (Z :. 0) [])
 
-iota, iotaSh :: Int -> Acc (Vector Int)
-iota n = Acc.enumFromN (Acc.index1 $ Acc.lift n) 1
+iota :: (Elt e, Acc.IsNum e) => Exp Int -> Acc (Vector e)
+iota n = Acc.enumFromN (Acc.index1 n) 1
+
+iotaSh :: Exp Int -> Acc (Vector Int)
 iotaSh = iota
 
 unitvec :: (Elt e) => Acc (Scalar e) -> Acc (Vector e)
