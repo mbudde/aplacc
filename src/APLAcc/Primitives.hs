@@ -142,8 +142,8 @@ drop n arr =
   in Acc.backpermute sh' idx arr
 dropSh = drop
 
-first :: (Shape sh, Elt e) => Acc (Array sh e) -> Exp e
-first arr = arr Acc.!! 0
+first :: (Shape sh, Elt e, Acc.IsNum e) => Acc (Array sh e) -> Exp e
+first arr = Acc.cond (Acc.null arr) 0 (arr Acc.!! 0)
 
 firstSh :: Acc (Vector Int) -> Exp Int
 firstSh = first

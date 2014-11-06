@@ -118,6 +118,7 @@ functions = Map.fromList
   , ( "iotaSh",  \Nothing                    _ -> (prim "iotaSh",   [plainArg IntT], Acc 1 IntT) )
   , ( "drop",    \(Just ([t], [r]))          _ -> (prim "drop",     [expArg t, accArg r t], Acc r t) )
   , ( "dropSh",  \Nothing                    _ -> (prim "dropSh",   [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
+  -- FIXME: take should take a default element
   , ( "take",    \(Just ([t], [r]))          _ -> (prim "take",     [expArg t, accArg r t], Acc r t) )
   , ( "takeSh",  \Nothing                    t -> (prim "takeSh",   [expArg IntT, accArg 1 IntT], t) )
   , ( "shape",   \(Just ([t], [r]))          _ -> (prim "shape",    [accArg r t], Acc 1 IntT) )
@@ -134,6 +135,7 @@ functions = Map.fromList
   , ( "rotateSh",\Nothing                    _ -> (prim "rotateSh", [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
   , ( "transp",  \(Just ([t], [r]))          _ -> (prim "transp",   [accArg r t], Acc r t) )
   --, ( "transp2", \(Just ([t], [r]))          _ -> (prim "transp",   [shapeArg, accArg r t], Acc r t) )
+  -- FIXME: first should take a default element
   , ( "first",   \(Just ([t], [r]))          _ -> (prim "first",    [accArg r t], Exp t) )
   , ( "firstSh", \Nothing                    _ -> (prim "firstSh",  [accArg 1 IntT], Exp IntT) )
   ]
