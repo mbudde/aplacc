@@ -122,7 +122,8 @@ functions = Map.fromList
   , ( "takeSh",  \Nothing                    t -> (prim "takeSh",   [expArg IntT, accArg 1 IntT], t) )
   , ( "shape",   \(Just ([t], [r]))          _ -> (prim "shape",    [accArg r t], Acc 1 IntT) )
   , ( "shapeSh", \Nothing                    _ -> (prim "shapeSh",  [accArg 1 IntT], Exp IntT) )
-  , ( "reshape", \(Just ([t], [r1, r2]))     _ -> (prim "reshape",  [shapeArg, accArg r1 t], Acc r2 t) )
+  -- FIXME: APLT currently uses the reshape name for reshape0
+  , ( "reshape", \(Just ([t], [r1, r2]))     _ -> (prim "reshape0", [shapeArg, accArg r1 t], Acc r2 t) )
   , ( "cons",    \(Just ([t], [r]))          _ -> (prim "cons",     [accArg r t, accArg (r+1) t], Acc (r+1) t) )
   , ( "consSh",  \Nothing                    _ -> (prim "consSh",   [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
   , ( "snoc",    \(Just ([t], [r]))          _ -> (prim "snoc",     [accArg (r+1) t, accArg r t], Acc (r+1) t) )

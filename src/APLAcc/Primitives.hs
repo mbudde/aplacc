@@ -83,15 +83,20 @@ shape arr =
 shapeSh :: Acc (Vector Int) -> Exp Int
 shapeSh arr = shape arr Acc.!! 0
 
-reshape0 = undefined
+reshape0 :: (Shape ix, Shape ix', Elt e)
+         => Exp ix
+         -> Acc (Array ix' e)
+         -> Acc (Array ix e)
+reshape0 sh arr = Acc.backpermute sh (Acc.fromIndex sh' . flip mod m . Acc.toIndex sh) arr
+  where m   = Acc.size arr
+        sh' = Acc.shape arr
 
 reshape :: (Shape ix, Shape ix', Elt e)
         => Exp ix
+        -> Exp e
         -> Acc (Array ix' e)
         -> Acc (Array ix e)
-reshape sh arr = Acc.backpermute sh (Acc.fromIndex sh' . flip mod m . Acc.toIndex sh) arr
-  where m   = Acc.size arr
-        sh' = Acc.shape arr
+reshape sh el arr = Acc.acond (Acc.size arr Acc.==* 0) (Acc.fill sh el) (reshape0 sh arr)
 
 reverse = undefined
 
@@ -113,6 +118,7 @@ transp = Acc.transpose
 transp2 :: (Shape sh, Elt e) => Acc (Vector Int) -> Acc (Array sh e) -> Acc (Array sh e)
 transp2 dimIdx arr = undefined
 
+-- FIXME: Support negative arguments
 take, drop, takeSh, dropSh
      :: (Slice sh, Shape sh, Elt a)
      => Exp Int
