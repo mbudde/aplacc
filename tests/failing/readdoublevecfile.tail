@@ -1,0 +1,8 @@
+let v1:[double]1 = readDoubleVecFile(['r','e','a','d','d','o','u','b','l','e','v','e','c','f','i','l','e','.','t','x','t']) in
+let v2:[char]1 = prArrC(['N','u','m','b','e','r',' ','o','f',' ','d','o','u','b','l','e','s',' ','i','n',' ','f','i','l','e',':']) in
+let v3:[int]0 = prSclI(first{[int],[1]}(shape{[double],[1]}(v1))) in
+let v4:[char]1 = prArrC(['F','i','l','e',' ','c','o','n','t','e','n','t',':']) in
+let v5:[double]1 = prArrD(v1) in
+let v6:[char]1 = prArrC(['F','i','l','e',' ','c','o','n','t','e','n','t',' ','r','e','v','e','r','s','e','d',':']) in
+let v7:[double]1 = prArrD(transp{[double],[1]}(vreverse{[double],[1]}(transp{[double],[1]}(v1)))) in
+i2d(b2iV(ff))

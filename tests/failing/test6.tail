@@ -1,0 +1,2 @@
+let v1:S(int,9) = 9 in
+i2d(addi(6,v1))

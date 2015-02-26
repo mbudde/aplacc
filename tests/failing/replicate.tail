@@ -1,0 +1,3 @@
+let v1:<int>4 = iotaV(4) in
+let v2:[int]1 = replicate(0,v1,v1) in
+i2d(reduce{[int],[0]}(addi,0,v2))

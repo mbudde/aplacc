@@ -1,0 +1,22 @@
+let v1:[bool]0 = gti(3,2) in
+let v2:S(int,28) = 28 in
+let v9:[int]0 = prSclI(condScl(fn v7:[int]0 => let v8:[int]0 = v7 in
+                   addi(v8,30),v1,condScl(fn v4:[int]0 => let v5:[int]0 = v4 in
+                           subi(v5,30),notb(v1),v2))) in
+let v10:[bool]0 = gti(3,3) in
+let v11:S(int,28) = 28 in
+let v18:[int]0 = prSclI(condScl(fn v16:[int]0 => let v17:[int]0 = v16 in
+                   addi(v17,30),v10,condScl(fn v13:[int]0 => let v14:[int]0 = v13 in
+                           subi(v14,30),notb(v10),v11))) in
+let v19:[int]2 = reshape{[int],[1,2]}([2,2],iotaV(4)) in
+let v20:[bool]0 = gti(3,2) in
+let v21:[int]2 = v19 in
+let v28:[int]2 = prArrI(power(fn v25:[int]2 => let v26:[int]2 = v25 in
+                 each{[int,int],[2]}(fn v27:[int]0 => addi(v27,30),v26),b2i(v20),power(fn v22:[int]2 => let v23:[int]2 = v22 in
+                       each{[int,int],[2]}(fn v24:[int]0 => subi(v24,30),v23),b2i(notb(v20)),v21))) in
+let v29:[bool]0 = gti(3,3) in
+let v30:[int]2 = v19 in
+let v37:[int]2 = prArrI(power(fn v34:[int]2 => let v35:[int]2 = v34 in
+                 each{[int,int],[2]}(fn v36:[int]0 => addi(v36,30),v35),b2i(v29),power(fn v31:[int]2 => let v32:[int]2 = v31 in
+                       each{[int,int],[2]}(fn v33:[int]0 => subi(v33,30),v32),b2i(notb(v29)),v30))) in
+i2d(b2iV(ff))

@@ -1,0 +1,3 @@
+let v1:S(int,3) = 3 in
+let v2:S(int,5) = 5 in
+i2d(subi(addi(v1,v1),muli(v2,v2)))

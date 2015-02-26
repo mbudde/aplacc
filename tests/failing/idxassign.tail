@@ -1,0 +1,17 @@
+let mv1:<int>28 = iotaV(28) in
+let v2:[bool]0 = idxassign([4],mv1,34) in
+let v3:<int>28 = prArrI(mv1) in
+let mv4:[int]2 = reshape{[int],[1,2]}([3,4],iotaV(9)) in
+let v5:[bool]0 = idxassign([2,3],mv4,b2iV(ff)) in
+let v6:[int]2 = prArrI(mv4) in
+let mv7:[int]3 = reshape{[int],[1,3]}([3,4,3],iotaV(128)) in
+let v8:[bool]0 = idxassign([b2iV(tt),b2iV(tt),3],mv7,1000) in
+let v9:[int]3 = prArrI(mv7) in
+let mv12:[double]3 = each{[double,double],[3]}(fn v11:[double]0 => addd(v11,0.20),each{[int,double],[3]}(i2d,mv7)) in
+let v13:S(int,3) = 3 in
+let v14:[bool]0 = idxassign([2,v13,b2iV(tt)],mv12,i2d(2001)) in
+let v15:[double]3 = prArrD(mv12) in
+let mv16:[char]2 = reshape{[char],[1,2]}([7,5],['h','e','l','l','o',' ','t','h','i','s',' ','i','s',' ','a',' ','g','r','e','a','t',' ','s','t','o','r','y',' ','I',' ','t','h','i','n','k']) in
+let v17:[bool]0 = idxassign([3,4],mv16,'X') in
+let v18:[char]2 = prArrC(mv16) in
+i2d(b2iV(ff))

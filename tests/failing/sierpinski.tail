@@ -1,0 +1,4 @@
+let v1:S(int,5) = 5 in
+let v6:[bool]2 = prArrB(power(fn v4:[bool]2 => let v5:[bool]2 = v4 in
+                 transp{[bool],[2]}(cat{[bool],[2]}(transp{[bool],[2]}(cat{[bool],[2]}(v5,reshape{[bool],[1,2]}(shape{[bool],[2]}(v5),[ff]))),transp{[bool],[2]}(cat{[bool],[2]}(v5,v5)))),v1,reshape{[bool],[1,2]}(eachV{[bool,int],[2]}(b2i,[tt,tt]),[tt]))) in
+i2d(b2iV(ff))

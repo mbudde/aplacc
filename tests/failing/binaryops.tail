@@ -1,0 +1,121 @@
+let v1:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['o','r','_','1']) in
+let v2:[bool]0 = eqi(3,ori(b2iV(tt),2)) in
+let v3:[bool]0 = v2 in
+let v4:S(int,3) = 3 in
+let v15:[int]0 = condScl(fn v12:[int]0 => let v13:[int]0 = v12 in
+            let v14:[char]1 = prArrC(cat{[char],[1]}(v1,[':',' ','O','K'])) in
+            addi(v13,b2iV(tt)),v3,condScl(fn v7:[int]0 => let v8:[int]0 = v7 in
+                    let v9:[char]1 = prArrC(cat{[char],[1]}(v1,[':',' ','E','R','R'])) in
+                    addi(v8,2),notb(v3),v4)) in
+let v16:[bool]0 = v2 in
+let v17:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['o','r','_','2']) in
+let v18:[bool]0 = eqi(5,ori(4,5)) in
+let v19:[bool]0 = v18 in
+let v20:S(int,3) = 3 in
+let v31:[int]0 = condScl(fn v28:[int]0 => let v29:[int]0 = v28 in
+            let v30:[char]1 = prArrC(cat{[char],[1]}(v17,[':',' ','O','K'])) in
+            addi(v29,b2iV(tt)),v19,condScl(fn v23:[int]0 => let v24:[int]0 = v23 in
+                    let v25:[char]1 = prArrC(cat{[char],[1]}(v17,[':',' ','E','R','R'])) in
+                    addi(v24,2),notb(v19),v20)) in
+let v32:[bool]0 = v18 in
+let v33:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['a','n','d','_','1']) in
+let v34:[bool]0 = eqi(b2iV(ff),andi(3,4)) in
+let v35:[bool]0 = v34 in
+let v36:S(int,3) = 3 in
+let v47:[int]0 = condScl(fn v44:[int]0 => let v45:[int]0 = v44 in
+            let v46:[char]1 = prArrC(cat{[char],[1]}(v33,[':',' ','O','K'])) in
+            addi(v45,b2iV(tt)),v35,condScl(fn v39:[int]0 => let v40:[int]0 = v39 in
+                    let v41:[char]1 = prArrC(cat{[char],[1]}(v33,[':',' ','E','R','R'])) in
+                    addi(v40,2),notb(v35),v36)) in
+let v48:[bool]0 = v34 in
+let v49:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['a','n','d','_','2']) in
+let v50:[bool]0 = eqi(b2iV(tt),andi(3,5)) in
+let v51:[bool]0 = v50 in
+let v52:S(int,3) = 3 in
+let v63:[int]0 = condScl(fn v60:[int]0 => let v61:[int]0 = v60 in
+            let v62:[char]1 = prArrC(cat{[char],[1]}(v49,[':',' ','O','K'])) in
+            addi(v61,b2iV(tt)),v51,condScl(fn v55:[int]0 => let v56:[int]0 = v55 in
+                    let v57:[char]1 = prArrC(cat{[char],[1]}(v49,[':',' ','E','R','R'])) in
+                    addi(v56,2),notb(v51),v52)) in
+let v64:[bool]0 = v50 in
+let v65:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['x','o','r','_','1']) in
+let v66:[bool]0 = eqi(6,xori(3,5)) in
+let v67:[bool]0 = v66 in
+let v68:S(int,3) = 3 in
+let v79:[int]0 = condScl(fn v76:[int]0 => let v77:[int]0 = v76 in
+            let v78:[char]1 = prArrC(cat{[char],[1]}(v65,[':',' ','O','K'])) in
+            addi(v77,b2iV(tt)),v67,condScl(fn v71:[int]0 => let v72:[int]0 = v71 in
+                    let v73:[char]1 = prArrC(cat{[char],[1]}(v65,[':',' ','E','R','R'])) in
+                    addi(v72,2),notb(v67),v68)) in
+let v80:[bool]0 = v66 in
+let v81:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['x','o','r','_','2']) in
+let v82:[bool]0 = eqi(5,xori(b2iV(ff),5)) in
+let v83:[bool]0 = v82 in
+let v84:S(int,3) = 3 in
+let v95:[int]0 = condScl(fn v92:[int]0 => let v93:[int]0 = v92 in
+            let v94:[char]1 = prArrC(cat{[char],[1]}(v81,[':',' ','O','K'])) in
+            addi(v93,b2iV(tt)),v83,condScl(fn v87:[int]0 => let v88:[int]0 = v87 in
+                    let v89:[char]1 = prArrC(cat{[char],[1]}(v81,[':',' ','E','R','R'])) in
+                    addi(v88,2),notb(v83),v84)) in
+let v96:[bool]0 = v82 in
+let v97:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['s','h','l','_','1']) in
+let v98:[bool]0 = eqi(1024,shli(b2iV(tt),10)) in
+let v99:[bool]0 = v98 in
+let v100:S(int,3) = 3 in
+let v111:[int]0 = condScl(fn v108:[int]0 => let v109:[int]0 = v108 in
+            let v110:[char]1 = prArrC(cat{[char],[1]}(v97,[':',' ','O','K'])) in
+            addi(v109,b2iV(tt)),v99,condScl(fn v103:[int]0 => let v104:[int]0 = v103 in
+                    let v105:[char]1 = prArrC(cat{[char],[1]}(v97,[':',' ','E','R','R'])) in
+                    addi(v104,2),notb(v99),v100)) in
+let v112:[bool]0 = v98 in
+let v113:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['s','h','l','_','2']) in
+let v114:[bool]0 = eqi(~2147483648,shli(b2iV(tt),31)) in
+let v115:[bool]0 = v114 in
+let v116:S(int,3) = 3 in
+let v127:[int]0 = condScl(fn v124:[int]0 => let v125:[int]0 = v124 in
+            let v126:[char]1 = prArrC(cat{[char],[1]}(v113,[':',' ','O','K'])) in
+            addi(v125,b2iV(tt)),v115,condScl(fn v119:[int]0 => let v120:[int]0 = v119 in
+                    let v121:[char]1 = prArrC(cat{[char],[1]}(v113,[':',' ','E','R','R'])) in
+                    addi(v120,2),notb(v115),v116)) in
+let v128:[bool]0 = v114 in
+let v129:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['s','h','r','_','1']) in
+let v130:[bool]0 = eqi(b2iV(tt),shri(1024,10)) in
+let v131:[bool]0 = v130 in
+let v132:S(int,3) = 3 in
+let v143:[int]0 = condScl(fn v140:[int]0 => let v141:[int]0 = v140 in
+            let v142:[char]1 = prArrC(cat{[char],[1]}(v129,[':',' ','O','K'])) in
+            addi(v141,b2iV(tt)),v131,condScl(fn v135:[int]0 => let v136:[int]0 = v135 in
+                    let v137:[char]1 = prArrC(cat{[char],[1]}(v129,[':',' ','E','R','R'])) in
+                    addi(v136,2),notb(v131),v132)) in
+let v144:[bool]0 = v130 in
+let v145:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['s','h','r','_','2']) in
+let v146:[bool]0 = eqi(2,shri(~2147483648,30)) in
+let v147:[bool]0 = v146 in
+let v148:S(int,3) = 3 in
+let v159:[int]0 = condScl(fn v156:[int]0 => let v157:[int]0 = v156 in
+            let v158:[char]1 = prArrC(cat{[char],[1]}(v145,[':',' ','O','K'])) in
+            addi(v157,b2iV(tt)),v147,condScl(fn v151:[int]0 => let v152:[int]0 = v151 in
+                    let v153:[char]1 = prArrC(cat{[char],[1]}(v145,[':',' ','E','R','R'])) in
+                    addi(v152,2),notb(v147),v148)) in
+let v160:[bool]0 = v146 in
+let v161:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['s','h','a','r','_','1']) in
+let v162:[bool]0 = eqi(b2iV(tt),shari(1024,10)) in
+let v163:[bool]0 = v162 in
+let v164:S(int,3) = 3 in
+let v175:[int]0 = condScl(fn v172:[int]0 => let v173:[int]0 = v172 in
+            let v174:[char]1 = prArrC(cat{[char],[1]}(v161,[':',' ','O','K'])) in
+            addi(v173,b2iV(tt)),v163,condScl(fn v167:[int]0 => let v168:[int]0 = v167 in
+                    let v169:[char]1 = prArrC(cat{[char],[1]}(v161,[':',' ','E','R','R'])) in
+                    addi(v168,2),notb(v163),v164)) in
+let v176:[bool]0 = v162 in
+let v177:[char]1 = cat{[char],[1]}(['T','e','s','t',' ','o','f',' '],['s','h','a','r','_','2']) in
+let v178:[bool]0 = eqi(~512,shari(~1024,b2iV(tt))) in
+let v179:[bool]0 = v178 in
+let v180:S(int,3) = 3 in
+let v191:[int]0 = condScl(fn v188:[int]0 => let v189:[int]0 = v188 in
+            let v190:[char]1 = prArrC(cat{[char],[1]}(v177,[':',' ','O','K'])) in
+            addi(v189,b2iV(tt)),v179,condScl(fn v183:[int]0 => let v184:[int]0 = v183 in
+                    let v185:[char]1 = prArrC(cat{[char],[1]}(v177,[':',' ','E','R','R'])) in
+                    addi(v184,2),notb(v179),v180)) in
+let v192:[bool]0 = v178 in
+i2d(b2iV(ff))

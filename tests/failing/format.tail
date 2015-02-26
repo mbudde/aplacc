@@ -1,0 +1,4 @@
+let v3:[int]0 = reduce{[int],[0]}(addi,0,iotaV(10)) in
+let v4:[char]1 = cat{[char],[1]}(['T','h','e',' ','d','o','u','b','l','e',' ','v','a','l','u','e',' ','i','s',' '],cat{[char],[1]}(formatD(34.32),cat{[char],[1]}([' ','a','n','d',' ','t','h','e',' ','i','n','t','e','g','e','r',' ','v','a','l','u','e',' ','i','s',' '],snoc{[char],[0]}(formatI(v3),'.')))) in
+let v5:[char]1 = prArrC(v4) in
+i2d(b2iV(ff))

@@ -1,0 +1,29 @@
+let v1:[bool]2 = reshape{[bool],[1,2]}([3,3],[tt,tt,tt,tt,ff,ff,ff,tt,ff]) in
+let v2:[bool]2 = transp{[bool],[2]}(take{[bool],[2]}(~10,transp{[bool],[2]}(take{[bool],[2]}(~10,v1)))) in
+let v3:[bool]2 = v2 in
+let v4:[bool]2 = cat{[bool],[2]}(vrotate{[bool],[2]}(5,v3),transp{[bool],[2]}(vrotate{[bool],[2]}(3,transp{[bool],[2]}(transp{[bool],[2]}(v3))))) in
+let v5:[bool]2 = transp{[bool],[2]}(cat{[bool],[2]}(transp{[bool],[2]}(v4),transp{[bool],[2]}(vrotate{[bool],[2]}(4,v4)))) in
+let v6:[bool]2 = v5 in
+let v7:[bool]2 = cat{[bool],[2]}(vrotate{[bool],[2]}(5,v6),transp{[bool],[2]}(vrotate{[bool],[2]}(3,transp{[bool],[2]}(transp{[bool],[2]}(v6))))) in
+let v8:[bool]2 = transp{[bool],[2]}(cat{[bool],[2]}(transp{[bool],[2]}(v7),transp{[bool],[2]}(vrotate{[bool],[2]}(4,v7)))) in
+let v9:S(int,20000) = 20000 in
+let v10:[bool]2 = v8 in
+let v88:[bool]2 = power(fn v49:[bool]2 => let v50:[bool]2 = v49 in
+          let v51:[bool]2 = v50 in
+          let v52:[bool]2 = v51 in
+          let v53:[bool]2 = vrotate{[bool],[2]}(b2iV(tt),v52) in
+          let v61:[bool]2 = v52 in
+          let v71:[bool]2 = vrotate{[bool],[2]}(~1,v52) in
+          let v81:[int]2 = zipWith{[int,int,int],[2]}(addi,zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(~1,transp{[bool],[2]}(v71)))),zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,v71),each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(b2iV(tt),transp{[bool],[2]}(v71)))))),zipWith{[int,int,int],[2]}(addi,zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(~1,transp{[bool],[2]}(v61)))),zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,v61),each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(b2iV(tt),transp{[bool],[2]}(v61)))))),zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(~1,transp{[bool],[2]}(v53)))),zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,v53),each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(b2iV(tt),transp{[bool],[2]}(v53)))))))) in
+          zipWith{[bool,bool,bool],[2]}(orb,each{[int,bool],[2]}(fn v85:[int]0 => eqi(v85,3),v81),zipWith{[bool,bool,bool],[2]}(andb,each{[int,bool],[2]}(fn v82:[int]0 => eqi(v82,4),v81),v51)),v9,v10) in
+let v89:[bool]2 = v88 in
+let v90:[bool]2 = v89 in
+let v91:[bool]2 = vrotate{[bool],[2]}(b2iV(tt),v90) in
+let v99:[bool]2 = v90 in
+let v109:[bool]2 = vrotate{[bool],[2]}(~1,v90) in
+let v119:[int]2 = zipWith{[int,int,int],[2]}(addi,zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(~1,transp{[bool],[2]}(v109)))),zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,v109),each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(b2iV(tt),transp{[bool],[2]}(v109)))))),zipWith{[int,int,int],[2]}(addi,zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(~1,transp{[bool],[2]}(v99)))),zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,v99),each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(b2iV(tt),transp{[bool],[2]}(v99)))))),zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(~1,transp{[bool],[2]}(v91)))),zipWith{[int,int,int],[2]}(addi,each{[bool,int],[2]}(b2i,v91),each{[bool,int],[2]}(b2i,transp{[bool],[2]}(vrotate{[bool],[2]}(b2iV(tt),transp{[bool],[2]}(v91)))))))) in
+let v126:[bool]2 = zipWith{[bool,bool,bool],[2]}(orb,each{[int,bool],[2]}(fn v123:[int]0 => eqi(v123,3),v119),zipWith{[bool,bool,bool],[2]}(andb,each{[int,bool],[2]}(fn v120:[int]0 => eqi(v120,4),v119),v89)) in
+let v127:[bool]2 = prArrB(v88) in
+let v128:[char]1 = prArrC(['S','t','a','b','l','e',':',' ']) in
+let v133:[bool]0 = reduce{[bool],[0]}(andb,tt,rav(zipWith{[bool,bool,bool],[2]}(eqb,v88,v126))) in
+i2d(b2i(v133))
