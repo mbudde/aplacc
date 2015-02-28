@@ -56,6 +56,7 @@ convertExp (T.Var name) t = do
 convertExp (T.I i) t = return $ typeCast (Plain IntT) t $ A.I i
 convertExp (T.D d) t = return $ typeCast (Plain DoubleT) t $ A.D d
 convertExp (T.B b) t = return $ typeCast (Plain BoolT) t $ A.B b
+convertExp (T.C c) t = return $ typeCast (Plain CharT) t $ A.C c
 convertExp (T.Inf) t = return $ typeCast (Plain DoubleT) t $ A.Var $ Primitive $ Ident "infinity"
 
 convertExp (T.Neg e) t = do

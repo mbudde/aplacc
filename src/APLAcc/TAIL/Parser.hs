@@ -31,7 +31,7 @@ tailDef = Token.LanguageDef {
               , Token.opStart          = oneOf ""
               , Token.opLetter         = oneOf ""
               , Token.reservedOpNames  = []
-              , Token.reservedNames    = [ "let", "in", "int", "double", "bool", "fn", "inf", "tt", "ff" ]
+              , Token.reservedNames    = [ "let", "in", "int", "double", "bool", "char", "fn", "inf", "tt", "ff" ]
               , Token.caseSensitive    = True
   }
 
@@ -41,6 +41,7 @@ identifier = Token.identifier lexer
 reserved   = Token.reserved   lexer
 reservedOp = Token.reservedOp lexer
 stringlit  = Token.stringLiteral lexer
+charlit    = Token.charLiteral lexer
 parens     = Token.parens     lexer
 brackets   = Token.brackets   lexer
 angles     = Token.angles     lexer
@@ -84,12 +85,13 @@ expr = opExpr
 valueExpr :: Parser Exp
 valueExpr = try (liftM D $ lexeme float)
          <|> liftM I (lexeme decimal)
+         <|> liftM C charlit
          <|> try (reserved "tt" >> return (B True))
          <|> try (reserved "ff" >> return (B False))
          <|> try (reserved "inf" >> return Inf)
          <|> (char '~' >> liftM Neg valueExpr)
          <|> liftM Var identifier
-         <?> "number or identifier"
+         <?> "value or identifier"
 
 arrayExpr :: Parser Exp
 arrayExpr = liftM Vc $ brackets (sepBy expr comma)
@@ -178,6 +180,7 @@ basicType :: Parser BType
 basicType = (reserved "int" >> return IntT)
         <|> (reserved "double" >> return DoubleT)
         <|> (reserved "bool" >> return BoolT)
+        <|> (reserved "char" >> return CharT)
         <?> "basic type"
 
 -------------------

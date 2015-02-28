@@ -8,7 +8,7 @@ data Rank
   -- | Radd Rank Rank     Unsupported
   deriving (Show)
 
-data BType = IntT | DoubleT | BoolT
+data BType = IntT | DoubleT | BoolT | CharT
            | Btyv Ident
   deriving (Show, Eq)
 
@@ -37,6 +37,7 @@ data Exp
   | I Integer
   | D Double
   | B Bool
+  | C Char
   | Inf
   | Neg Exp
   | Let Ident Type Exp Exp

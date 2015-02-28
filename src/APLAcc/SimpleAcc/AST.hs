@@ -31,6 +31,7 @@ data Exp
   | I Integer
   | D Double
   | B Bool
+  | C Char
   | Shape [Integer]
   | Neg Exp
   | TypSig Exp Type
