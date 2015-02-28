@@ -31,7 +31,7 @@ tailDef = Token.LanguageDef {
               , Token.opStart          = oneOf ""
               , Token.opLetter         = oneOf ""
               , Token.reservedOpNames  = []
-              , Token.reservedNames    = [ "let", "in", "int", "double", "fn", "inf" ]
+              , Token.reservedNames    = [ "let", "in", "int", "double", "bool", "fn", "inf", "tt", "ff" ]
               , Token.caseSensitive    = True
   }
 
@@ -43,6 +43,7 @@ reservedOp = Token.reservedOp lexer
 stringlit  = Token.stringLiteral lexer
 parens     = Token.parens     lexer
 brackets   = Token.brackets   lexer
+angles     = Token.angles     lexer
 braces     = Token.braces     lexer
 integer    = Token.integer    lexer
 semi       = Token.semi       lexer
@@ -83,13 +84,15 @@ expr = opExpr
 valueExpr :: Parser Exp
 valueExpr = try (liftM D $ lexeme float)
          <|> liftM I (lexeme decimal)
+         <|> try (reserved "tt" >> return (B True))
+         <|> try (reserved "ff" >> return (B False))
          <|> try (reserved "inf" >> return Inf)
          <|> (char '~' >> liftM Neg valueExpr)
          <|> liftM Var identifier
          <?> "number or identifier"
 
 arrayExpr :: Parser Exp
-arrayExpr = liftM Vc $ brackets (sepBy valueExpr comma)
+arrayExpr = liftM Vc $ brackets (sepBy expr comma)
 
 letExpr :: Parser Exp
 letExpr =
@@ -135,17 +138,36 @@ typedIdent =
 
 typeExpr :: Parser Type
 typeExpr = liftM (foldr1 FunT) $
-  sepBy1 (arrayType <|> shapeType <?> "type") (symbol "->")
+  sepBy1 (     arrayType
+           <|> vectorType
+           <|> singleElemType
+           <|> singletonType
+           <?> "type" )
+         ( symbol "->" )
 
 arrayType :: Parser Type
 arrayType = liftM2 ArrT (brackets basicType) rank
 
-shapeType :: Parser Type
-shapeType = shape "Sh" ShT
-        <|> shape "Si" SiT
-        <|> shape "Vi" ViT
-        <?> "shape type"
-  where shape name con = try (symbol name) >> liftM con (parens rank)
+vectorType :: Parser Type
+vectorType = liftM2 VecT (angles basicType) rank
+
+singletonType :: Parser Type
+singletonType =
+  do symbol "S"
+     parens $ do
+       typ <- basicType
+       comma
+       val <- rank
+       return $ ST typ val
+
+singleElemType :: Parser Type
+singleElemType =
+  do try $ symbol "SV"
+     parens $ do
+       typ <- basicType
+       comma
+       val <- rank
+       return $ SVT typ val
 
 rank :: Parser Rank
 rank = liftM R (lexeme decimal)
@@ -155,6 +177,7 @@ rank = liftM R (lexeme decimal)
 basicType :: Parser BType
 basicType = (reserved "int" >> return IntT)
         <|> (reserved "double" >> return DoubleT)
+        <|> (reserved "bool" >> return BoolT)
         <?> "basic type"
 
 -------------------

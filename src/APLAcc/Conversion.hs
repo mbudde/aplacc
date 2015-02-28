@@ -55,6 +55,7 @@ convertExp (T.Var name) t = do
 
 convertExp (T.I i) t = return $ typeCast (Plain IntT) t $ A.I i
 convertExp (T.D d) t = return $ typeCast (Plain DoubleT) t $ A.D d
+convertExp (T.B b) t = return $ typeCast (Plain BoolT) t $ A.B b
 convertExp (T.Inf) t = return $ typeCast (Plain DoubleT) t $ A.Var $ Primitive $ Ident "infinity"
 
 convertExp (T.Neg e) t = do
@@ -89,9 +90,9 @@ convertExp e t = error $ "failed to convert exp " ++ show e ++ " to type " ++ sh
 convertType :: T.Type -> A.Type
 convertType (T.ArrT t (T.R 0)) = Exp t
 convertType (T.ArrT t (T.R r)) = Acc r t
-convertType (T.ShT _) = Acc 1 IntT
-convertType (T.SiT _) = Exp IntT
-convertType (T.ViT _) = Acc 1 IntT
+convertType (T.VecT t (T.R len)) = Acc 1 t
+convertType (T.ST t _) = Exp t
+convertType (T.SVT t _) = Acc 1 t
 convertType _ = error "convertType - not implemented"
 
 functions :: Map.Map String (Maybe T.InstDecl -> A.Type -> ([A.Exp] -> A.Exp, [T.Exp -> Convert A.Exp], A.Type))
@@ -107,6 +108,10 @@ functions = Map.fromList
   , ( "divd",    \Nothing                    t -> binOp (symb "/")   DoubleT t )
   , ( "mind",    \Nothing                    t -> binOp (prel "min") DoubleT t )
   , ( "maxd",    \Nothing                    t -> binOp (prel "max") DoubleT t )
+  , ( "andb",    \Nothing                    t -> binOp (symb "&&")  BoolT   t )
+  , ( "orb",     \Nothing                    t -> binOp (symb "||")  BoolT   t )
+  , ( "xorb",    \Nothing                    t -> binOp (symb "/=")  BoolT   t )
+  , ( "notb",    \Nothing                    t -> binOp (prel "not") BoolT   t )
   , ( "i2d",     \Nothing                    t -> unaryOp (prim "i2d")      IntT    DoubleT t )
   , ( "negi",    \Nothing                    t -> unaryOp (\[a] -> A.Neg a) IntT    IntT    t )
   , ( "negd",    \Nothing                    t -> unaryOp (\[a] -> A.Neg a) DoubleT DoubleT t )
@@ -180,6 +185,10 @@ functions = Map.fromList
         funcArg (Exp DoubleT) (T.Var "divd") = return $ A.Var $ Prelude $ Symbol "/"
         funcArg (Exp DoubleT) (T.Var "mind") = return $ A.Var $ Prelude $ Ident "min"
         funcArg (Exp DoubleT) (T.Var "maxd") = return $ A.Var $ Prelude $ Ident "max"
+        funcArg (Exp BoolT) (T.Var "andb") = return $ A.Var $ Prelude $ Symbol "&&"
+        funcArg (Exp BoolT) (T.Var "orb")  = return $ A.Var $ Prelude $ Symbol "||"
+        funcArg (Exp BoolT) (T.Var "xorb") = return $ A.Var $ Prelude $ Symbol "/="
+        funcArg (Exp BoolT) (T.Var "notb") = return $ A.Var $ Prelude $ Ident "not"
         funcArg t e@(T.Fn{}) = convertExp e t
         funcArg t name = error $ show name ++ " not implemented as function for " ++ show t
 

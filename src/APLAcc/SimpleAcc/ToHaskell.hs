@@ -62,6 +62,7 @@ array d = TyApp (TyApp (TyCon $ qname $ A.Accelerate $ A.Ident "Array") d)
 dim n  = TyCon $ qname $ A.Accelerate $ A.Ident $ "DIM" ++ show n
 int    = TyCon $ qname $ A.Prelude $ A.Ident "Int"
 double = TyCon $ qname $ A.Prelude $ A.Ident "Double"
+bool   = TyCon $ qname $ A.Prelude $ A.Ident "Bool"
 
 snocList :: (Integral a) => [a] -> Exp
 snocList ns =
@@ -132,6 +133,8 @@ outputExp :: A.Exp -> Exp
 outputExp (A.Var n) = Var $ qname n 
 outputExp (A.I i) = Lit $ Int i
 outputExp (A.D d) = Lit $ Frac $ toRational d
+outputExp (A.B True) = Con $ qualPrelude $ Ident "True"
+outputExp (A.B False) = Con $ qualPrelude $ Ident "False"
 outputExp (A.Shape is) = snocList is
 outputExp (A.TypSig e t) = ExpTypeSig noLoc (outputExp e) (outputType t)
 outputExp (A.Neg e) = NegApp $ outputExp e
@@ -159,3 +162,4 @@ outputType (A.Plain btyp) = outputBType btyp
 outputBType :: A.BType -> Type
 outputBType A.IntT = int
 outputBType A.DoubleT = double
+outputBType A.BoolT = bool

@@ -30,6 +30,7 @@ data Exp
   = Var QName
   | I Integer
   | D Double
+  | B Bool
   | Shape [Integer]
   | Neg Exp
   | TypSig Exp Type
