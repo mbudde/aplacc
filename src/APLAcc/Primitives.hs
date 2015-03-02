@@ -10,7 +10,7 @@ module APLAcc.Primitives (
   zilde,
   iota, iotaV,
   unitvec,
-  each,
+  each, eachV,
   reduce,
   shape, shapeV,
   reshape0, reshape,
@@ -63,6 +63,12 @@ each :: (Shape ix, Elt a, Elt b)
      -> Acc (Array ix a)
      -> Acc (Array ix b)
 each = Acc.map
+
+eachV :: (Elt a, Elt b)
+      => (Exp a -> Exp b)
+      -> Acc (Vector a)
+      -> Acc (Vector b)
+eachV = each
 
 reduce :: (Shape ix, Elt a)
        => (Exp a -> Exp a -> Exp a)
