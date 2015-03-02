@@ -124,10 +124,10 @@ functions = Map.fromList
   , ( "catV",    \(Just ([t], [_, _]))       _ -> (prim "catV",     [accArg 1 t, accArg 1 t], Acc 1 t) )
   , ( "iota",    \Nothing                    t -> (prim "iota",     [expArg IntT], Acc 1 (A.baseType t)) )
   , ( "iotaV",   \Nothing                    _ -> (prim "iotaV",    [expArg IntT], Acc 1 IntT) )
-  , ( "drop",    \(Just ([t], [r]))          _ -> (prim "drop",     [expArg t, accArg r t], Acc r t) )
+  , ( "drop",    \(Just ([t], [r]))          _ -> (prim "drop",     [expArg IntT, accArg r t], Acc r t) )
   , ( "dropV",   \(Just ([t], [_]))          _ -> (prim "dropV",    [expArg IntT, accArg 1 t], Acc 1 t) )
   -- FIXME: take should take a default element
-  , ( "take",    \(Just ([t], [r]))          _ -> (prim "take",     [expArg t, accArg r t], Acc r t) )
+  , ( "take",    \(Just ([t], [r]))          _ -> (prim "take",     [expArg IntT, accArg r t], Acc r t) )
   , ( "takeV",   \Nothing                    t -> (prim "takeV",    [expArg IntT, accArg 1 IntT], t) )
   , ( "shape",   \(Just ([t], [r]))          _ -> (prim "shape",    [accArg r t], Acc 1 IntT) )
   , ( "shapeV",  \Nothing                    _ -> (prim "shapeV",   [accArg 1 IntT], Exp IntT) )
