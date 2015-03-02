@@ -97,7 +97,7 @@ shape arr =
   let sh = Acc.shape arr
   in Acc.generate (Acc.lift $ Z :. dimSh sh) (indexSh sh . Acc.indexHead)
 
-shapeV :: Acc (Vector Int) -> Exp Int
+shapeV :: (Elt e) => Acc (Vector e) -> Exp Int
 shapeV arr = shape arr Acc.!! 0
 
 reshape0 :: (Shape ix, Shape ix', Elt e)
@@ -165,7 +165,7 @@ dropV = drop
 first :: (Shape sh, Elt e, Acc.IsNum e) => Acc (Array sh e) -> Exp e
 first arr = Acc.cond (Acc.null arr) 0 (arr Acc.!! 0)
 
-firstV :: Acc (Vector Int) -> Exp Int
+firstV :: (Elt e, Acc.IsNum e) => Acc (Vector e) -> Exp e
 firstV = first
 
 zipWith :: (Shape sh, Elt a, Elt b, Elt c)
@@ -195,7 +195,7 @@ cons :: (Shape sh, Slice sh, Elt e)
      -> Acc (Array (sh :. Int) e)
 cons a1 a2 = extend a1 Acc.++ a2
 
-consV :: Exp Int -> Acc (Vector Int) -> Acc (Vector Int)
+consV :: (Elt e) => Exp e -> Acc (Vector e) -> Acc (Vector e)
 consV e = cons (Acc.unit e)
 
 snoc :: (Shape sh, Slice sh, Elt e)
@@ -204,7 +204,7 @@ snoc :: (Shape sh, Slice sh, Elt e)
      -> Acc (Array (sh :. Int) e)
 snoc a1 a2 = a1 Acc.++ extend a2
 
-snocV :: Acc (Vector Int) -> Exp Int -> Acc (Vector Int)
+snocV :: (Elt e) => Acc (Vector e) -> Exp e -> Acc (Vector e)
 snocV arr e = snoc arr (Acc.unit e)
 
 sum :: (Elt e, Acc.IsNum e)
