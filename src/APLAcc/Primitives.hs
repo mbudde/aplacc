@@ -8,22 +8,22 @@ module APLAcc.Primitives (
   i2d,
   residue,
   zilde,
-  iota, iotaSh,
+  iota, iotaV,
   unitvec,
   each,
   reduce,
-  shape, shapeSh,
+  shape, shapeV,
   reshape0, reshape,
   reverse,
-  rotate, rotateSh,
+  rotate, rotateV,
   transp, transp2,
-  take, takeSh,
-  drop, dropSh,
-  first, firstSh,
+  take, takeV,
+  drop, dropV,
+  first, firstV,
   zipWith,
-  cat, catSh,
-  cons, consSh,
-  snoc, snocSh,
+  cat, catV,
+  cons, consV,
+  snoc, snocV,
   sum,
 ) where
 
@@ -51,8 +51,8 @@ zilde = Acc.use (Acc.fromList (Z :. 0) [])
 iota :: (Elt e, Acc.IsNum e) => Exp Int -> Acc (Vector e)
 iota n = Acc.enumFromN (Acc.index1 n) 1
 
-iotaSh :: Exp Int -> Acc (Vector Int)
-iotaSh = iota
+iotaV :: Exp Int -> Acc (Vector Int)
+iotaV = iota
 
 unitvec :: (Elt e) => Acc (Scalar e) -> Acc (Vector e)
 unitvec = Acc.reshape (Acc.lift $ Z :. (1 :: Int))
@@ -90,8 +90,8 @@ shape arr =
   let sh = Acc.shape arr
   in Acc.generate (Acc.lift $ Z :. dimSh sh) (indexSh sh . Acc.indexHead)
 
-shapeSh :: Acc (Vector Int) -> Exp Int
-shapeSh arr = shape arr Acc.!! 0
+shapeV :: Acc (Vector Int) -> Exp Int
+shapeV arr = shape arr Acc.!! 0
 
 reshape0 :: (Shape ix, Shape ix', Elt e)
          => Exp ix
@@ -125,8 +125,8 @@ rotate n arr =
       idx sh = Acc.lift $ Acc.indexTail sh :. (Acc.indexHead sh + n) `mod` m
   in Acc.backpermute sh idx arr
 
-rotateSh :: (Elt e) => Exp Int -> Acc (Vector e) -> Acc (Vector e)
-rotateSh = rotate
+rotateV :: (Elt e) => Exp Int -> Acc (Vector e) -> Acc (Vector e)
+rotateV = rotate
 
 transp :: (Elt e) => Acc (Array Acc.DIM2 e) -> Acc (Array Acc.DIM2 e)
 transp = Acc.transpose
@@ -135,7 +135,7 @@ transp2 :: (Shape sh, Elt e) => Acc (Vector Int) -> Acc (Array sh e) -> Acc (Arr
 transp2 dimIdx arr = undefined
 
 -- FIXME: Support negative arguments
-take, drop, takeSh, dropSh
+take, drop, takeV, dropV
      :: (Slice sh, Shape sh, Elt a)
      => Exp Int
      -> Acc (Array (sh :. Int) a)
@@ -143,20 +143,20 @@ take, drop, takeSh, dropSh
 take n arr =
   let sh' = Acc.lift $ Acc.indexTail (Acc.shape arr) :. n
   in Acc.backpermute sh' id arr
-takeSh = take
+takeV = take
 
 drop n arr =
   let sh  = Acc.shape arr
       sh' = Acc.lift $ Acc.indexTail sh :. max 0 (Acc.indexHead sh - n)
       idx sh = Acc.lift $ Acc.indexTail sh :. Acc.indexHead sh + n
   in Acc.backpermute sh' idx arr
-dropSh = drop
+dropV = drop
 
 first :: (Shape sh, Elt e, Acc.IsNum e) => Acc (Array sh e) -> Exp e
 first arr = Acc.cond (Acc.null arr) 0 (arr Acc.!! 0)
 
-firstSh :: Acc (Vector Int) -> Exp Int
-firstSh = first
+firstV :: Acc (Vector Int) -> Exp Int
+firstV = first
 
 zipWith :: (Shape sh, Elt a, Elt b, Elt c)
         => (Exp a -> Exp b -> Exp c)
@@ -165,12 +165,12 @@ zipWith :: (Shape sh, Elt a, Elt b, Elt c)
         -> Acc (Array sh c)
 zipWith = Acc.zipWith
 
-cat, catSh :: forall sh e. (Slice sh, Shape sh, Elt e)
+cat, catV :: forall sh e. (Slice sh, Shape sh, Elt e)
     => Acc (Array (sh :. Int) e)
     -> Acc (Array (sh :. Int) e)
     -> Acc (Array (sh :. Int) e)
 cat = (Acc.++)
-catSh = cat
+catV = cat
 
 extend :: (Shape sh, Slice sh, Elt e) => Acc (Array sh e) -> Acc (Array (sh :. Int) e)
 extend arr =
@@ -185,8 +185,8 @@ cons :: (Shape sh, Slice sh, Elt e)
      -> Acc (Array (sh :. Int) e)
 cons a1 a2 = extend a1 Acc.++ a2
 
-consSh :: Exp Int -> Acc (Vector Int) -> Acc (Vector Int)
-consSh e = cons (Acc.unit e)
+consV :: Exp Int -> Acc (Vector Int) -> Acc (Vector Int)
+consV e = cons (Acc.unit e)
 
 snoc :: (Shape sh, Slice sh, Elt e)
      => Acc (Array (sh :. Int) e)
@@ -194,8 +194,8 @@ snoc :: (Shape sh, Slice sh, Elt e)
      -> Acc (Array (sh :. Int) e)
 snoc a1 a2 = a1 Acc.++ extend a2
 
-snocSh :: Acc (Vector Int) -> Exp Int -> Acc (Vector Int)
-snocSh arr e = snoc arr (Acc.unit e)
+snocV :: Acc (Vector Int) -> Exp Int -> Acc (Vector Int)
+snocV arr e = snoc arr (Acc.unit e)
 
 sum :: (Elt e, Acc.IsNum e)
     => (Exp e -> Exp e -> Exp e)
