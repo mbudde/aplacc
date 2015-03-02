@@ -16,6 +16,7 @@ module APLAcc.Primitives (
   reshape0, reshape,
   reverse,
   rotate, rotateV,
+  vrotate,
   transp, transp2,
   take, takeV,
   drop, dropV,
@@ -127,6 +128,9 @@ rotate n arr =
 
 rotateV :: (Elt e) => Exp Int -> Acc (Vector e) -> Acc (Vector e)
 rotateV = rotate
+
+vrotate :: (Elt e) => Exp Int -> Acc (Array Acc.DIM2 e) -> Acc (Array Acc.DIM2 e)
+vrotate n = transp . rotate n . transp
 
 transp :: (Elt e) => Acc (Array Acc.DIM2 e) -> Acc (Array Acc.DIM2 e)
 transp = Acc.transpose
