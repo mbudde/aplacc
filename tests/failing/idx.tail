@@ -1,11 +1,9 @@
 let v1:<int>28 = iotaV(28) in
 let v2:[int]2 = reshape{[int],[1,2]}([5,7],iotaV(35)) in
 let v3:[int]3 = reshape{[int],[1,3]}([5,4,3],iotaV(60)) in
-let v4:<int>2 = iotaV(2) in
-let v5:<int>3 = [b2iV(tt),4,2] in
 let v6:[int]0 = idxS{[int],[0]}(1,5,v1) in
 let v7:[int]0 = prSclI(v6) in
-let v8:[int]1 = idxS{[int],[1]}(1,b2iV(tt),v2) in
+let v8:[int]1 = idxS{[int],[1]}(1,1,v2) in
 let v9:[int]1 = prArrI(v8) in
 let v10:[int]1 = idxS{[int],[1]}(1,2,v2) in
 let v11:[int]1 = prArrI(v10) in
@@ -14,7 +12,7 @@ let v13:[int]1 = prArrI(v12) in
 let v14:[int]2 = idxS{[int],[2]}(1,2,v3) in
 let v15:[int]2 = prArrI(v14) in
 let v16:[int]2 = idxS{[int],[2]}(2,2,v3) in
-let v17:[int]2 = prArrI(drop{[int],[2]}(b2iV(tt),v16)) in
+let v17:[int]2 = prArrI(drop{[int],[2]}(1,v16)) in
 let v18:[int]2 = idxS{[int],[2]}(3,2,v3) in
-let v19:[int]2 = prArrI(drop{[int],[2]}(b2iV(tt),v18)) in
-i2d(b2iV(ff))
+let v19:[int]2 = prArrI(drop{[int],[2]}(1,v18)) in
+0.00

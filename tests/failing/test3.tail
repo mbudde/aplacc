@@ -1,3 +1,1 @@
-let v1:S(int,1000) = 1000 in
-let v2:<int>2 = [300,20] in
-i2d(reduce{[int],[0]}(addi,0,eachV{[int,int],[2]}(fn v3:[int]0 => addi(v3,v1),v2)))
+i2d(reduce{[int],[0]}(addi,0,eachV{[int,int],[2]}(fn v3:[int]0 => addi(v3,1000),[300,20])))

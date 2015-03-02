@@ -1,0 +1,13 @@
+let v61:<int>4 = prArrI(eachV{[int,int],[4]}(fn v31:[int]0 => let v33:[int]0 = addi(1,resi(19,v31)) in
+                 let v34:[int]0 = addi(1,floor(divd(i2d(v31),100.00))) in
+                 let v35:[int]0 = addi(~12,floor(muld(i2d(v34),divd(3.00,4.00)))) in
+                 let v36:[int]0 = addi(~5,floor(divd(i2d(addi(5,muli(8,v34))),25.00))) in
+                 let v37:[int]0 = subi(floor(divd(i2d(muli(5,v31)),4.00)),addi(v35,10)) in
+                 let v38:[int]0 = resi(30,addi(muli(11,v33),addi(20,subi(v36,v35)))) in
+                 let v39:[int]0 = addi(v38,b2i(orb(eqi(v38,24),andb(eqi(v38,25),gti(v33,11))))) in
+                 let v40:[int]0 = addi(muli(30,b2i(gti(v39,23))),subi(44,v39)) in
+                 let v41:[int]0 = addi(v40,subi(7,resi(7,addi(v37,v40)))) in
+                 let v42:[int]0 = addi(3,b2i(gti(v41,31))) in
+                 let v43:[int]0 = subi(v41,muli(31,b2i(gti(v41,31)))) in
+                 reduce{[int],[0]}(addi,0,zipWith{[int,int,int],[1]}(muli,[10000,100,1],[v31,v42,v43])),eachV{[int,int],[4]}(fn v1:[int]0 => addi(2014,v1),iotaV(4)))) in
+0.00

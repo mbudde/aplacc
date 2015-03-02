@@ -1,3 +1,1 @@
-let v1:S(int,5) = 5 in
-let v2:[int]0 = addi(3,v1) in
-addd(i2d(v1),muld(i2d(v2),4.20))
+addd(5.00,muld(8.00,4.20))

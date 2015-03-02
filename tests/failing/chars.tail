@@ -1,8 +1,6 @@
-let v1:[char]1 = ['H','e','l','l','o',' ','w','o','r','l','d'] in
-let v2:[char]1 = prArrC(transp{[char],[1]}(vreverse{[char],[1]}(transp{[char],[1]}(v1)))) in
-let v3:[char]0 = 'X' in
-let v4:[char]0 = prSclC(v3) in
-let v5:[char]1 = prArrC(cons{[char],[0]}(v3,transp{[char],[1]}(vreverse{[char],[1]}(transp{[char],[1]}(v1))))) in
-let v6:[char]2 = prArrC(transp{[char],[2]}(reshape{[char],[1,2]}([5,6],v1))) in
-let v7:[char]1 = prArrC(replicate(' ',[b2iV(ff),b2iV(tt),3,b2iV(ff)],['b','o','a','t'])) in
-i2d(first{[int],[1]}(shape{[char],[1]}(cons{[char],[0]}(v3,v1))))
+let v2:[char]1 = prArrC(['d','l','r','o','w',' ','o','l','l','e','H']) in
+let v4:[char]0 = prSclC('X') in
+let v5:[char]1 = prArrC(cons{[char],[0]}('X',['d','l','r','o','w',' ','o','l','l','e','H'])) in
+let v6:[char]2 = prArrC(transp{[char],[2]}(reshape{[char],[1,2]}([5,6],['H','e','l','l','o',' ','w','o','r','l','d']))) in
+let v7:[char]1 = prArrC(replicate(' ',[0,1,3,0],['b','o','a','t'])) in
+i2d(first{[int],[1]}(shape{[char],[1]}(cons{[char],[0]}('X',['H','e','l','l','o',' ','w','o','r','l','d']))))

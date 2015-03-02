@@ -1,3 +1,1 @@
-let v1:S(int,6) = 6 in
-let v2:S(int,6) = v1 in
-i2d(v2)
+6.00

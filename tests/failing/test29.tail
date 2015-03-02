@@ -1,7 +1,6 @@
-let v3:[int]0 = reduce{[int],[0]}(addi,0,[b2iV(tt),2,3]) in
+let v3:[int]0 = reduce{[int],[0]}(addi,0,[1,2,3]) in
 let v4:<int>8 = iotaV(8) in
 let v7:[int]0 = reduce{[int],[0]}(addi,0,v4) in
-let v13:[int]0 = reduce{[int],[0]}(addi,0,eachV{[int,int],[8]}(fn v9:[int]0 => let v10:[int]0 = v9 in
-                 addi(2,muli(v10,v10)),v4)) in
+let v13:[int]0 = reduce{[int],[0]}(addi,0,eachV{[int,int],[8]}(fn v9:[int]0 => addi(2,muli(v9,v9)),v4)) in
 let v14:[int]0 = addi(v3,addi(v7,v13)) in
 i2d(v14)

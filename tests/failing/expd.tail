@@ -1,0 +1,5 @@
+let v1:[double]0 = powd(2.00,3.00) in
+let v2:[double]0 = prSclD(v1) in
+let v3:[double]0 = expd(3.00) in
+let v4:[double]0 = prSclD(v3) in
+0.00

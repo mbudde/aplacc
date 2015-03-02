@@ -1,4 +1,2 @@
-let v1:S(int,5) = 5 in
-let v2:[double]0 = 5.20 in
-let v3:[double]0 = addd(i2d(3),maxd(v2,4.50)) in
-addd(i2d(v1),muld(v3,4.20))
+let v3:[double]0 = addd(3.00,maxd(5.20,4.50)) in
+addd(5.00,muld(v3,4.20))

@@ -1,0 +1,15 @@
+let v117:<double>100000 = eachV{[double,double],[100000]}(fn v62:[double]0 => let v66:[double]0 = subd(divd(addd(ln(divd(60.00,65.00)),muld(addd(0.10,divd(powd(0.20,2.00),2.00)),v62)),muld(0.20,powd(v62,0.50))),muld(0.20,powd(v62,0.50))) in
+          let v69:[double]0 = absd(v66) in
+          let v70:[double]0 = divd(1.00,addd(1.00,muld(0.23,v69))) in
+          let v74:<double>5 = eachV{[double,double],[5]}(fn v72:[double]0 => powd(v70,v72),eachV{[int,double],[5]}(i2d,iotaV(5))) in
+          let v85:[double]1 = reshape{[double],[1,1]}([5],v74) in
+          let v90:[double]0 = subd(1.00,muld(divd(1.00,powd(muld(2.00,muld(1.00,pi)),0.50)),muld(expd(negd(divd(muld(v69,v69),2.00))),reduce{[double],[0]}(addd,0.00,zipWith{[double,double,double],[1]}(muld,[0.32,~0.36,1.78,~1.82,1.33],v85))))) in
+          let v92:[double]0 = divd(addd(ln(divd(60.00,65.00)),muld(addd(0.10,divd(powd(0.20,2.00),2.00)),v62)),muld(0.20,powd(v62,0.50))) in
+          let v95:[double]0 = absd(v92) in
+          let v96:[double]0 = divd(1.00,addd(1.00,muld(0.23,v95))) in
+          let v100:<double>5 = eachV{[double,double],[5]}(fn v98:[double]0 => powd(v96,v98),eachV{[int,double],[5]}(i2d,iotaV(5))) in
+          let v111:[double]1 = reshape{[double],[1,1]}([5],v100) in
+          let v116:[double]0 = subd(1.00,muld(divd(1.00,powd(muld(2.00,muld(1.00,pi)),0.50)),muld(expd(negd(divd(muld(v95,v95),2.00))),reduce{[double],[0]}(addd,0.00,zipWith{[double,double,double],[1]}(muld,[0.32,~0.36,1.78,~1.82,1.33],v111))))) in
+          subd(muld(60.00,addd(muld(i2d(absi(mini(0,signd(v92)))),subd(1.00,v116)),muld(i2d(subi(1,absi(mini(0,signd(v92))))),v116))),muld(muld(65.00,expd(negd(muld(0.10,v62)))),addd(muld(i2d(absi(mini(0,signd(v66)))),subd(1.00,v90)),muld(i2d(subi(1,absi(mini(0,signd(v66))))),v90)))),eachV{[double,double],[100000]}(fn v7:[double]0 => divd(v7,10000.00),eachV{[int,double],[100000]}(i2d,iotaV(100000)))) in
+let v120:[double]0 = prSclD(divd(reduce{[double],[0]}(addd,0.00,v117),100000.00)) in
+v120

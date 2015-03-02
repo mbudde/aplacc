@@ -1,0 +1,13 @@
+let v128:[int]0 = prSclI(reduce{[int],[0]}(mini,2147483647,eachV{[int,int],[400]}(fn v63:[int]0 => reduce{[int],[0]}(maxi,~2147483648,each{[int,int],[1]}(fn v94:[int]0 => let v96:[int]0 = addi(1,resi(19,v94)) in
+                                      let v97:[int]0 = addi(1,floor(divd(i2d(v94),100.00))) in
+                                      let v98:[int]0 = addi(~12,floor(muld(i2d(v97),divd(3.00,4.00)))) in
+                                      let v99:[int]0 = addi(~5,floor(divd(i2d(addi(5,muli(8,v97))),25.00))) in
+                                      let v100:[int]0 = subi(floor(divd(i2d(muli(5,v94)),4.00)),addi(v98,10)) in
+                                      let v101:[int]0 = resi(30,addi(muli(11,v96),addi(20,subi(v99,v98)))) in
+                                      let v102:[int]0 = addi(v101,b2i(orb(eqi(v101,24),andb(eqi(v101,25),gti(v96,11))))) in
+                                      let v103:[int]0 = addi(muli(30,b2i(gti(v102,23))),subi(44,v102)) in
+                                      let v104:[int]0 = addi(v103,subi(7,resi(7,addi(v100,v103)))) in
+                                      let v105:[int]0 = addi(3,b2i(gti(v104,31))) in
+                                      let v106:[int]0 = subi(v104,muli(31,b2i(gti(v104,31)))) in
+                                      reduce{[int],[0]}(addi,0,zipWith{[int,int,int],[1]}(muli,[10000,100,1],[v94,v105,v106])),iota(addi(3000,v63)))),iotaV(400)))) in
+0.00

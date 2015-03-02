@@ -1,7 +1,6 @@
-let v1:S(int,20) = 20 in
-let v2:<int>2 = [2,muli(3,v1)] in
-let v3:[int]2 = transp{[int],[2]}(reshape{[int],[1,2]}(v2,cat{[int],[1]}(replicate(0,replicate(0,[3],[v1]),[b2iV(ff),b2iV(tt),2]),reshape{[int],[1,1]}([muli(3,v1)],iotaV(v1))))) in
-let v7:[int]2 = each{[double,int],[2]}(ceil,each{[double,double],[2]}(fn v5:[double]0 => divd(v5,i2d(3)),each{[int,double],[2]}(i2d,v3))) in
+let v2:<int>2 = [2,muli(3,20)] in
+let v3:[int]2 = transp{[int],[2]}(reshape{[int],[1,2]}(v2,cat{[int],[1]}(replicate(0,replicate(0,[3],[20]),[0,1,2]),reshape{[int],[1,1]}([muli(3,20)],iotaV(20))))) in
+let v7:[int]2 = each{[double,int],[2]}(ceil,each{[double,double],[2]}(fn v5:[double]0 => divd(v5,3.00),each{[int,double],[2]}(i2d,v3))) in
 let v8:[int]2 = prArrI(v7) in
 let v9:[bool]1 = compress{[bool],[1]}([ff],[tt]) in
 let v10:[bool]1 = prArrB(v9) in
@@ -17,4 +16,4 @@ let v19:[double]1 = replicate(0.00,[3],[2.00]) in
 let v20:[double]1 = prArrD(v19) in
 let v21:[double]1 = replicate(0.00,[3,2],[1.00,0.00]) in
 let v22:[double]1 = prArrD(v21) in
-i2d(b2iV(ff))
+0.00
