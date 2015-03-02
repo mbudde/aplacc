@@ -1,10 +1,13 @@
 #!/bin/bash
 
+shopt -s nullglob
+
 toplevel=$(dirname $0)
 verbose=
 write_output=
 files=()
 move=
+bail=
 
 while [ $# != 0 ]; do
     case "$1" in
@@ -16,12 +19,25 @@ while [ $# != 0 ]; do
             files=($toplevel/tests/working/*.tail $toplevel/tests/failing/*.tail) ;;
         -m|--move)
             move=1 ;;
+        --bail)
+            bail=1 ;;
         --)
             shift
-            files+=("$@")
+            for name in "$@"; do
+                if [ -d "$name" ]; then
+                    files+=(${name%%/*}/*.tail)
+                else
+                    files+=($name)
+                fi
+            done
             break ;;
         *)
-            files+=("$1") ;;
+            if [ -d "$1" ]; then
+                files+=(${1%%/*}/*.tail)
+            else
+                files+=($1)
+            fi
+            ;;
     esac
     shift
 done
@@ -46,14 +62,19 @@ if [ $verbose ]; then
     output=/dev/stderr
 fi
 
+declare -i num_tests=0 num_failed=0
+
 for f in "${files[@]}"; do
-    if [ ! -r "$f" ]; then
+    if [ ! -f "$f" ]; then
         echo -e "\033[31;1m>>> [$f] File not found\033[0m"
+        echo
         continue
     fi
     if [ $write_output ]; then
         output="${f%.tail}.hs"
     fi
+    echo -e "\033[33m>>> [$f] Testing... \033[0m"
+    num_tests+=1
     if [ $verbose ]; then
         echo -e "\033[33m>>> [$f] Tail input\033[0m"
         cat "$f"
@@ -63,7 +84,13 @@ for f in "${files[@]}"; do
     if [ $? != 0 ]; then
         echo -e "\033[31;1m<<< [$f] aplacc failed\033[0m"
         move_to "$f" "$toplevel/tests/failing"
-        continue
+        num_failed+=1
+        echo
+        if [ $bail ]; then
+            break
+        else
+            continue
+        fi
     fi
     if [ -n "$output" ]; then
         echo "$hsoutput" > $output
@@ -72,9 +99,21 @@ for f in "${files[@]}"; do
     echo "$hsoutput" | runghc "-i$toplevel/src"
     if [ $? = 0 ]; then
         echo -e "\033[32m<<< [$f] Success\033[0m"
+        echo
         move_to "$f" "$toplevel/tests/working"
     else
         echo -e "\033[31;1m<<< [$f] ghc failed\033[0m"
+        echo
         move_to "$f" "$toplevel/tests/failing"
+        num_failed+=1
+        if [ $bail ]; then
+            break
+        fi
     fi
 done
+if [ $num_failed = 0 ]; then
+   echo -e "\033[32m$num_tests tests run, all succeeded\033[0m"
+else
+   echo -e "\033[31m$num_tests tests run, $num_failed failed\033[0m"
+   exit 1
+fi
