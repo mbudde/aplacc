@@ -134,7 +134,7 @@ functions = Map.fromList
   , ( "reshape", \(Just ([t], [r1, r2]))     _ -> (prim "reshape0", [shapeArg, accArg r1 t], Acc r2 t) )
   , ( "reverse", \(Just ([t], [r]))          _ -> (prim "reverse",  [accArg r t], Acc r t) )
   , ( "cons",    \(Just ([t], [r]))          _ -> (prim "cons",     [accArg r t, accArg (r+1) t], Acc (r+1) t) )
-  , ( "consV",   \Nothing                    _ -> (prim "consV",    [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
+  , ( "consV",   \(Just ([t], [r]))          _ -> (prim "consV",    [expArg t, accArg 1 t], Acc 1 t) )
   , ( "snoc",    \(Just ([t], [r]))          _ -> (prim "snoc",     [accArg (r+1) t, accArg r t], Acc (r+1) t) )
   , ( "snocV",   \Nothing                    _ -> (prim "snocV",    [accArg 1 IntT, expArg IntT], Acc 1 IntT) )
   , ( "zipWith", \(Just ([t1, t2, t3], [r])) _ -> (prim "zipWith",  [funcArg $ Exp t1, accArg r t1, accArg r t2], Acc r t3) )
