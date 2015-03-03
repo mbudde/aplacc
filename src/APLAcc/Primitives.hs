@@ -2,6 +2,7 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module APLAcc.Primitives (
   infinity,
@@ -13,6 +14,7 @@ module APLAcc.Primitives (
   each, eachV,
   reduce,
   shape, shapeV,
+  power,
   reshape0, reshape,
   reverse,
   rotate, rotateV,
@@ -88,6 +90,18 @@ reduce :: (Shape ix, Elt a)
        -> Acc (Array (ix :. Int) a)
        -> Acc (Array ix a)
 reduce = Acc.fold
+
+power :: forall a. (Acc.Arrays a)
+      => (Acc a -> Acc a)
+      -> Exp Int
+      -> Acc a
+      -> Acc a
+power fn n arr = unpack snd $
+  Acc.awhile (unpack (\(m, _) -> Acc.unit $ Acc.the m Acc.>* 0))
+             (unpack (\(m, a) -> Acc.lift $ (each (\k -> k-1) m, fn a)))
+             (Acc.lift (Acc.unit n, arr))
+  where unpack :: (Acc.Arrays b) => ((Acc (Scalar Int), Acc a) -> Acc b) -> Acc (Scalar Int, a) -> Acc b
+        unpack f x = let y = Acc.unlift x in f y
 
 class IndexShape sh where
   indexSh :: sh -> Exp Int -> Exp Int

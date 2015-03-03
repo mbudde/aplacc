@@ -150,6 +150,7 @@ functions = Map.fromList
   -- FIXME: first should take a default element
   , ( "first",   \(Just ([t], [r]))          _ -> (prim "first",    [accArg r t], Exp t) )
   , ( "firstV",  \Nothing                    _ -> (prim "firstV",   [accArg 1 IntT], Exp IntT) )
+  , ( "power",   \(Just ([t], [r]))          _ -> (prim "power",    [funcArg $ Acc r t, expArg IntT, accArg r t], Acc r t) )
   ]
   where symb = A.InfixApp . Prelude . Symbol
         accSymb = A.InfixApp . Accelerate . Symbol

@@ -1,5 +1,5 @@
 let v1:[int]2 = reshape{[int],[1,2]}([3,7],iotaV(9)) in
 let v2:[int]2 = prArrI(v1) in
-let v5:[int]2 = prArrI(power(fn v3:[int]2 => transp{[int],[2]}(vrotate{[int],[2]}(1,transp{[int],[2]}(v3))),2,v1)) in
-let v8:[int]2 = prArrI(power(fn v6:[int]2 => transp{[int],[2]}(vrotate{[int],[2]}(~1,transp{[int],[2]}(v6))),2,v1)) in
+let v5:[int]2 = prArrI(power{[int],[2]}(fn v3:[int]2 => transp{[int],[2]}(vrotate{[int],[2]}(1,transp{[int],[2]}(v3))),2,v1)) in
+let v8:[int]2 = prArrI(power{[int],[2]}(fn v6:[int]2 => transp{[int],[2]}(vrotate{[int],[2]}(~1,transp{[int],[2]}(v6))),2,v1)) in
 0.00
