@@ -142,7 +142,7 @@ functions = Map.fromList
   , ( "rotate",  \(Just ([t], [r]))          _ -> (prim "rotate",   [expArg IntT, accArg r t], Acc r t) )
   , ( "rotateV", \Nothing                    _ -> (prim "rotateV",  [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
   , ( "vrotate", \(Just ([t], [r]))          _ -> (prim "vrotate",  [expArg IntT, accArg r t], Acc r t) )
-  , ( "vrotateV",\Nothing                    _ -> (prim "rotateV",  [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
+  , ( "vrotateV",\(Just ([t], [_]))          _ -> (prim "rotateV",  [expArg IntT, accArg 1 t], Acc 1 t) )
   , ( "transp",  \(Just ([t], [r]))          _ -> (prim "transp",   [accArg r t], Acc r t) )
   --, ( "transp2", \(Just ([t], [r]))          _ -> (prim "transp",   [shapeArg, accArg r t], Acc r t) )
   -- FIXME: first should take a default element
