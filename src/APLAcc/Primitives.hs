@@ -5,7 +5,7 @@
 
 module APLAcc.Primitives (
   infinity,
-  i2d,
+  i2d, b2i,
   residue,
   zilde,
   iota, iotaV,
@@ -42,6 +42,9 @@ infinity = 1/0
 i2d :: (Elt a, Elt b, Acc.IsIntegral a, Acc.IsNum b)
     => Exp a -> Exp b
 i2d = Acc.fromIntegral
+
+b2i :: (Elt b, Acc.IsIntegral b) => Exp Bool -> Exp b
+b2i b = (Acc.?) b (1, 0)
 
 residue :: (Elt a, Acc.IsIntegral a) => Exp a -> Exp a -> Exp a
 residue a b = Acc.cond (a Acc.==* 0) b (b `mod` a)

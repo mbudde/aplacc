@@ -103,17 +103,19 @@ functions = Map.fromList
   , ( "muli",    \Nothing                    t -> binOp (symb "*")   IntT    t )
   , ( "mini",    \Nothing                    t -> binOp (prel "min") IntT    t )
   , ( "maxi",    \Nothing                    t -> binOp (prel "max") IntT    t )
+  , ( "eqi",     \Nothing                    t -> binOp (accSymb "==*") IntT t )
   , ( "addd",    \Nothing                    t -> binOp (symb "+")   DoubleT t )
   , ( "subd",    \Nothing                    t -> binOp (symb "-")   DoubleT t )
   , ( "muld",    \Nothing                    t -> binOp (symb "*")   DoubleT t )
   , ( "divd",    \Nothing                    t -> binOp (symb "/")   DoubleT t )
   , ( "mind",    \Nothing                    t -> binOp (prel "min") DoubleT t )
   , ( "maxd",    \Nothing                    t -> binOp (prel "max") DoubleT t )
-  , ( "andb",    \Nothing                    t -> binOp (symb "&&")  BoolT   t )
-  , ( "orb",     \Nothing                    t -> binOp (symb "||")  BoolT   t )
-  , ( "xorb",    \Nothing                    t -> binOp (symb "/=")  BoolT   t )
-  , ( "notb",    \Nothing                    t -> binOp (prel "not") BoolT   t )
+  , ( "andb",    \Nothing                    t -> binOp (accSymb "&&*")  BoolT   t )
+  , ( "orb",     \Nothing                    t -> binOp (accSymb "||*")  BoolT   t )
+  , ( "xorb",    \Nothing                    t -> binOp (accSymb "/=*")  BoolT   t )
+  , ( "notb",    \Nothing                    t -> binOp (acc "not") BoolT   t )
   , ( "i2d",     \Nothing                    t -> unaryOp (prim "i2d")      IntT    DoubleT t )
+  , ( "b2i",     \Nothing                    t -> unaryOp (prim "b2i")      BoolT   IntT    t )
   , ( "negi",    \Nothing                    t -> unaryOp (\[a] -> A.Neg a) IntT    IntT    t )
   , ( "negd",    \Nothing                    t -> unaryOp (\[a] -> A.Neg a) DoubleT DoubleT t )
   , ( "resi",    \Nothing                    _ -> (prim "residue",  [expArg IntT, expArg IntT], Exp IntT) )
@@ -150,6 +152,8 @@ functions = Map.fromList
   , ( "firstV",  \Nothing                    _ -> (prim "firstV",   [accArg 1 IntT], Exp IntT) )
   ]
   where symb = A.InfixApp . Prelude . Symbol
+        accSymb = A.InfixApp . Accelerate . Symbol
+        acc = A.App . Accelerate . Ident
         prim = A.App . Primitive . Ident
         prel = A.App . Prelude . Ident
 
@@ -177,6 +181,7 @@ functions = Map.fromList
 
         funcArg :: A.Type -> T.Exp -> Convert A.Exp
         funcArg (Exp IntT) (T.Var "i2d") = return $ A.Var $ Primitive $ Ident "i2d"
+        funcArg (Exp BoolT) (T.Var "b2i") = return $ A.Var $ Primitive $ Ident "b2i"
         funcArg (Exp IntT) (T.Var "addi") = return $ A.Var $ Prelude $ Symbol "+"
         funcArg (Exp IntT) (T.Var "subi") = return $ A.Var $ Prelude $ Symbol "-"
         funcArg (Exp IntT) (T.Var "muli") = return $ A.Var $ Prelude $ Symbol "*"
@@ -189,10 +194,10 @@ functions = Map.fromList
         funcArg (Exp DoubleT) (T.Var "divd") = return $ A.Var $ Prelude $ Symbol "/"
         funcArg (Exp DoubleT) (T.Var "mind") = return $ A.Var $ Prelude $ Ident "min"
         funcArg (Exp DoubleT) (T.Var "maxd") = return $ A.Var $ Prelude $ Ident "max"
-        funcArg (Exp BoolT) (T.Var "andb") = return $ A.Var $ Prelude $ Symbol "&&"
-        funcArg (Exp BoolT) (T.Var "orb")  = return $ A.Var $ Prelude $ Symbol "||"
-        funcArg (Exp BoolT) (T.Var "xorb") = return $ A.Var $ Prelude $ Symbol "/="
-        funcArg (Exp BoolT) (T.Var "notb") = return $ A.Var $ Prelude $ Ident "not"
+        funcArg (Exp BoolT) (T.Var "andb") = return $ A.Var $ Accelerate $ Symbol "&&*"
+        funcArg (Exp BoolT) (T.Var "orb")  = return $ A.Var $ Accelerate $ Symbol "||*"
+        funcArg (Exp BoolT) (T.Var "xorb") = return $ A.Var $ Accelerate $ Symbol "/=*"
+        funcArg (Exp BoolT) (T.Var "notb") = return $ A.Var $ Accelerate $ Ident "not"
         funcArg t e@(T.Fn{}) = convertExp e t
         funcArg t name = error $ show name ++ " not implemented as function for " ++ show t
 
