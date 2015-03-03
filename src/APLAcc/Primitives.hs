@@ -29,12 +29,21 @@ module APLAcc.Primitives (
 ) where
 
 
+import Data.Default
 import Prelude hiding (take, drop, reverse, zipWith, sum)
 import qualified Data.Array.Accelerate as Acc
 import Data.Array.Accelerate (Acc, Exp, Elt, Shape, Slice,
                               Z(..), (:.)(..), Vector, Scalar, Array)
 import Data.Array.Accelerate.Array.Sugar (shapeToList)
 
+instance (Default a, Elt a) => Default (Exp a) where
+  def = Acc.constant def
+
+instance Default Bool where
+  def = False
+
+instance Default Char where
+  def = ' '
 
 infinity :: Double
 infinity = 1/0
@@ -147,22 +156,50 @@ transp = Acc.transpose
 transp2 :: (Shape sh, Elt e) => Acc (Vector Int) -> Acc (Array sh e) -> Acc (Array sh e)
 transp2 dimIdx arr = undefined
 
--- FIXME: Support negative arguments
-take, drop, takeV, dropV
-     :: (Slice sh, Shape sh, Elt a)
+padArray :: (Slice sh, Shape sh, Elt a, Default a)
+         => Exp Int
+         -> Acc (Array (sh :. Int) a)
+         -> Acc (Array (sh :. Int) a)
+padArray n arr =
+  let sh = Acc.shape arr
+      sh' = Acc.lift $ Acc.indexTail sh :. (abs n) - Acc.indexHead sh
+      zeroes = Acc.generate sh' (\_ -> def)
+  in n Acc.>=* 0 Acc.?| (arr Acc.++ zeroes, zeroes Acc.++ arr)
+
+take, takeAux, drop, dropAux, takeV, dropV
+     :: (Slice sh, Shape sh, Elt a, Default a)
      => Exp Int
      -> Acc (Array (sh :. Int) a)
      -> Acc (Array (sh :. Int) a)
-take n arr =
-  let sh' = Acc.lift $ Acc.indexTail (Acc.shape arr) :. n
-  in Acc.backpermute sh' id arr
-takeV = take
 
-drop n arr =
+-- FIXME: operate on first dimension instead of last
+takeAux n arr =
+  let sh' = Acc.lift $ Acc.indexTail (Acc.shape arr) :. n in
+  Acc.backpermute sh' id arr
+
+take n arr =
+  let sh = Acc.shape arr in
+  abs n Acc.>* Acc.indexHead sh Acc.?|
+    ( padArray n arr
+    , n Acc.>=* 0 Acc.?|
+        ( takeAux n arr
+        , dropAux (Acc.indexHead sh + n) arr ))
+
+-- FIXME: operate on first dimension instead of last
+dropAux n arr =
   let sh  = Acc.shape arr
       sh' = Acc.lift $ Acc.indexTail sh :. max 0 (Acc.indexHead sh - n)
       idx sh = Acc.lift $ Acc.indexTail sh :. Acc.indexHead sh + n
   in Acc.backpermute sh' idx arr
+
+drop n arr =
+  let sh = Acc.shape arr
+      m = min (Acc.indexHead sh) (abs n) in
+  n Acc.>=* 0 Acc.?|
+    ( dropAux m arr
+    , takeAux (Acc.indexHead sh - m) arr )
+
+takeV = take
 dropV = drop
 
 first :: (Shape sh, Elt e, Acc.IsNum e) => Acc (Array sh e) -> Exp e
