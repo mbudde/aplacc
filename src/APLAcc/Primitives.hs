@@ -167,8 +167,26 @@ vrotate n = transp . rotate n . transp
 transp :: (Elt e) => Acc (Array Acc.DIM2 e) -> Acc (Array Acc.DIM2 e)
 transp = Acc.transpose
 
-transp2 :: (Shape sh, Elt e) => Acc (Vector Int) -> Acc (Array sh e) -> Acc (Array sh e)
-transp2 dimIdx arr = undefined
+
+permuteIndex3 :: forall i. (Elt i, Slice (Z :. i), Slice (Z :. i :. i))
+              => [Int]
+              -> Exp (Z :. i :. i :. i)
+              -> Exp (Z :. i :. i :. i)
+permuteIndex3 [m,n,l] ix =
+  let Z :. i :. j :. k = Acc.unlift ix :: Z :. Exp i :. Exp i :. Exp i
+      tup = (i, j, k)
+  in  Acc.lift $ Z :. idxTuple tup m :. idxTuple tup n :. idxTuple tup l
+  where idxTuple (x, _, _) 1 = x
+        idxTuple (_, y, _) 2 = y
+        idxTuple (_, _, z) 3 = z
+        idxTuple _         _ = error "bad index"
+permuteIndex3 _ _ = error "bad index list"
+
+transp2 :: (Elt e) => [Int] -> Acc (Array Acc.DIM3 e) -> Acc (Array Acc.DIM3 e)
+transp2 dimIdx arr = Acc.backpermute sh oldIdx arr
+  where sh = Acc.shape arr
+        oldIdx ix = permuteIndex3 dimIdx ix
+
 
 padArray :: (Slice sh, Shape sh, Elt a, Default a)
          => Exp Int

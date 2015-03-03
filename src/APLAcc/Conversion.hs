@@ -86,6 +86,10 @@ convertExp (T.Vc es) (Acc 1 t) = do
   es' <- mapM (`convertExp` Plain t) es
   return $ A.TypSig (A.use $ A.fromList (length es') (A.List es')) (Acc 1 t)
 
+convertExp (T.Vc es) (Plain t) = do
+  es' <- mapM (`convertExp` Plain t) es
+  return $ A.List es'
+
 convertExp e t = error $ "failed to convert exp " ++ show e ++ " to type " ++ show t
 
 convertType :: T.Type -> A.Type
@@ -146,7 +150,7 @@ functions = Map.fromList
   , ( "vrotate", \(Just ([t], [r]))          _ -> (prim "vrotate",  [expArg IntT, accArg r t], Acc r t) )
   , ( "vrotateV",\(Just ([t], [_]))          _ -> (prim "rotateV",  [expArg IntT, accArg 1 t], Acc 1 t) )
   , ( "transp",  \(Just ([t], [r]))          _ -> (prim "transp",   [accArg r t], Acc r t) )
-  --, ( "transp2", \(Just ([t], [r]))          _ -> (prim "transp",   [shapeArg, accArg r t], Acc r t) )
+  , ( "transp2", \(Just ([t], [r]))          _ -> (prim "transp2",  [plainArg IntT, accArg r t], Acc r t) )
   -- FIXME: first should take a default element
   , ( "first",   \(Just ([t], [r]))          _ -> (prim "first",    [accArg r t], Exp t) )
   , ( "firstV",  \Nothing                    _ -> (prim "firstV",   [accArg 1 IntT], Exp IntT) )
