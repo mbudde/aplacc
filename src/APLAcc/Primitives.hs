@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module APLAcc.Primitives (
   infinity,
@@ -34,9 +35,11 @@ module APLAcc.Primitives (
 import Data.Default
 import Prelude hiding (take, drop, reverse, zipWith, sum)
 import qualified Data.Array.Accelerate as Acc
-import Data.Array.Accelerate (Acc, Exp, Elt, Shape, Slice,
-                              Z(..), (:.)(..), Vector, Scalar, Array)
+import Data.Array.Accelerate (
+  Acc, Exp, Elt, Shape, Slice, Plain, Unlift,
+  Z(..), (:.)(..), Vector, Scalar, Array )
 import Data.Array.Accelerate.Array.Sugar (shapeToList)
+
 
 instance (Default a, Elt a) => Default (Exp a) where
   def = Acc.constant def
@@ -46,6 +49,48 @@ instance Default Bool where
 
 instance Default Char where
   def = ' '
+
+-- A type-level function that gives the unlifted type of an (Exp shape)
+class Unlifting e where
+  type Unlifted e
+
+instance Unlifting Z where
+  type Unlifted Z = Z
+
+instance Unlifting sh => Unlifting (sh :. Int) where
+  type Unlifted (sh :. Int) = Unlifted sh :. Exp Int
+
+-- A typeclass for shapes that can be indexed
+class IndexShape sh where
+  indexSh :: sh -> Exp Int -> Exp Int
+  dimSh   :: sh -> Exp Int
+
+instance IndexShape (Exp Z) where
+  indexSh _ _ = Acc.constant 0
+  dimSh _ = Acc.constant 0
+
+instance (Slice sh, IndexShape (Exp sh)) => IndexShape (Exp (sh :. Int)) where
+  indexSh e n = Acc.cond (n Acc.==* 0) (Acc.indexHead e)
+                                       (indexSh (Acc.indexTail e) (n-1))
+  dimSh e = 1 + dimSh (Acc.indexTail e)
+
+-- A typeclass for shapes that can be reordered using another shape as list of indices.
+class (IndexShape shOrder) => Exchange shOrder where
+  exchange :: IndexShape sh => shOrder -> sh -> shOrder
+
+instance Exchange (Exp Z) where
+  exchange _ _ = Acc.constant Z
+
+instance (sh ~ Plain (Unlifted sh),
+          Slice sh,
+          IndexShape (Exp sh),
+          Exchange (Exp sh),
+          (Unlift Exp (Unlifted sh))) => Exchange (Exp (sh :. Int)) where
+  exchange order sh = Acc.lift $ r :. indexSh sh (Acc.indexHead order)
+    where
+      r :: Unlifted sh
+      r = Acc.unlift $ exchange (Acc.indexTail order) sh
+
 
 infinity :: Double
 infinity = 1/0
@@ -103,19 +148,6 @@ power fn n arr = unpack snd $
   where unpack :: (Acc.Arrays b) => ((Acc (Scalar Int), Acc a) -> Acc b) -> Acc (Scalar Int, a) -> Acc b
         unpack f x = let y = Acc.unlift x in f y
 
-class IndexShape sh where
-  indexSh :: sh -> Exp Int -> Exp Int
-  dimSh   :: sh -> Exp Int
-
-instance IndexShape (Exp Z) where
-  indexSh _ _ = Acc.constant 0
-  dimSh _ = Acc.constant 0
-
-instance (Acc.Slice sh, IndexShape (Exp sh)) => IndexShape (Exp (sh :. Int)) where
-  indexSh e n = Acc.cond (n Acc.==* 0) (Acc.indexHead e)
-                                       (indexSh (Acc.indexTail e) (n-1))
-  dimSh e = 1 + dimSh (Acc.indexTail e)
-
 
 shape :: (Shape sh, Elt e, IndexShape (Exp sh))
       => Acc (Array sh e) -> Acc (Vector Int)
@@ -167,26 +199,11 @@ vrotate n = transp . rotate n . transp
 transp :: (Elt e) => Acc (Array Acc.DIM2 e) -> Acc (Array Acc.DIM2 e)
 transp = Acc.transpose
 
-
-permuteIndex3 :: forall i. (Elt i, Slice (Z :. i), Slice (Z :. i :. i))
-              => [Int]
-              -> Exp (Z :. i :. i :. i)
-              -> Exp (Z :. i :. i :. i)
-permuteIndex3 [m,n,l] ix =
-  let Z :. i :. j :. k = Acc.unlift ix :: Z :. Exp i :. Exp i :. Exp i
-      tup = (i, j, k)
-  in  Acc.lift $ Z :. idxTuple tup m :. idxTuple tup n :. idxTuple tup l
-  where idxTuple (x, _, _) 1 = x
-        idxTuple (_, y, _) 2 = y
-        idxTuple (_, _, z) 3 = z
-        idxTuple _         _ = error "bad index"
-permuteIndex3 _ _ = error "bad index list"
-
-transp2 :: (Elt e) => [Int] -> Acc (Array Acc.DIM3 e) -> Acc (Array Acc.DIM3 e)
-transp2 dimIdx arr = Acc.backpermute sh oldIdx arr
-  where sh = Acc.shape arr
-        oldIdx ix = permuteIndex3 dimIdx ix
-
+transp2 :: (Exchange (Exp ix), Elt a, Shape ix) =>  Exp ix -> Acc (Array ix a) -> Acc (Array ix a)
+transp2 order array = Acc.backpermute newShape reorder array
+  where
+    reorder = exchange order
+    newShape = reorder (Acc.shape array)
 
 padArray :: (Slice sh, Shape sh, Elt a, Default a)
          => Exp Int

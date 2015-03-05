@@ -150,7 +150,7 @@ functions = Map.fromList
   , ( "vrotate", \(Just ([t], [r]))          _ -> (prim "vrotate",  [expArg IntT, accArg r t], Acc r t) )
   , ( "vrotateV",\(Just ([t], [_]))          _ -> (prim "rotateV",  [expArg IntT, accArg 1 t], Acc 1 t) )
   , ( "transp",  \(Just ([t], [r]))          _ -> (prim "transp",   [accArg r t], Acc r t) )
-  , ( "transp2", \(Just ([t], [r]))          _ -> (prim "transp2",  [plainArg IntT, accArg r t], Acc r t) )
+  , ( "transp2", \(Just ([t], [r]))          _ -> (prim "transp2",  [shapeArg.transp2Arg, accArg r t], Acc r t) )
   -- FIXME: first should take a default element
   , ( "first",   \(Just ([t], [r]))          _ -> (prim "first",    [accArg r t], Exp t) )
   , ( "firstV",  \Nothing                    _ -> (prim "firstV",   [accArg 1 IntT], Exp IntT) )
@@ -176,6 +176,13 @@ functions = Map.fromList
 
         accArg :: Integer -> A.BType -> T.Exp -> Convert A.Exp
         accArg n t = flip convertExp (Acc n t)
+
+        transp2Arg :: T.Exp -> T.Exp
+        transp2Arg (T.Vc es) = T.Vc $ map decrInt es
+        transp2Arg e         = e
+
+        decrInt (T.I i) = T.I (i-1)
+        decrInt e       = e
 
         shapeArg :: T.Exp -> Convert A.Exp
         shapeArg (T.Vc es) =
