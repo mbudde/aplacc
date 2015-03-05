@@ -208,7 +208,10 @@ rotate n arr =
 rotateV :: (Elt e) => Exp Int -> Acc (Vector e) -> Acc (Vector e)
 rotateV = rotate
 
-vrotate :: (Elt e) => Exp Int -> Acc (Array Acc.DIM2 e) -> Acc (Array Acc.DIM2 e)
+vrotate :: (Elt e, Shape sh, Slice sh, Iota (sh :. Int), Exchange (Exp (sh :. Int)))
+        => Exp Int
+        -> Acc (Array (sh :. Int) e)
+        -> Acc (Array (sh :. Int) e)
 vrotate n = transp . rotate n . transp
 
 transp :: (Elt e, Iota sh, Exchange (Exp sh)) => Acc (Array sh e) -> Acc (Array sh e)
