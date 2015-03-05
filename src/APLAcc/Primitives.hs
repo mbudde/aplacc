@@ -231,37 +231,37 @@ padArray n arr =
   in n Acc.>=* 0 Acc.?| (arr Acc.++ zeroes, zeroes Acc.++ arr)
 
 take, takeAux, drop, dropAux, takeV, dropV
-     :: (Slice sh, Shape sh, Elt a, Default a)
+     :: (Shape sh, Slice sh, Iota (sh :. Int), Exchange (Exp (sh :. Int)), Elt a, Default a)
      => Exp Int
      -> Acc (Array (sh :. Int) a)
      -> Acc (Array (sh :. Int) a)
 
--- FIXME: operate on first dimension instead of last
 takeAux n arr =
-  let sh' = Acc.lift $ Acc.indexTail (Acc.shape arr) :. n in
-  Acc.backpermute sh' id arr
+  let sh' = Acc.lift $ Acc.indexTail (Acc.shape arr) :. n
+  in  Acc.backpermute sh' id arr
 
 take n arr =
-  let sh = Acc.shape arr in
+  let arr' = transp arr
+      sh = Acc.shape arr' in
   abs n Acc.>* Acc.indexHead sh Acc.?|
-    ( padArray n arr
+    ( transp $ padArray n arr'
     , n Acc.>=* 0 Acc.?|
-        ( takeAux n arr
-        , dropAux (Acc.indexHead sh + n) arr ))
+        ( transp $ takeAux n arr'
+        , transp $ dropAux (Acc.indexHead sh + n) arr' ))
 
--- FIXME: operate on first dimension instead of last
 dropAux n arr =
-  let sh  = Acc.shape arr
+  let sh = Acc.shape arr
       sh' = Acc.lift $ Acc.indexTail sh :. max 0 (Acc.indexHead sh - n)
       idx sh = Acc.lift $ Acc.indexTail sh :. Acc.indexHead sh + n
-  in Acc.backpermute sh' idx arr
+  in  Acc.backpermute sh' idx arr
 
 drop n arr =
-  let sh = Acc.shape arr
+  let arr' = transp arr
+      sh = Acc.shape arr'
       m = min (Acc.indexHead sh) (abs n) in
   n Acc.>=* 0 Acc.?|
-    ( dropAux m arr
-    , takeAux (Acc.indexHead sh - m) arr )
+    ( transp $ dropAux m arr'
+    , transp $ takeAux (Acc.indexHead sh - m) arr' )
 
 takeV = take
 dropV = drop
