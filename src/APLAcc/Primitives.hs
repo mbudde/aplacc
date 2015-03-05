@@ -91,6 +91,21 @@ instance (sh ~ Plain (Unlifted sh),
       r :: Unlifted sh
       r = Acc.unlift $ exchange (Acc.indexTail order) sh
 
+-- A typeclass for generating shapes of the form (Z :. 0 :. 1 :. ...)
+class (Shape sh) => Iota sh where
+  iotaSh :: Exp sh
+  iotaNext :: Exp sh -> Exp Int
+
+instance Iota Z where
+  iotaSh = Acc.constant Z
+  iotaNext _ = Acc.constant 0
+
+instance (Iota sh, Slice sh) => Iota (sh :. Int) where
+  iotaSh = Acc.lift $ sh :. iotaNext sh
+    where sh = iotaSh
+
+  iotaNext sh = iotaNext (Acc.indexTail sh) + 1
+
 
 infinity :: Double
 infinity = 1/0
@@ -196,8 +211,8 @@ rotateV = rotate
 vrotate :: (Elt e) => Exp Int -> Acc (Array Acc.DIM2 e) -> Acc (Array Acc.DIM2 e)
 vrotate n = transp . rotate n . transp
 
-transp :: (Elt e) => Acc (Array Acc.DIM2 e) -> Acc (Array Acc.DIM2 e)
-transp = Acc.transpose
+transp :: (Elt e, Iota sh, Exchange (Exp sh)) => Acc (Array sh e) -> Acc (Array sh e)
+transp = transp2 iotaSh
 
 transp2 :: (Exchange (Exp ix), Elt a, Shape ix) =>  Exp ix -> Acc (Array ix a) -> Acc (Array ix a)
 transp2 order array = Acc.backpermute newShape reorder array
