@@ -1,4 +1,4 @@
-module APLAcc.TAIL.Parser (parseFile) where
+module APLAcc.TAIL.Parser (parseFile, parseString) where
 
 import System.IO (Handle, hGetContents)
 import Control.Monad (liftM, liftM2)
@@ -12,6 +12,12 @@ import qualified Text.Parsec.Token as Token
 
 import APLAcc.TAIL.AST
 
+
+parseString :: String -> String -> IO Program
+parseString programText filename =
+  do case parse program filename programText of
+       Left e  -> error $ show e
+       Right r -> return r
 
 parseFile :: Handle -> String -> IO Program
 parseFile handle filename =
@@ -186,8 +192,8 @@ basicType = (reserved "int" >> return IntT)
 -------------------
 -- Debug functions
 
-parseString :: Parser a -> String -> a
-parseString parser str =
+parseWith :: Parser a -> String -> a
+parseWith parser str =
   case parse parser "" str of
     Left e  -> error $ show e
     Right r -> r

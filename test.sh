@@ -80,7 +80,7 @@ for f in "${files[@]}"; do
         cat "$f"
         echo -e "\033[33m>>> [$f] Running aplacc\033[0m"
     fi
-    hsoutput=$($toplevel/dist/build/aplacc/aplacc "$f")
+    hsoutput=$($toplevel/dist/build/aplacc/aplacc --tail "$f")
     if [ $? != 0 ]; then
         echo -e "\033[31;1m<<< [$f] aplacc failed\033[0m"
         move_to "$f" "$toplevel/tests/failing"
