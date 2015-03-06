@@ -1,6 +1,7 @@
 module Main where
 
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, maybeToList)
+import Data.List (intercalate)
 import Control.Monad (when)
 import System.IO (IOMode(ReadMode), withFile, stdin, Handle, hGetContents)
 import System.Environment
@@ -44,7 +45,11 @@ main =
 compileApl :: OutputOpts -> Handle -> IO String
 compileApl opts handle =
   do input <- hGetContents handle
+     prelude <- lookupEnv "APLT_PRELUDE" >>= return . maybeToList
      aplt <- lookupEnv "APLT" >>= return . fromMaybe "aplt"
+     let args = apltArgs ++ prelude ++ ["-"]
+     when (verbose opts) $
+       putStrLn $ "\ESC[33m[ Running \"" ++ intercalate " " (aplt : args) ++ "\" ]\ESC[0m"
      (exitcode, stdout, _) <- readProcessWithExitCode aplt args input
      when (verbose opts) $
        putStrLn "\ESC[33m[ APLT output ]\ESC[0m" >>
@@ -52,12 +57,14 @@ compileApl opts handle =
      case exitcode of
        ExitSuccess -> return stdout
        ExitFailure n -> error $ "aplt failed with code " ++ show n
-  where args = ["-c", "-s_tail", "-p_tail", "-p_types", "-silent", "-"]
+  where apltArgs = ["-c", "-s_tail", "-p_tail", "-p_types", "-silent"]
 
 runGhc :: OutputOpts -> String -> IO ()
 runGhc opts program =
   do when (verbose opts) $ putStrLn "\ESC[33m[ Running GHC ]\ESC[0m"
      args <- getArgs
+     when (verbose opts) $
+       putStrLn $ "\ESC[33m[ Running \"" ++ intercalate " " ("runghc" : args) ++ "\" ]\ESC[0m"
      (exitcode, stdout, stderr) <- readProcessWithExitCode "runghc" args program
      case exitcode of
        ExitSuccess -> putStr stdout
