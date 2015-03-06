@@ -11,9 +11,19 @@ import Language.Haskell.Exts.Pretty (prettyPrint)
 
 import qualified APLAcc.SimpleAcc.AST as A
 
-data OutputOpts = ToHsOpts { toCUDA :: Bool, tailInput :: Bool, runProgram :: Bool }
+data OutputOpts = ToHsOpts
+  { toCUDA :: Bool
+  , tailInput :: Bool
+  , runProgram :: Bool
+  , verbose :: Bool
+  }
 
-defaultOpts = ToHsOpts { toCUDA = False, tailInput = False, runProgram = False }
+defaultOpts = ToHsOpts
+  { toCUDA = False
+  , tailInput = False
+  , runProgram = False
+  , verbose = False
+  }
 
 toHs :: OutputOpts -> A.Program -> String
 toHs opts = prettyPrint . outputProgram opts
