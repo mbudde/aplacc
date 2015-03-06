@@ -86,7 +86,7 @@ instance (sh ~ Plain (Unlifted sh),
           IndexShape (Exp sh),
           Exchange (Exp sh),
           (Unlift Exp (Unlifted sh))) => Exchange (Exp (sh :. Int)) where
-  exchange order sh = Acc.lift $ r :. indexSh sh (dimSh sh - Acc.indexHead order)
+  exchange order sh = Acc.lift $ r :. indexSh sh (Acc.indexHead order - 1)
     where
       r :: Unlifted sh
       r = Acc.unlift $ exchange (Acc.indexTail order) sh
@@ -215,8 +215,7 @@ vrotate :: (Elt e, Shape sh, Slice sh, Iota (sh :. Int), Exchange (Exp (sh :. In
 vrotate n = transp . rotate n . transp
 
 transp :: (Elt e, Iota sh, Exchange (Exp sh)) => Acc (Array sh e) -> Acc (Array sh e)
-transp = transp2 (sh, exchange sh sh)
-  where sh = iotaSh
+transp = let sh = iotaSh in transp2 (sh, sh)
 
 transp2 :: (Exchange (Exp ix), Elt a, Shape ix) =>  (Exp ix, Exp ix) -> Acc (Array ix a) -> Acc (Array ix a)
 transp2 (order, orderInv) array = Acc.backpermute newShape reorder array

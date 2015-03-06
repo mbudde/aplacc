@@ -180,12 +180,13 @@ functions = Map.fromList
         accArg n t = flip convertExp (Acc n t)
 
         transp2Arg :: T.Exp -> Convert A.Exp
-        transp2Arg e = let perm = intList e
+        transp2Arg e = let perm = toAccFormat $ intList e
                        in  return $ A.Tuple [A.lift $ A.Shape perm, A.lift $ A.Shape $ permInverse perm]
           where unwrapInt (T.I i) = i
                 unwrapInt e = error $ "list of ints expected, found " ++ show e
                 intList (T.Vc es) = map unwrapInt es
-                permInverse = map fst . sortBy (comparing snd) . zip [1..]
+                toAccFormat xs = let m = foldr max 0 xs in map (\n -> m - n + 1) xs
+                permInverse = reverse . map fst . sortBy (comparing snd) . zip [1..] . reverse
 
         shapeArg :: T.Exp -> Convert A.Exp
         shapeArg (T.Vc es) =
