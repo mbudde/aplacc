@@ -46,7 +46,7 @@ move_to() {
     [ $move ] || return;
     dest="$2/$(basename "$1")"
     if [ ! -f "$dest" ]; then
-        mv "$1" "$dest"
+        git mv "$1" "$dest"
     fi
 }
 
