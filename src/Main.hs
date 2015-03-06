@@ -36,10 +36,8 @@ main =
                            else compileApl opts h
              tailProg <- parseString tailText file
              let hsText = toHs opts $ convertProgram tailProg
-             when (verbose opts) $
-               putStrLn "\ESC[33m[ Accelerate output ]\ESC[0m" >>
-               putStrLn hsText >>
-               putStrLn ""
+             when (verbose opts) $ putStrLn "\ESC[33m[ Accelerate output ]\ESC[0m"
+             putStrLn hsText
              when (runProgram opts) $ runGhc opts hsText
 
 compileApl :: OutputOpts -> Handle -> IO String
