@@ -26,8 +26,9 @@ main =
         parseArgs ("--run"     : rest) opts = parseArgs rest (opts { runProgram = True })
         parseArgs ("-v"        : rest) opts = parseArgs rest (opts { verbose = True })
         parseArgs ("--verbose" : rest) opts = parseArgs rest (opts { verbose = True })
-        parseArgs (x : rest) opts        = let (as, opts') = parseArgs rest opts
-                                           in (x:as, opts')
+        parseArgs ("--"        : rest) opts = (rest, opts)
+        parseArgs (x : rest) opts = let (as, opts') = parseArgs rest opts
+                                    in  (x:as, opts')
         parseArgs [] opts = ([], opts)
 
         compileFile file opts h =
