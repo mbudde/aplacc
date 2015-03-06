@@ -86,19 +86,19 @@ instance (sh ~ Plain (Unlifted sh),
           IndexShape (Exp sh),
           Exchange (Exp sh),
           (Unlift Exp (Unlifted sh))) => Exchange (Exp (sh :. Int)) where
-  exchange order sh = Acc.lift $ r :. indexSh sh (Acc.indexHead order)
+  exchange order sh = Acc.lift $ r :. indexSh sh (dimSh sh - Acc.indexHead order)
     where
       r :: Unlifted sh
       r = Acc.unlift $ exchange (Acc.indexTail order) sh
 
--- A typeclass for generating shapes of the form (Z :. 0 :. 1 :. ...)
+-- A typeclass for generating shapes of the form (Z :. 1 :. 2 :. ...)
 class (Shape sh) => Iota sh where
   iotaSh :: Exp sh
   iotaNext :: Exp sh -> Exp Int
 
 instance Iota Z where
   iotaSh = Acc.constant Z
-  iotaNext _ = Acc.constant 0
+  iotaNext _ = Acc.constant 1
 
 instance (Iota sh, Slice sh) => Iota (sh :. Int) where
   iotaSh = Acc.lift $ sh :. iotaNext sh
@@ -215,13 +215,14 @@ vrotate :: (Elt e, Shape sh, Slice sh, Iota (sh :. Int), Exchange (Exp (sh :. In
 vrotate n = transp . rotate n . transp
 
 transp :: (Elt e, Iota sh, Exchange (Exp sh)) => Acc (Array sh e) -> Acc (Array sh e)
-transp = transp2 iotaSh
+transp = transp2 (sh, exchange sh sh)
+  where sh = iotaSh
 
-transp2 :: (Exchange (Exp ix), Elt a, Shape ix) =>  Exp ix -> Acc (Array ix a) -> Acc (Array ix a)
-transp2 order array = Acc.backpermute newShape reorder array
+transp2 :: (Exchange (Exp ix), Elt a, Shape ix) =>  (Exp ix, Exp ix) -> Acc (Array ix a) -> Acc (Array ix a)
+transp2 (order, orderInv) array = Acc.backpermute newShape reorder array
   where
-    reorder = exchange order
-    newShape = reorder (Acc.shape array)
+    newShape = exchange order (Acc.shape array)
+    reorder = exchange orderInv
 
 padArray :: (Slice sh, Shape sh, Elt a, Default a)
          => Exp Int

@@ -79,7 +79,8 @@ snocList :: (Integral a) => [a] -> Exp
 snocList ns =
   foldl (\e e' -> InfixApp e (infixOp $ A.Accelerate $ A.Symbol ":.") e')
         (Var $ qname $ A.Accelerate $ A.Ident "Z")
-        (map (Lit . Int . toInteger) ns)
+        (map typSigInt ns)
+  where typSigInt n = ExpTypeSig noLoc (Lit . Int . toInteger $ n) int
 
 outputProgram :: OutputOpts -> A.Program -> Module
 outputProgram opts p =
@@ -147,10 +148,13 @@ outputExp (A.D d) = Lit $ Frac $ toRational d
 outputExp (A.B True) = Con $ qualPrelude $ Ident "True"
 outputExp (A.B False) = Con $ qualPrelude $ Ident "False"
 outputExp (A.C c) = Lit $ Char c
-outputExp (A.Shape is) = snocList is
+outputExp (A.Shape is) = outputExp $ snoc is
+  where snoc es = A.InfixApp (A.Accelerate $ A.Symbol ":.") ((A.Var $ A.Accelerate $ A.Ident "Z") : map toInt es)
+        toInt i = A.TypSig (A.I i) (A.Plain A.IntT)
 outputExp (A.TypSig e t) = ExpTypeSig noLoc (outputExp e) (outputType t)
 outputExp (A.Neg e) = NegApp $ outputExp e
 outputExp (A.List es) = List $ map outputExp es
+outputExp (A.Tuple es) = Tuple Boxed $ map outputExp es
 outputExp (A.InfixApp n [e]) = outputExp e
 outputExp (A.InfixApp n (e1:e2:es)) =
   foldl op (op (outputExp e1) (outputExp e2)) (map outputExp es)

@@ -36,6 +36,7 @@ data Exp
   | Neg Exp
   | TypSig Exp Type
   | List [Exp]
+  | Tuple [Exp]
   | InfixApp QName [Exp]       -- x1 `op` x2 `op` …
   | App QName [Exp]            -- op x1 x2 …
   | Let T.Ident Type Exp Exp    -- let x = e1 :: t in e2
