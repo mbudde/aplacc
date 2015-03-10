@@ -219,6 +219,7 @@ functions = Map.fromList
 
 
 convertOp :: T.Ident -> Maybe T.InstDecl -> [T.Exp] -> A.Type -> Convert (A.Exp, A.Type)
+convertOp ('p':'r':_) _ [arg] t = convertExp arg t >>= \x -> return (x, t)
 convertOp name inst args t =
   case Map.lookup name functions of
     Just f  -> do let (g, argTyps, retTyp) = f inst t
