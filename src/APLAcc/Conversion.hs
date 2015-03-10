@@ -116,6 +116,7 @@ functions = Map.fromList
   , ( "divd",    \Nothing                    t -> binOp (symb "/")   DoubleT t )
   , ( "mind",    \Nothing                    t -> binOp (prel "min") DoubleT t )
   , ( "maxd",    \Nothing                    t -> binOp (prel "max") DoubleT t )
+  , ( "eqb",     \Nothing                    t -> binOp (accSymb "==*")  BoolT   t )
   , ( "andb",    \Nothing                    t -> binOp (accSymb "&&*")  BoolT   t )
   , ( "orb",     \Nothing                    t -> binOp (accSymb "||*")  BoolT   t )
   , ( "xorb",    \Nothing                    t -> binOp (accSymb "/=*")  BoolT   t )
@@ -211,6 +212,7 @@ functions = Map.fromList
         funcArg (Exp DoubleT) (T.Var "divd") = return $ A.Var $ Prelude $ Symbol "/"
         funcArg (Exp DoubleT) (T.Var "mind") = return $ A.Var $ Prelude $ Ident "min"
         funcArg (Exp DoubleT) (T.Var "maxd") = return $ A.Var $ Prelude $ Ident "max"
+        funcArg (Exp BoolT) (T.Var "eqb") = return $ A.Var $ Accelerate $ Symbol "==*"
         funcArg (Exp BoolT) (T.Var "andb") = return $ A.Var $ Accelerate $ Symbol "&&*"
         funcArg (Exp BoolT) (T.Var "orb")  = return $ A.Var $ Accelerate $ Symbol "||*"
         funcArg (Exp BoolT) (T.Var "xorb") = return $ A.Var $ Accelerate $ Symbol "/=*"
