@@ -64,6 +64,7 @@ qname (A.Primitive n)  = Qual (ModuleName "Prim") $ name n
 infixOp :: A.QName -> QOp
 infixOp = QVarOp . qname
 
+io     = TyApp $ TyCon $ qname $ A.Prelude $ A.Ident "IO"
 acc    = TyApp $ TyCon $ qname $ A.Accelerate $ A.Ident "Acc"
 exp    = TyApp $ TyCon $ qname $ A.Accelerate $ A.Ident "Exp"
 scalar = TyApp $ TyCon $ qname $ A.Accelerate $ A.Ident "Scalar"
@@ -83,7 +84,7 @@ snocList ns =
   where typSigInt n = ExpTypeSig noLoc (Lit . Int . toInteger $ n) int
 
 outputProgram :: OutputOpts -> A.Program -> Module
-outputProgram opts p =
+outputProgram opts stmts =
   Module noLoc (ModuleName "Main") [] Nothing Nothing imports [progSig, prog, main]
   where backend = if toCUDA opts
                   then "Data.Array.Accelerate.CUDA"
@@ -131,15 +132,27 @@ outputProgram opts p =
                        , importSpecs     = Nothing }
           ]
         -- Assume result is always scalar double for now
-        progSig = TypeSig noLoc [Ident "program"] $ acc (scalar double)
+        progSig = TypeSig noLoc [Ident "program"] $ io $ acc (scalar double)
         prog = FunBind
           [Match noLoc (Ident "program") [] Nothing
-                 (UnGuardedRhs $ outputExp p) (BDecls [])]
+                 (UnGuardedRhs $ Do $ map outputStmt stmts) (BDecls [])]
         main = FunBind
           [Match noLoc (Ident "main") [] Nothing
                  (UnGuardedRhs mainBody) (BDecls [])]
-        mainBody = App (Var $ qualPrelude $ Ident "print") $
-          App (Var $ Qual (ModuleName "Backend") $ Ident "run") (Var $ UnQual $ Ident "program")
+        mainBody =
+          let bind e1 e2 = InfixApp e1 (infixOp $ A.Prelude $ A.Symbol ">>=") e2
+              dot e1 e2  = InfixApp e1 (infixOp $ A.Prelude $ A.Symbol ".") e2
+          in  bind (Var $ UnQual $ Ident "program") $ dot (Var $ qualPrelude $ Ident "print")
+                                                          (Var $ Qual (ModuleName "Backend") $ Ident "run")
+
+outputStmt :: A.Stmt -> Stmt
+outputStmt (A.LetStmt ident typ e) =
+  let e' = case e of
+              (A.TypSig _ _) -> outputExp e
+              _              -> ExpTypeSig noLoc (outputExp e) (outputType typ)
+  in  LetStmt (BDecls [ PatBind noLoc (PVar $ Ident ident) (UnGuardedRhs e') (BDecls []) ])
+outputStmt (A.Bind ident typ e) = Generator noLoc (PVar $ Ident ident) (outputExp e)
+outputStmt (A.Return e) = Qualifier $ App (Var $ qualPrelude $ Ident "return") (outputExp e)
 
 outputExp :: A.Exp -> Exp
 outputExp (A.Var n) = Var $ qname n 
@@ -174,6 +187,7 @@ outputType :: A.Type -> Type
 outputType (A.Exp btyp) = exp (outputBType btyp)
 outputType (A.Acc r btyp) = acc $ array (dim r) (outputBType btyp)
 outputType (A.Plain btyp) = outputBType btyp
+outputType (A.IO_ typ) = io $ outputType typ
 
 outputBType :: A.BType -> Type
 outputBType A.IntT = int

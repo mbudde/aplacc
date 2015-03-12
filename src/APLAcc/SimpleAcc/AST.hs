@@ -9,6 +9,7 @@ data Type
   = Exp T.BType         -- Exp t
   | Acc Integer T.BType -- Acc (Array n t)
   | Plain T.BType
+  | IO_ Type            -- IO monad
   deriving (Eq)
 
 baseType :: Type -> T.BType
@@ -26,6 +27,11 @@ data QName
   | Accelerate Name
   | Primitive Name
 
+data Stmt
+  = LetStmt T.Ident Type Exp
+  | Bind T.Ident Type Exp
+  | Return Exp
+
 data Exp
   = Var QName
   | I Integer
@@ -42,7 +48,7 @@ data Exp
   | Let T.Ident Type Exp Exp    -- let x = e1 :: t in e2
   | Fn T.Ident Type Exp         -- \x -> e
 
-type Program = Exp
+type Program = [Stmt]
 
 the x  = App (Accelerate $ Ident "the") [x]
 unit x = App (Accelerate $ Ident "unit") [x]
@@ -55,3 +61,4 @@ use x  = App (Accelerate $ Ident "use") [x]
 fromInt x = App (Prelude $ Ident "fromIntegral") [x]
 unitvec x = App (Primitive $ Ident "unitvec") [x]
 first x = App (Primitive $ Ident "first") [x]
+ret x = App (Prelude $ Ident "return") [x]

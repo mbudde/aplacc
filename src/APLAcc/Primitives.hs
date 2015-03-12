@@ -29,9 +29,14 @@ module APLAcc.Primitives (
   cons, consV,
   snoc, snocV,
   sum,
+  readCharVecFile,
+  readVecFile,
+  readIntVecFile,
+  readDoubleVecFile,
 ) where
 
 
+import Control.Monad (liftM, mapM)
 import Data.Default
 import Prelude hiding (take, drop, reverse, zipWith, sum)
 import qualified Data.Array.Accelerate as Acc
@@ -323,3 +328,22 @@ sum g a b =
   let sh1 = Acc.unindex1 $ Acc.shape a
       sh2 = Acc.unindex1 $ Acc.shape b
   in if sh1 == sh2 then Acc.zipWith (+) a b else zilde
+
+
+-- Input/output primitives
+
+readCharVecFile :: String -> IO (Acc (Vector Char))
+readCharVecFile file =
+  do contents <- Prelude.readFile file
+     return $ Acc.use $ Acc.fromList (Z :. (length contents) :: Acc.DIM1) contents
+
+readVecFile :: (Read a, Elt a) => String -> IO (Acc (Vector a))
+readVecFile file =
+  do contents <- Prelude.readFile file
+     let values =  map read $ lines contents
+     return $ Acc.use $ Acc.fromList (Z :. (length values) :: Acc.DIM1) values
+
+readIntVecFile :: String -> IO (Acc (Vector Int))
+readIntVecFile = readVecFile
+readDoubleVecFile :: String -> IO (Acc (Vector Double))
+readDoubleVecFile = readVecFile

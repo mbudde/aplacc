@@ -2,7 +2,7 @@ module APLAcc.Conversion (convertProgram) where
 
 import Control.Monad.Reader
 import qualified Data.Map as Map
-import Data.List (sortBy)
+import Data.List (sortBy, isPrefixOf)
 import Data.Ord (comparing)
 
 import qualified APLAcc.TAIL.AST as T
@@ -21,7 +21,7 @@ type Convert a = Reader Env a
 runConvert = runReader
 
 convertProgram :: T.Program -> A.Program
-convertProgram p = runConvert (convertExp p (Acc 0 DoubleT)) emptyEnv
+convertProgram p = runConvert (convertStmt p) emptyEnv
 
 typeCast :: A.Type -- from
          -> A.Type -- to
@@ -45,6 +45,30 @@ typeCast t1 t2 = \e -> error $ "cannot type cast " ++ show e ++ " from " ++ show
 cancelLift :: A.Type -> A.Exp -> (A.Type, A.Exp)
 cancelLift (Exp t1) (A.App (Accelerate (Ident "constant")) [A.TypSig e (Plain t2)]) | t1 == t2 = (Plain t1, e)
 cancelLift t e = (t, e)
+
+isIOPrimitive "readFile" = True
+isIOPrimitive "readIntVecFile" = True
+isIOPrimitive "readDoubleVecFile" = True
+isIOPrimitive _ = False
+
+convertStmt :: T.Exp -> Convert [A.Stmt]
+convertStmt (T.Let x t1 e1@(T.Op opname _ _) e2) | isIOPrimitive opname = do
+  let t1' = convertType t1
+  e1' <- convertExp e1 (IO_ t1')
+  stmts <- local (Map.insert x t1') $ convertStmt e2
+  return $ A.Bind x t1' e1' : stmts
+
+convertStmt (T.Let x t1 e1 e2) = do
+  let t1' = convertType t1
+  e1' <- convertExp e1 t1'
+  -- If the e1 has been lifted to Exp then drop the lift and store as Plain
+  let (t3, e3) = cancelLift t1' e1'
+  stmts <- local (Map.insert x t3) $ convertStmt e2
+  return $ A.LetStmt x t3 e3 : stmts
+
+convertStmt e = do
+  e' <- convertExp e (Acc 0 DoubleT)
+  return [A.Return $ e']
 
 
 convertExp :: T.Exp -> A.Type -> Convert A.Exp
@@ -159,6 +183,10 @@ functions = Map.fromList
   , ( "firstV",  \Nothing                    _ -> (prim "firstV",   [accArg 1 IntT], Exp IntT) )
   , ( "power",   \(Just ([t], [r]))          _ -> (prim "power",    [funcArg $ Acc r t, expArg IntT, accArg r t], Acc r t) )
   , ( "rav",     \(Just ([t], [r]))          _ -> (acc "flatten",   [accArg r t], Acc 1 t) )
+
+  , ( "readFile",          \Nothing          _ -> (prim "readCharVecFile",   [plainArg CharT], IO_ (Acc 1 CharT)) )
+  , ( "readIntVecFile",    \Nothing          _ -> (prim "readIntVecFile",    [plainArg CharT], IO_ (Acc 1 IntT)) )
+  , ( "readDoubleVecFile", \Nothing          _ -> (prim "readDoubleVecFile", [plainArg CharT], IO_ (Acc 1 DoubleT)) )
   ]
   where symb = A.InfixApp . Prelude . Symbol
         accSymb = A.InfixApp . Accelerate . Symbol
