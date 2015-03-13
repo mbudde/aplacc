@@ -39,7 +39,7 @@ main =
              tailProg <- parseString tailText file
              let hsText = toHs opts $ convertProgram tailProg
              when (verbose opts) $ putStrLn "\ESC[33m[ Accelerate output ]\ESC[0m"
-             putStrLn hsText
+             when (verbose opts || not (runProgram opts)) $ putStrLn hsText
              when (runProgram opts) $ runGhc opts hsText
 
 compileApl :: OutputOpts -> Handle -> IO String
@@ -49,7 +49,7 @@ compileApl opts handle =
      aplt <- lookupEnv "APLT" >>= return . fromMaybe "aplt"
      let args = apltArgs ++ prelude ++ ["-"]
      when (verbose opts) $
-       putStrLn $ "\ESC[33m[ Running \"" ++ intercalate " " (aplt : args) ++ "\" ]\ESC[0m"
+       putStrLn $ "\ESC[33m[ Running aplt ] " ++ intercalate " " (aplt : args) ++ "\ESC[0m"
      (exitcode, stdout, _) <- readProcessWithExitCode aplt args input
      when (verbose opts) $
        putStrLn "\ESC[33m[ APLT output ]\ESC[0m" >>
@@ -61,10 +61,9 @@ compileApl opts handle =
 
 runGhc :: OutputOpts -> String -> IO ()
 runGhc opts program =
-  do when (verbose opts) $ putStrLn "\ESC[33m[ Running GHC ]\ESC[0m"
-     args <- getArgs
+  do args <- getArgs
      when (verbose opts) $
-       putStrLn $ "\ESC[33m[ Running \"" ++ intercalate " " ("runghc" : args) ++ "\" ]\ESC[0m"
+       putStrLn $ "\ESC[33m[ Running with GHC ] " ++ intercalate " " ("runghc" : args) ++ "\ESC[0m"
      (exitcode, stdout, stderr) <- readProcessWithExitCode "runghc" args program
      case exitcode of
        ExitSuccess -> putStr stdout
