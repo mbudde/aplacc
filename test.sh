@@ -50,6 +50,20 @@ move_to() {
     fi
 }
 
+test_output() {
+    [ -r "${1}.out" ] || return
+    expect=$(cat "${1}.out" | tail -1 | sed 's/^\[\](\(.*\))$/\1/')
+    got=$(echo "$2" | tail -1 | sed  's/^.*\[\(.*\)\]/\1/')
+    result=$(echo "scale=5; (${got/[eE]/*10^} - ${expect/[eE]/*10^})/1" | bc)
+    if [ "$result" = "0" ]; then
+        echo -e "\033[32m<<< [$f] Result correct\033[0m"
+    else
+        echo "Expected: $expect"
+        echo "Got:      $got"
+        echo -e "\033[31m<<< [$f] Result incorrect\033[0m"
+    fi
+}
+
 pushd $toplevel
 if ! cabal build; then
     echo -e "\033[31;1m<<< Build failed\033[0m"
@@ -96,12 +110,15 @@ for f in "${files[@]}"; do
         echo "$hsoutput" > $output
     fi
     echo -e "\033[33m>>> [$f] Running ghc \033[0m"
-    echo "$hsoutput" | runghc "-i$toplevel/src"
+    result=$(echo "$hsoutput" | runghc "-i$toplevel/src")
     if [ $? = 0 ]; then
+        echo "$result"
         echo -e "\033[32m<<< [$f] Success\033[0m"
+        test_output "${f%.tail}" "$result"
         echo
         move_to "$f" "$toplevel/tests/working"
     else
+        echo "$result"
         echo -e "\033[31;1m<<< [$f] ghc failed\033[0m"
         echo
         move_to "$f" "$toplevel/tests/failing"
