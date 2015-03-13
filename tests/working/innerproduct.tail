@@ -1,3 +1,3 @@
 let v3:<int>5 = iotaV(5) in
 let v14:[int]1 = reshape{[int],[1,1]}([5],v3) in
-reduce{[double],[0]}(addd,0.00,zipWith{[double,double,double],[1]}(muld,[0.32,~0.36,1.78,~1.82,1.33],each{[int,double],[1]}(i2d,v14)))
+reduce{[double],[0]}(addd,0.000000000000,zipWith{[double,double,double],[1]}(muld,[0.319381530000,~0.356563782000,1.781477937000,~1.821255978000,1.330274429000],each{[int,double],[1]}(i2d,v14)))
