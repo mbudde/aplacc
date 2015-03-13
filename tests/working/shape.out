@@ -1,0 +1,9 @@
+Shape of scalar
+[0]()
+Shape of vector
+[1](10)
+Shape of array
+[3](10,4,6)
+Shape of empty array
+[1](0)
+[](0.0)
