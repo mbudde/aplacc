@@ -170,7 +170,7 @@ outputExp (A.List es) = List $ map outputExp es
 outputExp (A.Tuple es) = Tuple Boxed $ map outputExp es
 outputExp (A.InfixApp n [e]) = outputExp e
 outputExp (A.InfixApp n (e1:e2:es)) =
-  foldl op (op (outputExp e1) (outputExp e2)) (map outputExp es)
+  foldl op (op (Paren $ outputExp e1) (Paren $ outputExp e2)) (map (Paren . outputExp) es)
   where op = flip InfixApp (infixOp n)
 outputExp (A.InfixApp n []) = error "invalid infix application"
 outputExp (A.App n es) = foldl App (Var $ qname n) (map outputExp es)
