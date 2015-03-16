@@ -95,7 +95,7 @@ valueExpr = try (liftM D $ lexeme float)
          <|> try (reserved "tt" >> return (B True))
          <|> try (reserved "ff" >> return (B False))
          <|> try (reserved "inf" >> return Inf)
-         <|> (char '~' >> liftM Neg valueExpr)
+         <|> (oneOf "~-" >> liftM Neg valueExpr)
          <|> liftM Var identifier
          <?> "value or identifier"
 
