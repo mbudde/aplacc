@@ -9,4 +9,4 @@ let v10:[int]3 = transp2{[int],[3]}([3,1,2],v1) in
 let v11:[char]1 = prArrC(['C',':']) in
 let v12:[int]3 = prArrI(v10) in
 let v15:[int]2 = prArrI(reduce{[int],[2]}(addi,0,v10)) in
-0.00
+0.0

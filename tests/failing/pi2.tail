@@ -1,7 +1,7 @@
-let v10:[double]0 = muld(4.00,divd(i2d(reduce{[int],[0]}(addi,0,each{[bool,int],[1]}(b2i,each{[double,bool],[1]}(fn v6:[double]0 => gtd(1.00,v6),reduce{[double],[1]}(addd,0.00,each{[double,double],[2]}(fn v3:[double]0 => powd(v3,2.00),each{[bool,double],[2]}(fn v2:[bool]0 => roll(b2i(v2)),reshape{[bool],[1,2]}([10000000,2],[ff])))))))),10000000.00)) in
-let v11:[double]0 = absd(subd(v10,muld(1.00,pi))) in
+let v10:[double]0 = muld(4.0,divd(i2d(reduce{[int],[0]}(addi,0,each{[bool,int],[1]}(b2i,each{[double,bool],[1]}(fn v6:[double]0 => gtd(1.0,v6),reduce{[double],[1]}(addd,0.0,each{[double,double],[2]}(fn v3:[double]0 => powd(v3,2.0),each{[bool,double],[2]}(fn v2:[bool]0 => roll(b2i(v2)),reshape{[bool],[1,2]}([10000000,2],[ff])))))))),1e7)) in
+let v11:[double]0 = absd(subd(v10,muld(1.0,pi))) in
 let v12:[char]1 = prArrC(['C','o','m','p','u','t','e','d',' ','p','i',':']) in
 let v13:[double]0 = prSclD(v10) in
 let v14:[char]1 = prArrC(['E','r','r','o','r',':']) in
 let v15:[double]0 = prSclD(v11) in
-i2d(b2i(gtd(0.00,v11)))
+i2d(b2i(gtd(1e-3,v11)))

@@ -26,7 +26,7 @@ let v98:[bool]0 = eqi(1024,shli(1,10)) in
 let v111:[int]0 = condScl(fn v108:[int]0 => let v110:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','l','_','1',':',' ','O','K']) in
             addi(v108,1),v98,condScl(fn v103:[int]0 => let v105:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','l','_','1',':',' ','E','R','R']) in
                     addi(v103,2),notb(v98),3)) in
-let v114:[bool]0 = eqi(~2147483648,shli(1,31)) in
+let v114:[bool]0 = eqi(-2147483648,shli(1,31)) in
 let v127:[int]0 = condScl(fn v124:[int]0 => let v126:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','l','_','2',':',' ','O','K']) in
             addi(v124,1),v114,condScl(fn v119:[int]0 => let v121:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','l','_','2',':',' ','E','R','R']) in
                     addi(v119,2),notb(v114),3)) in
@@ -34,7 +34,7 @@ let v130:[bool]0 = eqi(1,shri(1024,10)) in
 let v143:[int]0 = condScl(fn v140:[int]0 => let v142:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','r','_','1',':',' ','O','K']) in
             addi(v140,1),v130,condScl(fn v135:[int]0 => let v137:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','r','_','1',':',' ','E','R','R']) in
                     addi(v135,2),notb(v130),3)) in
-let v146:[bool]0 = eqi(2,shri(~2147483648,30)) in
+let v146:[bool]0 = eqi(2,shri(-2147483648,30)) in
 let v159:[int]0 = condScl(fn v156:[int]0 => let v158:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','r','_','2',':',' ','O','K']) in
             addi(v156,1),v146,condScl(fn v151:[int]0 => let v153:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','r','_','2',':',' ','E','R','R']) in
                     addi(v151,2),notb(v146),3)) in
@@ -42,8 +42,8 @@ let v162:[bool]0 = eqi(1,shari(1024,10)) in
 let v175:[int]0 = condScl(fn v172:[int]0 => let v174:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','a','r','_','1',':',' ','O','K']) in
             addi(v172,1),v162,condScl(fn v167:[int]0 => let v169:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','a','r','_','1',':',' ','E','R','R']) in
                     addi(v167,2),notb(v162),3)) in
-let v178:[bool]0 = eqi(~512,shari(~1024,1)) in
+let v178:[bool]0 = eqi(-512,shari(-1024,1)) in
 let v191:[int]0 = condScl(fn v188:[int]0 => let v190:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','a','r','_','2',':',' ','O','K']) in
             addi(v188,1),v178,condScl(fn v183:[int]0 => let v185:[char]1 = prArrC(['T','e','s','t',' ','o','f',' ','s','h','a','r','_','2',':',' ','E','R','R']) in
                     addi(v183,2),notb(v178),3)) in
-0.00
+0.0

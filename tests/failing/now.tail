@@ -1,8 +1,8 @@
 let v1:[int]0 = nowi(0) in
 let v2:[char]1 = prArrC(['S','t','a','r','t','i','n','g',' ','c','o','m','p','u','t','a','t','i','o','n',':']) in
-let v7:[int]0 = reduce{[int],[0]}(maxi,~2147483648,reduce{[int],[1]}(addi,0,reshape{[int],[1,2]}([5000,5000],iotaV(28)))) in
+let v7:[int]0 = reduce{[int],[0]}(maxi,-2147483648,reduce{[int],[1]}(addi,0,reshape{[int],[1,2]}([5000,5000],iotaV(28)))) in
 let v8:[char]1 = prArrC(['R','e','s','u','l','t',':']) in
 let v9:[int]0 = prSclI(v7) in
 let v10:[char]1 = prArrC(['T','i','m','e',' ','(','m','s',')',':']) in
 let v11:[int]0 = prSclI(subi(nowi(0),v1)) in
-0.00
+0.0

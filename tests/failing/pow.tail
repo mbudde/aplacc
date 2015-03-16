@@ -5,6 +5,6 @@ let v5:[int]2 = prArrI(vreverse{[int],[2]}(transp{[int],[2]}(v4))) in
 let v8:[int]2 = power{[int],[2]}(fn v6:[int]2 => vreverse{[int],[2]}(transp{[int],[2]}(v6)),14,v1) in
 let v10:[int]2 = vreverse{[int],[2]}(transp{[int],[2]}(v1)) in
 let v13:[bool]2 = zipWith{[int,int,bool],[2]}(eqi,v8,vreverse{[int],[2]}(transp{[int],[2]}(v10))) in
-let v16:[bool]0 = prSclB(reduce{[bool],[0]}(andb,tt,rav(v13))) in
-let v28:[int]1 = prArrI(power{[int],[1]}(fn v24:[int]1 => snoc{[int],[0]}(rav(v24),reduce{[int],[0]}(addi,0,takeV{[int],[2]}(~2,rav(v24)))),10,[0,1])) in
-0.00
+let v16:[bool]0 = prSclB(reduce{[bool],[0]}(andb,tt,rav{[bool],[2]}(v13))) in
+let v28:[int]1 = prArrI(power{[int],[1]}(fn v24:[int]1 => snoc{[int],[0]}(rav{[int],[1]}(v24),reduce{[int],[0]}(addi,0,takeV{[int],[2]}(-2,rav{[int],[1]}(v24)))),10,[0,1])) in
+0.0

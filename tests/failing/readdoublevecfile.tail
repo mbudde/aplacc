@@ -5,4 +5,4 @@ let v4:[char]1 = prArrC(['F','i','l','e',' ','c','o','n','t','e','n','t',':']) i
 let v5:[double]1 = prArrD(v1) in
 let v6:[char]1 = prArrC(['F','i','l','e',' ','c','o','n','t','e','n','t',' ','r','e','v','e','r','s','e','d',':']) in
 let v7:[double]1 = prArrD(transp{[double],[1]}(vreverse{[double],[1]}(transp{[double],[1]}(v1)))) in
-0.00
+0.0

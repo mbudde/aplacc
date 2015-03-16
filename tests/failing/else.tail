@@ -7,4 +7,4 @@ let v20:[bool]0 = gti(3,2) in
 let v28:[int]2 = prArrI(power{[int],[2]}(fn v25:[int]2 => each{[int,int],[2]}(fn v27:[int]0 => addi(v27,30),v25),b2i(v20),power{[int],[2]}(fn v22:[int]2 => each{[int,int],[2]}(fn v24:[int]0 => subi(v24,30),v22),b2i(notb(v20)),v19))) in
 let v29:[bool]0 = gti(3,3) in
 let v37:[int]2 = prArrI(power{[int],[2]}(fn v34:[int]2 => each{[int,int],[2]}(fn v36:[int]0 => addi(v36,30),v34),b2i(v29),power{[int],[2]}(fn v31:[int]2 => each{[int,int],[2]}(fn v33:[int]0 => subi(v33,30),v31),b2i(notb(v29)),v19))) in
-0.00
+0.0

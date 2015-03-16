@@ -1,1 +1,1 @@
-i2d(b2i(gtd(0.00,absd(subd(3.14,muld(1.00,pi))))))
+i2d(b2i(gtd(1e-6,absd(subd(3.141592,muld(1.0,pi))))))

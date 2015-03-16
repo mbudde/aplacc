@@ -1,5 +1,5 @@
 let v1:[char]1 = prArrC(['t','a','x','(','4','0','0','0','0','0',')',' ','=',' ']) in
-let v3:[double]0 = prSclD(addd(maxd(0.00,muld(0.20,150000.00)),maxd(0.00,muld(0.40,377000.00)))) in
+let v3:[double]0 = prSclD(addd(maxd(0.0,muld(0.2,1.5e5)),maxd(0.0,muld(0.4,377000.0)))) in
 let v4:[char]1 = prArrC(['t','a','x','(','4','0','0','0','0','0',',',' ','2','2','0','0','0','0',')',' ','=',' ']) in
-let v16:[double]1 = prArrD(zipWith{[double,double,double],[1]}(addd,eachV{[double,double],[2]}(fn v13:[double]0 => maxd(0.00,v13),eachV{[double,double],[2]}(fn v12:[double]0 => muld(0.20,v12),eachV{[int,double],[2]}(i2d,eachV{[int,int],[2]}(fn v10:[int]0 => subi(v10,250000),[400000,220000])))),eachV{[double,double],[2]}(fn v9:[double]0 => maxd(0.00,v9),eachV{[double,double],[2]}(fn v8:[double]0 => muld(0.40,v8),eachV{[int,double],[2]}(i2d,eachV{[int,int],[2]}(fn v6:[int]0 => subi(v6,23000),[400000,220000])))))) in
-0.00
+let v16:[double]1 = prArrD(zipWith{[double,double,double],[1]}(addd,eachV{[double,double],[2]}(fn v13:[double]0 => maxd(0.0,v13),eachV{[double,double],[2]}(fn v12:[double]0 => muld(0.2,v12),eachV{[int,double],[2]}(i2d,eachV{[int,int],[2]}(fn v10:[int]0 => subi(v10,250000),[400000,220000])))),eachV{[double,double],[2]}(fn v9:[double]0 => maxd(0.0,v9),eachV{[double,double],[2]}(fn v8:[double]0 => muld(0.4,v8),eachV{[int,double],[2]}(i2d,eachV{[int,int],[2]}(fn v6:[int]0 => subi(v6,23000),[400000,220000])))))) in
+0.0

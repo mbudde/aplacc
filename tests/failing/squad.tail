@@ -1,7 +1,7 @@
 let v1:[int]3 = reshape{[int],[1,3]}([3,4,5],iotaV(232)) in
 let v2:[int]2 = mem(idxS{[int],[2]}(1,2,v1)) in
-let v7:[int]0 = prSclI(reduce{[int],[0]}(addi,0,reduce{[int],[1]}(maxi,~2147483648,v2))) in
-let v10:[double]3 = each{[double,double],[3]}(fn v9:[double]0 => addd(0.00,v9),each{[int,double],[3]}(i2d,v1)) in
+let v7:[int]0 = prSclI(reduce{[int],[0]}(addi,0,reduce{[int],[1]}(maxi,-2147483648,v2))) in
+let v10:[double]3 = each{[double,double],[3]}(fn v9:[double]0 => addd(0.0,v9),each{[int,double],[3]}(i2d,v1)) in
 let v11:[double]2 = mem(idxS{[double],[2]}(1,2,v10)) in
-let v16:[double]0 = prSclD(reduce{[double],[0]}(addd,0.00,reduce{[double],[1]}(maxd,~inf,v11))) in
-0.00
+let v16:[double]0 = prSclD(reduce{[double],[0]}(addd,0.0,reduce{[double],[1]}(maxd,-inf,v11))) in
+0.0

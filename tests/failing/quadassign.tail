@@ -9,7 +9,7 @@ let v46:[int]2 = transp{[int],[2]}(reshape{[int],[1,2]}([8,5],v41)) in
 let v47:[int]2 = reshape{[int],[1,2]}([5,8],v42) in
 let v50:[bool]2 = zipWith{[int,int,bool],[2]}(lti,v46,v47) in
 let v51:[bool]2 = prArrB(v50) in
-let v55:[double]2 = each{[double,double],[2]}(fn v54:[double]0 => muld(v54,3.10),each{[int,double],[2]}(i2d,each{[bool,int],[2]}(b2i,v50))) in
+let v55:[double]2 = each{[double,double],[2]}(fn v54:[double]0 => muld(v54,3.1),each{[int,double],[2]}(i2d,each{[bool,int],[2]}(b2i,v50))) in
 let v56:[double]2 = prArrD(v55) in
 let v74:[bool]0 = prSclB(reduce{[bool],[0]}(orb,ff,zipWith{[int,int,bool],[1]}(ltei,[10,20,40,20],[1,2,40,4]))) in
 let v92:[bool]0 = prSclB(reduce{[bool],[0]}(orb,ff,zipWith{[int,int,bool],[1]}(ltei,[10,20,40,20],[1,2,39,4]))) in

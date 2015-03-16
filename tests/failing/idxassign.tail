@@ -7,10 +7,10 @@ let v6:[int]2 = prArrI(mv4) in
 let mv7:[int]3 = reshape{[int],[1,3]}([3,4,3],iotaV(128)) in
 let v8:[bool]0 = idxassign([1,1,3],mv7,1000) in
 let v9:[int]3 = prArrI(mv7) in
-let mv12:[double]3 = each{[double,double],[3]}(fn v11:[double]0 => addd(v11,0.20),each{[int,double],[3]}(i2d,mv7)) in
-let v14:[bool]0 = idxassign([2,3,1],mv12,2001.00) in
+let mv12:[double]3 = each{[double,double],[3]}(fn v11:[double]0 => addd(v11,0.2),each{[int,double],[3]}(i2d,mv7)) in
+let v14:[bool]0 = idxassign([2,3,1],mv12,2001.0) in
 let v15:[double]3 = prArrD(mv12) in
 let mv16:[char]2 = reshape{[char],[1,2]}([7,5],['h','e','l','l','o',' ','t','h','i','s',' ','i','s',' ','a',' ','g','r','e','a','t',' ','s','t','o','r','y',' ','I',' ','t','h','i','n','k']) in
 let v17:[bool]0 = idxassign([3,4],mv16,'X') in
 let v18:[char]2 = prArrC(mv16) in
-0.00
+0.0

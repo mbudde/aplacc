@@ -1,14 +1,14 @@
-let v4:[int]2 = each{[int,int],[2]}(fn v3:[int]0 => addi(~1,v3),reshape{[int],[1,2]}([5,30],[1,2])) in
+let v4:[int]2 = each{[int,int],[2]}(fn v3:[int]0 => addi(-1,v3),reshape{[int],[1,2]}([5,30],[1,2])) in
 let v5:[int]2 = transp{[int],[2]}(v4) in
 let v8:<int>3 = catV{[int],[1,2]}(dropV{[int],[1]}(1,shape{[int],[2]}(v5)),shape{[int],[2]}(v4)) in
 let v12:[int]3 = transp2{[int],[3]}([2,1,3],reshape{[int],[2,3]}(v8,v4)) in
-let v13:<int>3 = catV{[int],[1,2]}(dropV{[int],[1]}(~1,shape{[int],[2]}(v4)),shape{[int],[2]}(v5)) in
+let v13:<int>3 = catV{[int],[1,2]}(dropV{[int],[1]}(-1,shape{[int],[2]}(v4)),shape{[int],[2]}(v5)) in
 let v18:[int]3 = transp2{[int],[3]}([1,3,2],reshape{[int],[2,3]}(v13,v5)) in
 let v23:[int]2 = reduce{[int],[2]}(addi,0,zipWith{[int,int,int],[3]}(muli,v12,v18)) in
-let v26:[int]2 = each{[int,int],[2]}(fn v25:[int]0 => addi(~1,v25),reshape{[int],[1,2]}([5,5],[1,2])) in
+let v26:[int]2 = each{[int,int],[2]}(fn v25:[int]0 => addi(-1,v25),reshape{[int],[1,2]}([5,5],[1,2])) in
 let v29:<int>3 = catV{[int],[1,2]}(dropV{[int],[1]}(1,shape{[int],[2]}(v23)),shape{[int],[2]}(v26)) in
 let v33:[int]3 = transp2{[int],[3]}([2,1,3],reshape{[int],[2,3]}(v29,v26)) in
-let v34:<int>3 = catV{[int],[1,2]}(dropV{[int],[1]}(~1,shape{[int],[2]}(v26)),shape{[int],[2]}(v23)) in
+let v34:<int>3 = catV{[int],[1,2]}(dropV{[int],[1]}(-1,shape{[int],[2]}(v26)),shape{[int],[2]}(v23)) in
 let v39:[int]3 = transp2{[int],[3]}([1,3,2],reshape{[int],[2,3]}(v34,v23)) in
-let v44:[int]2 = reduce{[int],[2]}(maxi,~2147483648,zipWith{[int,int,int],[3]}(muli,v33,v39)) in
+let v44:[int]2 = reduce{[int],[2]}(maxi,-2147483648,zipWith{[int,int,int],[3]}(muli,v33,v39)) in
 i2d(reduce{[int],[0]}(addi,0,reduce{[int],[1]}(addi,0,v44)))

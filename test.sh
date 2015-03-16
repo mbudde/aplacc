@@ -52,9 +52,13 @@ move_to() {
 
 test_output() {
     [ -r "${1}.out" ] || return
-    expect=$(cat "${1}.out" | tail -1 | sed 's/^\[\](\(.*\))$/\1/')
+    expect=$(cat "${1}.out" | tail -1 | sed 's/^\[\](\(.*\))$/\1/; s/HUGE_VAL/Infinity/')
     got=$(echo "$2" | tail -1 | sed  's/^.*\[\(.*\)\]/\1/')
-    result=$(echo "scale=5; (${got/[eE]/*10^} - ${expect/[eE]/*10^})/1" | bc)
+    if [ "$got" = "Infinity" -a "$expect" = "$got" ]; then
+        result=0
+    else
+        result=$(echo "scale=5; (${got/[eE]/*10^} - ${expect/[eE]/*10^})/1" | bc)
+    fi
     if [ "$result" = "0" ]; then
         echo -e "\033[32m<<< [$f] Result correct\033[0m"
     else

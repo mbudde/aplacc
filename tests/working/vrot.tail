@@ -8,11 +8,11 @@ let v7:<int>3 = prArrI([1,2,3]) in
 let v8:[int]2 = reshape{[int],[1,2]}([3,4],iotaV(9)) in
 let v9:[int]2 = prArrI(vrotate{[int],[2]}(1,v8)) in
 let v10:[int]2 = prArrI(vrotate{[int],[2]}(4,v8)) in
-let v11:[int]2 = prArrI(vrotate{[int],[2]}(~1,v8)) in
-let v12:[int]2 = prArrI(vrotate{[int],[2]}(~4,v8)) in
+let v11:[int]2 = prArrI(vrotate{[int],[2]}(-1,v8)) in
+let v12:[int]2 = prArrI(vrotate{[int],[2]}(-4,v8)) in
 let v13:[int]2 = prArrI(vrotate{[int],[2]}(0,v8)) in
-let v14:<int>0 = prArrI(vrotateV{[int],[0]}(~2,zilde)) in
+let v14:<int>0 = prArrI(vrotateV{[int],[0]}(-2,zilde)) in
 let v15:<int>0 = prArrI(vrotateV{[int],[0]}(11,zilde)) in
 let v16:<int>0 = prArrI(zilde) in
 let v17:[int]2 = prArrI(vrotate{[int],[2]}(12,take{[int],[2]}(0,v8))) in
-0.00
+0.0

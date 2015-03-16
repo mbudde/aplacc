@@ -1,14 +1,14 @@
 let v1:[char]1 = prArrC(['P','i',' ','t','i','m','e','s',' ','1']) in
-let v2:[double]0 = prSclD(muld(1.00,pi)) in
+let v2:[double]0 = prSclD(muld(1.0,pi)) in
 let v3:[char]1 = prArrC(['P','i',' ','t','i','m','e','s',' ','3']) in
-let v4:[double]0 = prSclD(muld(3.00,pi)) in
+let v4:[double]0 = prSclD(muld(3.0,pi)) in
 let v5:[char]1 = prArrC(['P','i',' ','t','i','m','e','s',' ','3','.','1']) in
-let v6:[double]0 = prSclD(muld(3.10,pi)) in
+let v6:[double]0 = prSclD(muld(3.1,pi)) in
 let v7:[char]1 = prArrC(['S','i','n',' ','3','.','1','4']) in
 let v8:[double]0 = prSclD(sin(3.14)) in
 let v9:[char]1 = prArrC(['C','o','s',' ','3','.','1','4']) in
 let v10:[double]0 = prSclD(cos(3.14)) in
 let v11:[char]1 = prArrC(['T','a','n',' ','3','.','1','4']) in
 let v12:[double]0 = prSclD(tan(3.14)) in
-let v13:[double]0 = prSclD(addd(2.00,muld(3.14,pi))) in
-0.00
+let v13:[double]0 = prSclD(addd(2.0,muld(3.14,pi))) in
+0.0

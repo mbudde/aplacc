@@ -1,2 +1,2 @@
-let v3:[double]0 = addd(3.00,maxd(5.20,4.50)) in
-addd(5.00,muld(v3,4.20))
+let v3:[double]0 = addd(3.0,maxd(5.2,4.5)) in
+addd(5.0,muld(v3,4.2))

@@ -1,3 +1,3 @@
 let v3:<int>2 = prArrI([2,8]) in
 let v7:<int>3 = prArrI([25,13,8]) in
-0.00
+0.0
