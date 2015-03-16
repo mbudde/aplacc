@@ -76,7 +76,9 @@ convertExp (T.Var "zilde") (Acc 1 _) = return $ A.Var $ Primitive $ Ident "zilde
 convertExp (T.Var name) t = do
   env <- ask
   return $ case Map.lookup name env of
-    Nothing -> error $ name ++ " not found in env"
+    Nothing -> case name of
+                 "pi" -> A.Var $ Prelude $ Ident "pi"
+                 _    -> error $ name ++ " not found in env"
     Just t2 -> typeCast t2 t $ A.Var $ UnQual $ Ident name
 
 convertExp (T.I i) t = return $ typeCast (Plain IntT) t $ A.I i
@@ -108,6 +110,10 @@ convertExp (T.Fn x t1 e) t2 = do
   e' <- local (Map.insert x t1') (convertExp e t2)
   return $ A.Fn x t1' e'
 
+convertExp (T.Vc [T.Var x]) (Acc 1 t) = do
+  e' <- convertExp (T.Var x) (Exp t)
+  return $ A.App (A.Primitive $ A.Ident "unitvec") [A.unit e']
+
 convertExp (T.Vc es) (Acc 1 t) = do
   es' <- mapM (`convertExp` Plain t) es
   return $ A.TypSig (A.use $ A.fromList (length es') (A.List es')) (Acc 1 t)
@@ -133,26 +139,48 @@ functions = Map.fromList
   , ( "muli",    \Nothing                    t -> binOp (symb "*")   IntT    t )
   , ( "mini",    \Nothing                    t -> binOp (prel "min") IntT    t )
   , ( "maxi",    \Nothing                    t -> binOp (prel "max") IntT    t )
-  , ( "eqi",     \Nothing                    t -> binOp (accSymb "==*") IntT t )
+  , ( "eqi",     \Nothing                    t -> cmpOp (accSymb "==*") IntT t )
+  , ( "lti",     \Nothing                    t -> cmpOp (accSymb "<*") IntT t )
+  , ( "gti",     \Nothing                    t -> cmpOp (accSymb ">*") IntT t )
+  , ( "negi",    \Nothing                    t -> unaryOp (\[a] -> A.Neg a) IntT    IntT    t )
+  , ( "absi",    \Nothing                    t -> unaryOp (prel "abs")      IntT    IntT    t )
+  , ( "signi",   \Nothing                    t -> unaryOp (prel "signum")   IntT    IntT    t )
+  , ( "resi",    \Nothing                    _ -> (prim "residue",  [expArg IntT, expArg IntT], Exp IntT) )
+
   , ( "addd",    \Nothing                    t -> binOp (symb "+")   DoubleT t )
   , ( "subd",    \Nothing                    t -> binOp (symb "-")   DoubleT t )
   , ( "muld",    \Nothing                    t -> binOp (symb "*")   DoubleT t )
   , ( "divd",    \Nothing                    t -> binOp (symb "/")   DoubleT t )
+  , ( "powd",    \Nothing                    t -> binOp (symb "**")  DoubleT t )
   , ( "mind",    \Nothing                    t -> binOp (prel "min") DoubleT t )
   , ( "maxd",    \Nothing                    t -> binOp (prel "max") DoubleT t )
+  , ( "eqd",     \Nothing                    t -> cmpOp (accSymb "==*") DoubleT t )
+  , ( "gtd",     \Nothing                    t -> cmpOp (accSymb ">*") DoubleT t )
+  , ( "negd",    \Nothing                    t -> unaryOp (\[a] -> A.Neg a) DoubleT DoubleT t )
+  , ( "absd",    \Nothing                    t -> unaryOp (prel "abs")      DoubleT DoubleT t )
+  , ( "ln",      \Nothing                    t -> unaryOp (prel "log")      DoubleT DoubleT t )
+  , ( "expd",    \Nothing                    t -> unaryOp (prel "exp")      DoubleT DoubleT t )
+  , ( "sin",     \Nothing                    t -> unaryOp (prel "sin")      DoubleT DoubleT t )
+  , ( "cos",     \Nothing                    t -> unaryOp (prel "cos")      DoubleT DoubleT t )
+  , ( "tan",     \Nothing                    t -> unaryOp (prel "tan")      DoubleT DoubleT t )
+
+  , ( "eqc",     \Nothing                    t -> cmpOp (accSymb "==*") CharT t )
+
   , ( "eqb",     \Nothing                    t -> binOp (accSymb "==*")  BoolT   t )
   , ( "andb",    \Nothing                    t -> binOp (accSymb "&&*")  BoolT   t )
   , ( "orb",     \Nothing                    t -> binOp (accSymb "||*")  BoolT   t )
   , ( "xorb",    \Nothing                    t -> binOp (accSymb "/=*")  BoolT   t )
   , ( "notb",    \Nothing                    t -> binOp (acc "not") BoolT   t )
+
   , ( "i2d",     \Nothing                    t -> unaryOp (prim "i2d")      IntT    DoubleT t )
   , ( "b2i",     \Nothing                    t -> unaryOp (prim "b2i")      BoolT   IntT    t )
-  , ( "negi",    \Nothing                    t -> unaryOp (\[a] -> A.Neg a) IntT    IntT    t )
-  , ( "negd",    \Nothing                    t -> unaryOp (\[a] -> A.Neg a) DoubleT DoubleT t )
-  , ( "resi",    \Nothing                    _ -> (prim "residue",  [expArg IntT, expArg IntT], Exp IntT) )
-  , ( "each",    \(Just ([t1, t2], [r]))     _ -> (prim "each",     [funcArg $ Exp t1, accArg r t1], Acc r t2) )
-  , ( "eachV",   \(Just ([t1, t2], [_]))     _ -> (prim "eachV",    [funcArg $ Exp t1, accArg 1 t1], Acc 1 t2) )
-  , ( "reduce",  \(Just ([t], [r]))          _ -> (prim "reduce",   [funcArg $ Exp t, expArg t, accArg (r+1) t], Acc r t) )
+  , ( "floor",   \Nothing                    t -> unaryOp (acc "floor")     DoubleT IntT    t )
+  , ( "ceil",    \Nothing                    t -> unaryOp (acc "ceiling")   DoubleT IntT    t )
+  , ( "signd",   \Nothing                    t -> unaryOp (prim "signd")    DoubleT IntT    t )
+
+  , ( "each",    \(Just ([t1, t2], [r]))     _ -> (prim "each",     [funcArg (Exp t1) (Exp t2), accArg r t1], Acc r t2) )
+  , ( "eachV",   \(Just ([t1, t2], [_]))     _ -> (prim "eachV",    [funcArg (Exp t1) (Exp t2), accArg 1 t1], Acc 1 t2) )
+  , ( "reduce",  \(Just ([t], [r]))          _ -> (prim "reduce",   [funcArg (Exp t) (Exp t), expArg t, accArg (r+1) t], Acc r t) )
   , ( "cat",     \(Just ([t], [r]))          _ -> (prim "cat",      [accArg r t, accArg r t], Acc r t) )
   , ( "catV",    \(Just ([t], [_, _]))       _ -> (prim "catV",     [accArg 1 t, accArg 1 t], Acc 1 t) )
   , ( "iota",    \Nothing                    t -> (prim "iota",     [expArg IntT], Acc 1 (A.baseType t)) )
@@ -161,7 +189,7 @@ functions = Map.fromList
   , ( "dropV",   \(Just ([t], [_]))          _ -> (prim "dropV",    [expArg IntT, accArg 1 t], Acc 1 t) )
   -- FIXME: take should take a default element
   , ( "take",    \(Just ([t], [r]))          _ -> (prim "take",     [expArg IntT, accArg r t], Acc r t) )
-  , ( "takeV",   \Nothing                    t -> (prim "takeV",    [expArg IntT, accArg 1 IntT], t) )
+  , ( "takeV",   \(Just ([t], [_]))          _ -> (prim "takeV",    [expArg IntT, accArg 1 t], Acc 1 t) )
   , ( "shape",   \(Just ([t], [r]))          _ -> (prim "shape",    [accArg r t], Acc 1 IntT) )
   , ( "shapeV",  \Nothing                    _ -> (prim "shapeV",   [accArg 1 IntT], Exp IntT) )
   -- FIXME: APLT currently uses the reshape name for reshape0
@@ -171,7 +199,7 @@ functions = Map.fromList
   , ( "consV",   \(Just ([t], [_]))          _ -> (prim "consV",    [expArg t, accArg 1 t], Acc 1 t) )
   , ( "snoc",    \(Just ([t], [r]))          _ -> (prim "snoc",     [accArg (r+1) t, accArg r t], Acc (r+1) t) )
   , ( "snocV",   \(Just ([t], [_]))          _ -> (prim "snocV",    [accArg 1 t, expArg t], Acc 1 t) )
-  , ( "zipWith", \(Just ([t1, t2, t3], [r])) _ -> (prim "zipWith",  [funcArg $ Exp t1, accArg r t1, accArg r t2], Acc r t3) )
+  , ( "zipWith", \(Just ([t1, t2, t3], [r])) _ -> (prim "zipWith",  [funcArg (Exp t1) (Exp t3), accArg r t1, accArg r t2], Acc r t3) )
   , ( "rotate",  \(Just ([t], [r]))          _ -> (prim "rotate",   [expArg IntT, accArg r t], Acc r t) )
   , ( "rotateV", \Nothing                    _ -> (prim "rotateV",  [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
   , ( "vrotate", \(Just ([t], [r]))          _ -> (prim "vrotate",  [expArg IntT, accArg r t], Acc r t) )
@@ -181,9 +209,10 @@ functions = Map.fromList
   -- FIXME: first should take a default element
   , ( "first",   \(Just ([t], [r]))          _ -> (prim "first",    [accArg r t], Exp t) )
   , ( "firstV",  \Nothing                    _ -> (prim "firstV",   [accArg 1 IntT], Exp IntT) )
-  , ( "power",   \(Just ([t], [r]))          _ -> (prim "power",    [funcArg $ Acc r t, expArg IntT, accArg r t], Acc r t) )
+  , ( "power",   \(Just ([t], [r]))          _ -> (prim "power",    [funcArg (Acc r t) (Acc r t), expArg IntT, accArg r t], Acc r t) )
   , ( "rav",     \(Just ([t], [r]))          _ -> (acc "flatten",   [accArg r t], Acc 1 t) )
 
+  , ( "nowi",              \Nothing          _ -> (prim "now",               [plainArg IntT], IO_ (Plain IntT)) )
   , ( "readFile",          \Nothing          _ -> (prim "readCharVecFile",   [plainArg CharT], IO_ (Acc 1 CharT)) )
   , ( "readIntVecFile",    \Nothing          _ -> (prim "readIntVecFile",    [plainArg CharT], IO_ (Acc 1 IntT)) )
   , ( "readDoubleVecFile", \Nothing          _ -> (prim "readDoubleVecFile", [plainArg CharT], IO_ (Acc 1 DoubleT)) )
@@ -199,6 +228,9 @@ functions = Map.fromList
 
         binOp f bty (Plain _) = (f, [plainArg bty, plainArg bty], Plain bty)
         binOp f bty _         = (f, [expArg bty,   expArg bty],   Exp bty)
+
+        cmpOp f bty (Plain _) = (f, [plainArg bty, plainArg bty], Plain BoolT)
+        cmpOp f bty _         = (f, [expArg bty,   expArg bty],   Exp BoolT)
 
         plainArg :: A.BType -> T.Exp -> Convert A.Exp
         plainArg t = flip convertExp (Plain t)
@@ -225,32 +257,43 @@ functions = Map.fromList
                 toInt _ = error "shape must be list of ints"
         shapeArg e = error $ "shape argument " ++ show e ++ " not supported"
 
-        funcArg :: A.Type -> T.Exp -> Convert A.Exp
-        funcArg (Exp IntT) (T.Var "i2d") = return $ A.Var $ Primitive $ Ident "i2d"
-        funcArg (Exp BoolT) (T.Var "b2i") = return $ A.Var $ Primitive $ Ident "b2i"
-        funcArg (Exp IntT) (T.Var "addi") = return $ A.Var $ Prelude $ Symbol "+"
-        funcArg (Exp IntT) (T.Var "subi") = return $ A.Var $ Prelude $ Symbol "-"
-        funcArg (Exp IntT) (T.Var "muli") = return $ A.Var $ Prelude $ Symbol "*"
-        funcArg (Exp IntT) (T.Var "mini") = return $ A.Var $ Prelude $ Ident "min"
-        funcArg (Exp IntT) (T.Var "maxi") = return $ A.Var $ Prelude $ Ident "max"
-        funcArg (Exp IntT) (T.Var "resi") = return $ A.Var $ Primitive $ Ident "residue"
-        funcArg (Exp DoubleT) (T.Var "addd") = return $ A.Var $ Prelude $ Symbol "+"
-        funcArg (Exp DoubleT) (T.Var "subd") = return $ A.Var $ Prelude $ Symbol "-"
-        funcArg (Exp DoubleT) (T.Var "muld") = return $ A.Var $ Prelude $ Symbol "*"
-        funcArg (Exp DoubleT) (T.Var "divd") = return $ A.Var $ Prelude $ Symbol "/"
-        funcArg (Exp DoubleT) (T.Var "mind") = return $ A.Var $ Prelude $ Ident "min"
-        funcArg (Exp DoubleT) (T.Var "maxd") = return $ A.Var $ Prelude $ Ident "max"
-        funcArg (Exp BoolT) (T.Var "eqb") = return $ A.Var $ Accelerate $ Symbol "==*"
-        funcArg (Exp BoolT) (T.Var "andb") = return $ A.Var $ Accelerate $ Symbol "&&*"
-        funcArg (Exp BoolT) (T.Var "orb")  = return $ A.Var $ Accelerate $ Symbol "||*"
-        funcArg (Exp BoolT) (T.Var "xorb") = return $ A.Var $ Accelerate $ Symbol "/=*"
-        funcArg (Exp BoolT) (T.Var "notb") = return $ A.Var $ Accelerate $ Ident "not"
-        funcArg t e@(T.Fn{}) = convertExp e t
-        funcArg t name = error $ show name ++ " not implemented as function for " ++ show t
+        funcArg :: A.Type -> A.Type -> T.Exp -> Convert A.Exp
+        funcArg (Exp IntT) _ (T.Var "i2d") = return $ A.Var $ Primitive $ Ident "i2d"
+        funcArg (Exp BoolT) _ (T.Var "b2i") = return $ A.Var $ Primitive $ Ident "b2i"
+        funcArg (Exp DoubleT) _ (T.Var "floor") = return $ A.Var $ Accelerate $ Ident "floor"
+        funcArg (Exp DoubleT) _ (T.Var "ceil") = return $ A.Var $ Accelerate $ Ident "ceiling"
+
+        funcArg (Exp IntT) _ (T.Var "addi") = return $ A.Var $ Prelude $ Symbol "+"
+        funcArg (Exp IntT) _ (T.Var "subi") = return $ A.Var $ Prelude $ Symbol "-"
+        funcArg (Exp IntT) _ (T.Var "muli") = return $ A.Var $ Prelude $ Symbol "*"
+        funcArg (Exp IntT) _ (T.Var "mini") = return $ A.Var $ Prelude $ Ident "min"
+        funcArg (Exp IntT) _ (T.Var "maxi") = return $ A.Var $ Prelude $ Ident "max"
+        funcArg (Exp IntT) _ (T.Var "resi") = return $ A.Var $ Primitive $ Ident "residue"
+        funcArg (Exp IntT) _ (T.Var "signi") = return $ A.Var $ Prelude $ Ident "signum"
+        funcArg (Exp IntT) _ (T.Var "gti") = return $ A.Var $ Accelerate $ Symbol ">*"
+        funcArg (Exp IntT) _ (T.Var "lti") = return $ A.Var $ Accelerate $ Symbol "<*"
+
+        funcArg (Exp DoubleT) _ (T.Var "addd") = return $ A.Var $ Prelude $ Symbol "+"
+        funcArg (Exp DoubleT) _ (T.Var "subd") = return $ A.Var $ Prelude $ Symbol "-"
+        funcArg (Exp DoubleT) _ (T.Var "muld") = return $ A.Var $ Prelude $ Symbol "*"
+        funcArg (Exp DoubleT) _ (T.Var "divd") = return $ A.Var $ Prelude $ Symbol "/"
+        funcArg (Exp DoubleT) _ (T.Var "mind") = return $ A.Var $ Prelude $ Ident "min"
+        funcArg (Exp DoubleT) _ (T.Var "maxd") = return $ A.Var $ Prelude $ Ident "max"
+
+        funcArg (Exp CharT) _ (T.Var "eqc") = return $ A.Var $ Accelerate $ Symbol "==*"
+
+        funcArg (Exp BoolT) _ (T.Var "eqb") = return $ A.Var $ Accelerate $ Symbol "==*"
+        funcArg (Exp BoolT) _ (T.Var "andb") = return $ A.Var $ Accelerate $ Symbol "&&*"
+        funcArg (Exp BoolT) _ (T.Var "orb")  = return $ A.Var $ Accelerate $ Symbol "||*"
+        funcArg (Exp BoolT) _ (T.Var "xorb") = return $ A.Var $ Accelerate $ Symbol "/=*"
+        funcArg (Exp BoolT) _ (T.Var "notb") = return $ A.Var $ Accelerate $ Ident "not"
+        funcArg _ t2 e@(T.Fn{}) = convertExp e t2
+        funcArg t1 t2 name = error $ show name ++ " not implemented as function for " ++ show t1 ++ " -> " ++ show t2
 
 
 convertOp :: T.Ident -> Maybe T.InstDecl -> [T.Exp] -> A.Type -> Convert (A.Exp, A.Type)
 convertOp ('p':'r':_) _ [arg] t = convertExp arg t >>= \x -> return (x, t)
+convertOp "mem" _ [arg] t = convertExp arg t >>= \x -> return (x, t)
 convertOp name inst args t =
   case Map.lookup name functions of
     Just f  -> do let (g, argTyps, retTyp) = f inst t

@@ -8,12 +8,12 @@ let v22:[double]1 = zipWith{[double,double,double],[1]}(divd,eachV{[int,double],
 let v27:[double]1 = zipWith{[double,double,double],[1]}(divd,eachV{[int,double],[100]}(i2d,v3),each{[int,double],[1]}(i2d,v17)) in
 let v36:[double]1 = zipWith{[double,double,double],[1]}(divd,each{[int,double],[1]}(i2d,zipWith{[int,int,int],[1]}(addi,v1,v3)),each{[int,double],[1]}(i2d,zipWith{[int,int,int],[1]}(addi,v16,v17))) in
 let v39:[double]1 = zipWith{[double,double,double],[1]}(subd,v22,v27) in
-let v49:[double]1 = zipWith{[double,double,double],[1]}(muld,v36,zipWith{[double,double,double],[1]}(muld,each{[double,double],[1]}(fn v44:[double]0 => subd(1.00,v44),v36),zipWith{[double,double,double],[1]}(addd,each{[int,double],[1]}(fn v41:[int]0 => divd(1.00,i2d(v41)),v16),each{[int,double],[1]}(fn v40:[int]0 => divd(1.00,i2d(v40)),v17)))) in
-let v51:[double]1 = each{[double,double],[1]}(fn v50:[double]0 => powd(v50,0.50),v49) in
-let v52:[double]1 = rav(v51) in
-let v58:[double]1 = zipWith{[double,double,double],[1]}(addd,v52,each{[int,double],[1]}(i2d,each{[bool,int],[1]}(b2i,each{[double,bool],[1]}(fn v53:[double]0 => eqd(v53,0.00),v52)))) in
+let v49:[double]1 = zipWith{[double,double,double],[1]}(muld,v36,zipWith{[double,double,double],[1]}(muld,each{[double,double],[1]}(fn v44:[double]0 => subd(1.0,v44),v36),zipWith{[double,double,double],[1]}(addd,each{[int,double],[1]}(fn v41:[int]0 => divd(1.0,i2d(v41)),v16),each{[int,double],[1]}(fn v40:[int]0 => divd(1.0,i2d(v40)),v17)))) in
+let v51:[double]1 = each{[double,double],[1]}(fn v50:[double]0 => powd(v50,0.5),v49) in
+let v52:[double]1 = rav{[double],[1]}(v51) in
+let v58:[double]1 = zipWith{[double,double,double],[1]}(addd,v52,each{[int,double],[1]}(i2d,each{[bool,int],[1]}(b2i,each{[double,bool],[1]}(fn v53:[double]0 => eqd(v53,0.0),v52)))) in
 let v59:[double]1 = reshape{[double],[1,1]}(shape{[double],[1]}(v51),v58) in
 let v62:[double]1 = zipWith{[double,double,double],[1]}(divd,v39,v59) in
-let v65:[int]1 = each{[double,int],[1]}(ceil,each{[double,double],[1]}(fn v63:[double]0 => muld(100.00,v63),v62)) in
+let v65:[int]1 = each{[double,int],[1]}(ceil,each{[double,double],[1]}(fn v63:[double]0 => muld(100.0,v63),v62)) in
 let v66:[int]1 = prArrI(v65) in
-0.00
+0.0

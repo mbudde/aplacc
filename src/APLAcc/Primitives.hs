@@ -8,6 +8,7 @@
 module APLAcc.Primitives (
   infinity,
   i2d, b2i,
+  signd,
   residue,
   zilde,
   iota, iotaV,
@@ -121,6 +122,9 @@ i2d = Acc.fromIntegral
 
 b2i :: Exp Bool -> Exp Int
 b2i = Acc.boolToInt
+
+signd :: Exp Double -> Exp Int
+signd = Acc.truncate . signum
 
 residue :: (Elt a, Acc.IsIntegral a) => Exp a -> Exp a -> Exp a
 residue a b = Acc.cond (a Acc.==* 0) b (b `mod` a)

@@ -1,0 +1,2 @@
+let v12:[int]1 = prArrI(power{[int],[1]}(fn v8:[int]1 => snoc{[int],[0]}(rav{[int],[1]}(v8),reduce{[int],[0]}(addi,0,takeV{[int],[2]}(-2,rav{[int],[1]}(v8)))),10,[0,1])) in
+0.0
