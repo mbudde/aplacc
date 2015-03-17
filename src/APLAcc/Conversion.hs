@@ -272,6 +272,7 @@ functions = Map.fromList
         funcArg (Exp IntT) _ (T.Var "signi") = return $ A.Var $ Prelude $ Ident "signum"
         funcArg (Exp IntT) _ (T.Var "gti") = return $ A.Var $ Accelerate $ Symbol ">*"
         funcArg (Exp IntT) _ (T.Var "lti") = return $ A.Var $ Accelerate $ Symbol "<*"
+        funcArg (Exp IntT) _ (T.Var "ltei") = return $ A.Var $ Accelerate $ Symbol "<=*"
 
         funcArg (Exp DoubleT) _ (T.Var "addd") = return $ A.Var $ Prelude $ Symbol "+"
         funcArg (Exp DoubleT) _ (T.Var "subd") = return $ A.Var $ Prelude $ Symbol "-"
