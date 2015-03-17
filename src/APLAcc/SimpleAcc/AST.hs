@@ -27,6 +27,7 @@ data QName
   | Prelude Name
   | Accelerate Name
   | Primitive Name
+  | Backend Name
 
 data Stmt
   = LetStmt T.Ident Type Exp

@@ -35,11 +35,13 @@ module APLAcc.Primitives (
   readVecFile,
   readIntVecFile,
   readDoubleVecFile,
+  prArrC, prArrB, prArrD, prArrI, prSclB, prSclD, prSclI,
 ) where
 
 
 import Control.Monad (liftM, mapM)
 import Data.Default
+import Data.List (intercalate)
 import Prelude hiding (take, drop, reverse, zipWith, sum)
 import qualified Data.Array.Accelerate as Acc
 import Data.Array.Accelerate (
@@ -358,3 +360,53 @@ readIntVecFile :: String -> IO (Acc (Vector Int))
 readIntVecFile = readVecFile
 readDoubleVecFile :: String -> IO (Acc (Vector Double))
 readDoubleVecFile = readVecFile
+
+prArrC :: (Shape sh)
+       => (Acc (Array sh Char) -> Array sh Char)
+       -> Acc (Array sh Char)
+       -> IO (Acc (Array sh Char))
+prArrC run arr =
+  do let arr' = run arr
+     putStrLn $ Acc.toList arr'
+     return $ Acc.use arr'
+
+printArr :: (Shape sh, Elt e, Show e)
+         => (Acc (Array sh e) -> Array sh e)
+         -> Acc (Array sh e)
+         -> IO (Acc (Array sh e))
+printArr run arr =
+  do let arr' = run arr
+     print arr'
+     return $ Acc.use arr'
+
+
+prArrB :: (Shape sh)
+       => (Acc (Array sh Bool) -> Array sh Bool)
+       -> Acc (Array sh Bool)
+       -> IO (Acc (Array sh Bool))
+prArrB = printArr
+
+prArrD :: (Shape sh)
+       => (Acc (Array sh Double) -> Array sh Double)
+       -> Acc (Array sh Double)
+       -> IO (Acc (Array sh Double))
+prArrD = printArr
+
+prArrI :: (Shape sh)
+       => (Acc (Array sh Int) -> Array sh Int)
+       -> Acc (Array sh Int)
+       -> IO (Acc (Array sh Int))
+prArrI = printArr
+
+printScl, prSclB, prSclD, prSclI :: (Elt e, Show e)
+         => (Acc (Array Acc.DIM0 e) -> Array Acc.DIM0 e)
+         -> Exp e
+         -> IO (Exp e)
+printScl run arr =
+  do let arr' = run $ Acc.unit arr
+     print arr'
+     return arr
+
+prSclB = printScl
+prSclD = printScl
+prSclI = printScl

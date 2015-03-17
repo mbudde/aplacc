@@ -53,6 +53,7 @@ cancelLift t e = (t, e)
 isIOPrimitive "readFile" = True
 isIOPrimitive "readIntVecFile" = True
 isIOPrimitive "readDoubleVecFile" = True
+isIOPrimitive name | isPrefixOf "pr" name = True
 isIOPrimitive _ = False
 
 convertStmt :: T.Exp -> Convert [A.Stmt]
@@ -297,6 +298,9 @@ functions = Map.fromList
 
 
 convertOp :: T.Ident -> Maybe T.InstDecl -> [T.Exp] -> A.Type -> Convert (A.Exp, A.Type)
+convertOp name@('p':'r':_) _ [arg] (IO_ t) =
+  do e' <- convertExp arg t
+     return (A.App (Primitive $ Ident name) [A.Var (Backend $ Ident "run"), e'], IO_ t)
 convertOp ('p':'r':_) _ [arg] t = convertExp arg t >>= \x -> return (x, t)
 convertOp "mem" _ [arg] t = convertExp arg t >>= \x -> return (x, t)
 convertOp name inst args t =

@@ -60,6 +60,7 @@ qname (A.Prelude (A.Symbol "/")) = UnQual $ Symbol "/"
 qname (A.Prelude n)    = Qual (ModuleName "P") $ name n
 qname (A.Accelerate n) = UnQual $ name n
 qname (A.Primitive n)  = Qual (ModuleName "Prim") $ name n
+qname (A.Backend n)  = Qual (ModuleName "Backend") $ name n
 
 infixOp :: A.QName -> QOp
 infixOp = QVarOp . qname
