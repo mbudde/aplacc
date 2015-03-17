@@ -16,6 +16,7 @@ module APLAcc.Primitives (
   each, eachV,
   reduce,
   shape, shapeV,
+  shFromVec,
   power,
   reshape0, reshape,
   reverse,
@@ -101,16 +102,20 @@ instance (sh ~ Plain (Unlifted sh),
 class (Shape sh) => Iota sh where
   iotaSh :: Exp sh
   iotaNext :: Exp sh -> Exp Int
+  shFromVec :: Acc (Vector Int) -> Exp sh
 
 instance Iota Z where
   iotaSh = Acc.constant Z
   iotaNext _ = Acc.constant 1
+  shFromVec _ = Acc.constant Z
 
 instance (Iota sh, Slice sh) => Iota (sh :. Int) where
   iotaSh = Acc.lift $ sh :. iotaNext sh
     where sh = iotaSh
-
   iotaNext sh = iotaNext (Acc.indexTail sh) + 1
+  shFromVec vec = Acc.lift $ (shFromVec vec) :. (vec Acc.!! (Acc.indexHead sh' - 1))
+    where sh' = iotaSh :: Exp (sh :. Int)
+
 
 
 infinity :: Double
@@ -176,8 +181,10 @@ power fn n arr = unpack snd $
 shape :: (Shape sh, Elt e, IndexShape (Exp sh))
       => Acc (Array sh e) -> Acc (Vector Int)
 shape arr =
-  let sh = Acc.shape arr
-  in Acc.generate (Acc.lift $ Z :. dimSh sh) (indexSh sh . Acc.indexHead)
+  Acc.generate (Acc.lift $ Z :. n) (indexSh sh . rev . Acc.indexHead)
+  where sh = Acc.shape arr
+        n = dimSh sh
+        rev x = n - x - 1
 
 shapeV :: (Elt e) => Acc (Vector e) -> Exp Int
 shapeV arr = shape arr Acc.!! 0

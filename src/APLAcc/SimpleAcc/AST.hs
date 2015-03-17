@@ -9,6 +9,7 @@ data Type
   = Exp T.BType         -- Exp t
   | Acc Integer T.BType -- Acc (Array n t)
   | Plain T.BType
+  | ShapeT
   | IO_ Type            -- IO monad
   deriving (Eq)
 
@@ -60,5 +61,6 @@ fromList n x = App (Accelerate $ Ident "fromList") [Shape [fromIntegral n], x]
 use x  = App (Accelerate $ Ident "use") [x]
 fromInt x = App (Prelude $ Ident "fromIntegral") [x]
 unitvec x = App (Primitive $ Ident "unitvec") [x]
+shFromVec x = App (Primitive $ Ident "shFromVec") [x]
 first x = App (Primitive $ Ident "first") [x]
 ret x = App (Prelude $ Ident "return") [x]

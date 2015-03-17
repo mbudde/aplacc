@@ -37,10 +37,14 @@ typeCast (Acc 0 t1)  (Exp t2)         | t1 == t2 = A.the
 typeCast (Acc 1 t1)  (Exp t2)         | t1 == t2 = A.first
 typeCast (Acc 0 t1)  (Acc 1 t2)       | t1 == t2 = A.unitvec
 typeCast (Acc 1 t1)  (Acc 0 t2)       = typeCast (Exp t1) (Acc 0 t2) . A.first
+typeCast (Acc 1 IntT) (ShapeT)        = cancelShape
 
 typeCast t1 t2 | t1 == t2 = id
 typeCast t1 t2 = \e -> error $ "cannot type cast " ++ show e ++ " from " ++ show t1 ++ " to " ++ show t2
 
+cancelShape :: A.Exp -> A.Exp
+cancelShape (A.App (Primitive (Ident "shape")) [e]) = A.App (Accelerate $ Ident "shape") [e]
+cancelShape e = A.shFromVec e
 
 cancelLift :: A.Type -> A.Exp -> (A.Type, A.Exp)
 cancelLift (Exp t1) (A.App (Accelerate (Ident "constant")) [A.TypSig e (Plain t2)]) | t1 == t2 = (Plain t1, e)
@@ -255,7 +259,7 @@ functions = Map.fromList
           return $ A.lift $ A.InfixApp (Accelerate $ Symbol ":.") ((A.Var $ Accelerate $ Ident "Z") : map toInt es)
           where toInt (T.I i) = A.TypSig (A.I i) (Plain IntT)
                 toInt _ = error "shape must be list of ints"
-        shapeArg e = error $ "shape argument " ++ show e ++ " not supported"
+        shapeArg e = convertExp e (ShapeT)
 
         funcArg :: A.Type -> A.Type -> T.Exp -> Convert A.Exp
         funcArg (Exp IntT) _ (T.Var "i2d") = return $ A.Var $ Primitive $ Ident "i2d"
