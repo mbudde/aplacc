@@ -86,6 +86,7 @@ runGhc opts program =
             putErrLn $ "aplacc: ghc failed with code " ++ show n
             exitFailure
   where getArgs =
-          do home <- lookupEnv "APLACC_HOME" >>=
-                       return . fromMaybe (error "APLACC_HOME env var not set")
-             return ["-i"++home++"/src"]
+          do home <- lookupEnv "APLACC_HOME"
+             case home of
+               Just dir -> return ["-i"++dir++"/src"]
+               Nothing  -> return []
