@@ -49,6 +49,7 @@ data Exp
   | App QName [Exp]            -- op x1 x2 …
   | Let T.Ident Type Exp Exp    -- let x = e1 :: t in e2
   | Fn T.Ident Type Exp         -- \x -> e
+  | IdxFn [Integer]             -- \(Z :. a1 :. a2 :. a3 -> Z :. a3 :. a1 :. a2)
 
 type Program = [Stmt]
 

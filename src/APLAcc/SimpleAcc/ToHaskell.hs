@@ -42,7 +42,7 @@ instance Show A.Exp where
 
 
 qualAcc :: Name -> QName
-qualAcc = Qual (ModuleName "Acc")
+qualAcc = UnQual
 
 qualPrelude :: Name -> QName
 qualPrelude = Qual (ModuleName "P")
@@ -77,12 +77,20 @@ double = TyCon $ qname $ A.Prelude $ A.Ident "Double"
 bool   = TyCon $ qname $ A.Prelude $ A.Ident "Bool"
 char   = TyCon $ qname $ A.Prelude $ A.Ident "Char"
 
-snocList :: (Integral a) => [a] -> Exp
-snocList ns =
+snocList :: [Exp] -> Exp
+snocList es =
   foldl (\e e' -> InfixApp e (infixOp $ A.Accelerate $ A.Symbol ":.") e')
         (Var $ qname $ A.Accelerate $ A.Ident "Z")
+        (map typSigInt es)
+  where typSigInt e = ExpTypeSig noLoc e (exp int)
+
+snocPat :: [Integer] -> Pat
+snocPat ns =
+  foldl (\e e' -> PInfixApp e (qname $ A.Accelerate $ A.Symbol ":.") e')
+        (PApp (qname $ A.Accelerate $ A.Ident "Z") [])
         (map typSigInt ns)
-  where typSigInt n = ExpTypeSig noLoc (Lit . Int . toInteger $ n) int
+  where typSigInt n = PVar $ Ident $ "a" ++ show n
+
 
 outputProgram :: OutputOpts -> A.Program -> Module
 outputProgram opts stmts =
@@ -183,6 +191,13 @@ outputExp (A.Let ident typ e1 e2) =
          (outputExp e2)
 outputExp (A.Fn ident _ e) =
   Lambda noLoc [PVar $ Ident ident] (outputExp e)
+outputExp (A.IdxFn perm) =
+  Lambda noLoc [PVar $ Ident "a"] $
+    Let (BDecls [PatBind noLoc pat (UnGuardedRhs unlift) (BDecls [])]) $
+       lift $ snocList $ map (Var . UnQual . Ident . \n -> "a" ++ show n) perm
+  where pat = snocPat $ take (length perm) [1..]
+        unlift = App (Var $ qualAcc $ Ident "unlift") (Var $ UnQual $ Ident "a")
+        lift = App (Var $ qualAcc $ Ident "lift")
 
 outputType :: A.Type -> Type
 outputType (A.Exp btyp) = exp (outputBType btyp)

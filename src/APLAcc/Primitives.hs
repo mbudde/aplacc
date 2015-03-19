@@ -46,6 +46,7 @@ import Prelude hiding (take, drop, reverse, zipWith, sum)
 import qualified Data.Array.Accelerate as Acc
 import Data.Array.Accelerate (
   Acc, Exp, Elt, Shape, Slice, Plain, Unlift,
+  DIM0, DIM1, DIM2, DIM3,
   Z(..), (:.)(..), Vector, Scalar, Array )
 import Data.Array.Accelerate.Array.Sugar (shapeToList)
 
@@ -82,23 +83,6 @@ instance (Slice sh, IndexShape (Exp sh)) => IndexShape (Exp (sh :. Int)) where
   indexSh e n = Acc.cond (n Acc.==* 0) (Acc.indexHead e)
                                        (indexSh (Acc.indexTail e) (n-1))
   dimSh e = 1 + dimSh (Acc.indexTail e)
-
--- A typeclass for shapes that can be reordered using another shape as list of indices.
-class (IndexShape shOrder) => Exchange shOrder where
-  exchange :: IndexShape sh => shOrder -> sh -> shOrder
-
-instance Exchange (Exp Z) where
-  exchange _ _ = Acc.constant Z
-
-instance (sh ~ Plain (Unlifted sh),
-          Slice sh,
-          IndexShape (Exp sh),
-          Exchange (Exp sh),
-          (Unlift Exp (Unlifted sh))) => Exchange (Exp (sh :. Int)) where
-  exchange order sh = Acc.lift $ r :. indexSh sh (Acc.indexHead order - 1)
-    where
-      r :: Unlifted sh
-      r = Acc.unlift $ exchange (Acc.indexTail order) sh
 
 -- A typeclass for generating shapes of the form (Z :. 1 :. 2 :. ...)
 class (Shape sh) => Iota sh where
@@ -226,20 +210,42 @@ rotate n arr =
 rotateV :: (Elt e) => Exp Int -> Acc (Vector e) -> Acc (Vector e)
 rotateV = rotate
 
-vrotate :: (Elt e, Shape sh, Slice sh, Iota (sh :. Int), Exchange (Exp (sh :. Int)))
+vrotate :: (Elt e, Shape sh, Slice sh, ReverseIdx (sh :. Int))
         => Exp Int
         -> Acc (Array (sh :. Int) e)
         -> Acc (Array (sh :. Int) e)
 vrotate n = transp . rotate n . transp
 
-transp :: (Elt e, Iota sh, Exchange (Exp sh)) => Acc (Array sh e) -> Acc (Array sh e)
-transp = let sh = iotaSh in transp2 (sh, sh)
 
-transp2 :: (Exchange (Exp ix), Elt a, Shape ix) =>  (Exp ix, Exp ix) -> Acc (Array ix a) -> Acc (Array ix a)
-transp2 (order, orderInv) array = Acc.backpermute newShape reorder array
+class ReverseIdx ix where
+  indexRev :: Exp ix -> Exp ix
+
+instance ReverseIdx DIM0 where
+  indexRev ix = ix
+
+instance ReverseIdx DIM1 where
+  indexRev ix = ix
+
+instance ReverseIdx DIM2 where
+  indexRev ix = let (Z :. a1 :. a2) = Acc.unlift ix :: Unlifted DIM2
+                in  Acc.lift (Z :. a2 :. a1)
+
+instance ReverseIdx DIM3 where
+  indexRev ix = let (Z :. a1 :. a2 :. a3) = Acc.unlift ix :: Unlifted DIM3
+                in  Acc.lift (Z :. a3 :. a2 :. a1)
+
+instance ReverseIdx Acc.DIM4 where
+  indexRev ix = let (Z :. a1 :. a2 :. a3 :. a4) = Acc.unlift ix :: Unlifted Acc.DIM4
+                in  Acc.lift (Z :. a4 :. a3 :. a2 :. a1)
+
+transp :: forall e sh. (Elt e, Shape sh, ReverseIdx sh) => Acc (Array sh e) -> Acc (Array sh e)
+transp = transp2 (idx, idx)
+  where idx = indexRev :: Exp sh -> Exp sh
+
+transp2 :: (Elt a, Shape ix) =>  (Exp ix -> Exp ix, Exp ix -> Exp ix) -> Acc (Array ix a) -> Acc (Array ix a)
+transp2 (order, orderInv) array = Acc.backpermute newShape orderInv array
   where
-    newShape = exchange order (Acc.shape array)
-    reorder = exchange orderInv
+    newShape = order (Acc.shape array)
 
 padArray :: (Slice sh, Shape sh, Elt a, Default a)
          => Exp Int
@@ -252,7 +258,7 @@ padArray n arr =
   in n Acc.>=* 0 Acc.?| (arr Acc.++ zeroes, zeroes Acc.++ arr)
 
 take, takeAux, drop, dropAux, takeV, dropV
-     :: (Shape sh, Slice sh, Iota (sh :. Int), Exchange (Exp (sh :. Int)), Elt a, Default a)
+     :: (Shape sh, Slice sh, ReverseIdx (sh :. Int), Elt a, Default a)
      => Exp Int
      -> Acc (Array (sh :. Int) a)
      -> Acc (Array (sh :. Int) a)
