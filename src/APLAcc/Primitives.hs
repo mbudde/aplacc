@@ -9,7 +9,7 @@
 module APLAcc.Primitives (
   infinity,
   i2d, b2i,
-  signd,
+  signd, xori, andi,
   residue,
   zilde,
   iota, iotaV,
@@ -41,6 +41,7 @@ module APLAcc.Primitives (
 
 
 import Control.Monad (liftM, mapM)
+import Data.Bits (xor, (.&.))
 import Data.Default
 import Data.List (intercalate)
 import Prelude hiding (take, drop, reverse, zipWith, sum)
@@ -133,6 +134,10 @@ b2i = Acc.boolToInt
 
 signd :: Exp Double -> Exp Int
 signd = Acc.truncate . signum
+
+xori, andi :: Exp Int -> Exp Int -> Exp Int
+xori = xor
+andi = (.&.)
 
 residue :: (Elt a, Acc.IsIntegral a) => Exp a -> Exp a -> Exp a
 residue a b = Acc.cond (a Acc.==* 0) b (b `mod` a)

@@ -144,6 +144,10 @@ functions = Map.fromList
   , ( "muli",    \Nothing                    t -> binOp (symb "*")   IntT    t )
   , ( "mini",    \Nothing                    t -> binOp (prel "min") IntT    t )
   , ( "maxi",    \Nothing                    t -> binOp (prel "max") IntT    t )
+  , ( "andi",    \Nothing                    t -> binOp (prim "andi") IntT   t )
+  , ( "xori",    \Nothing                    t -> binOp (prim "xori") IntT   t )
+  , ( "shri",    \Nothing                    t -> binOp (acc "shiftR") IntT  t )
+  , ( "shli",    \Nothing                    t -> binOp (acc "shiftL") IntT  t )
   , ( "eqi",     \Nothing                    t -> cmpOp (accSymb "==*") IntT t )
   , ( "lti",     \Nothing                    t -> cmpOp (accSymb "<*") IntT t )
   , ( "gti",     \Nothing                    t -> cmpOp (accSymb ">*") IntT t )
@@ -274,6 +278,10 @@ functions = Map.fromList
         funcArg (Exp IntT) _ (T.Var "maxi") = return $ A.Var $ Prelude $ Ident "max"
         funcArg (Exp IntT) _ (T.Var "resi") = return $ A.Var $ Primitive $ Ident "residue"
         funcArg (Exp IntT) _ (T.Var "signi") = return $ A.Var $ Prelude $ Ident "signum"
+        funcArg (Exp IntT) _ (T.Var "andi") = return $ A.Var $ Primitive $ Ident "andi"
+        funcArg (Exp IntT) _ (T.Var "xori") = return $ A.Var $ Primitive $ Ident "xori"
+        funcArg (Exp IntT) _ (T.Var "shri") = return $ A.Var $ Accelerate $ Ident "shiftR"
+        funcArg (Exp IntT) _ (T.Var "shli") = return $ A.Var $ Accelerate $ Ident "shiftL"
         funcArg (Exp IntT) _ (T.Var "gti") = return $ A.Var $ Accelerate $ Symbol ">*"
         funcArg (Exp IntT) _ (T.Var "lti") = return $ A.Var $ Accelerate $ Symbol "<*"
         funcArg (Exp IntT) _ (T.Var "ltei") = return $ A.Var $ Accelerate $ Symbol "<=*"
