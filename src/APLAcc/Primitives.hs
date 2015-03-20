@@ -48,7 +48,8 @@ import qualified Data.Array.Accelerate as Acc
 import Data.Array.Accelerate (
   Acc, Exp, Elt, Shape, Slice, Plain, Unlift,
   DIM0, DIM1, DIM2, DIM3,
-  Z(..), (:.)(..), Vector, Scalar, Array )
+  Z(..), (:.)(..), Vector, Scalar, Array,
+  unit, the, lift, unlift, indexTail, indexHead )
 import Data.Array.Accelerate.Array.Sugar (shapeToList)
 
 
@@ -103,7 +104,22 @@ instance (Iota sh, Slice sh) => Iota (sh :. Int) where
   shFromVec vec = Acc.lift $ (shFromVec vec) :. (vec Acc.!! (Acc.indexHead sh' - 1))
     where sh' = iotaSh :: Exp (sh :. Int)
 
+-- A typeclass for shapes with additional methods
+class (Shape ix, Slice ix) => ShapeExt ix where
+  mapFirst :: (Exp Int -> Exp Int) -> Exp ix -> Exp ix
+  indexFirst :: Exp ix -> Exp Int
 
+instance ShapeExt Z where
+  indexFirst _ = Acc.constant 0
+  mapFirst f = id
+
+instance ShapeExt (Z :. Int) where
+  indexFirst = indexHead
+  mapFirst f ix = lift $ Z :. f (indexHead ix)
+
+instance (ShapeExt (ix :. Int)) => ShapeExt (ix :. Int :. Int) where
+  indexFirst = indexFirst . indexTail
+  mapFirst f ix = lift $ mapFirst f (indexTail ix) :. indexHead ix
 
 infinity :: Double
 infinity = 1/0
@@ -248,48 +264,50 @@ transp2 (order, orderInv) array = Acc.backpermute newShape orderInv array
   where
     newShape = order (Acc.shape array)
 
-padArray :: (Slice sh, Shape sh, Elt a, Default a)
+padArray :: (Slice sh, Shape sh, ShapeExt (sh :. Int), Elt a, Default a)
          => Exp Int
          -> Acc (Array (sh :. Int) a)
          -> Acc (Array (sh :. Int) a)
 padArray n arr =
-  let sh = Acc.shape arr
-      sh' = Acc.lift $ Acc.indexTail sh :. (abs n) - Acc.indexHead sh
-      zeroes = Acc.generate sh' (\_ -> def)
-  in n Acc.>=* 0 Acc.?| (arr Acc.++ zeroes, zeroes Acc.++ arr)
+  Acc.permute const zeroes (mapFirst (+ moveN)) arr
+  where sh = Acc.shape arr
+        moveN = the $ unit $ max 0 (-n - indexFirst sh)
+        sh' = mapFirst (const (abs n)) sh
+        zeroes = Acc.generate sh' (\_ -> def)
 
 take, takeAux, drop, dropAux, takeV, dropV
-     :: (Shape sh, Slice sh, ReverseIdx (sh :. Int), Elt a, Default a)
+     :: (Shape sh, Slice sh, ShapeExt (sh :. Int), Elt a, Default a)
      => Exp Int
      -> Acc (Array (sh :. Int) a)
      -> Acc (Array (sh :. Int) a)
 
 takeAux n arr =
-  let sh' = Acc.lift $ Acc.indexTail (Acc.shape arr) :. n
-  in  Acc.backpermute sh' id arr
+  let sh = Acc.shape arr
+      sh' = the $ unit $ mapFirst (const n) sh
+  in  Acc.reshape sh' $ Acc.take (Acc.shapeSize sh') $ Acc.flatten arr
 
 take n arr =
-  let arr' = transp arr
-      sh = Acc.shape arr' in
-  abs n Acc.>* Acc.indexHead sh Acc.?|
-    ( transp $ padArray n arr'
+  let sh = Acc.shape arr
+      n' = the (unit n) in
+  abs n' Acc.>* indexFirst sh Acc.?|
+    ( padArray n' arr
     , n Acc.>=* 0 Acc.?|
-        ( transp $ takeAux n arr'
-        , transp $ dropAux (Acc.indexHead sh + n) arr' ))
+        ( takeAux n' arr
+        , dropAux (indexFirst sh + n') arr ))
 
 dropAux n arr =
   let sh = Acc.shape arr
-      sh' = Acc.lift $ Acc.indexTail sh :. max 0 (Acc.indexHead sh - n)
-      idx sh = Acc.lift $ Acc.indexTail sh :. Acc.indexHead sh + n
+      sh' = mapFirst (\m -> max 0 (m - n)) sh
+      idx = mapFirst ((+) n)
   in  Acc.backpermute sh' idx arr
 
 drop n arr =
-  let arr' = transp arr
-      sh = Acc.shape arr'
-      m = min (Acc.indexHead sh) (abs n) in
-  n Acc.>=* 0 Acc.?|
-    ( transp $ dropAux m arr'
-    , transp $ takeAux (Acc.indexHead sh - m) arr' )
+  let sh = Acc.shape arr
+      n' = the $ unit n
+      m = the $ unit $ min (indexFirst sh) (abs n) in
+  n' Acc.>=* 0 Acc.?|
+    ( dropAux m arr
+    , takeAux (indexFirst sh - m) arr )
 
 takeV = take
 dropV = drop
