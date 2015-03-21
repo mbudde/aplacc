@@ -92,12 +92,19 @@ valueExpr :: Parser Exp
 valueExpr = try (liftM D $ lexeme float)
          <|> liftM I (lexeme decimal)
          <|> liftM C charlit
-         <|> try (reserved "tt" >> return (B True))
-         <|> try (reserved "ff" >> return (B False))
-         <|> try (reserved "inf" >> return Inf)
+         <|> boolExpr
+         <|> infExpr
          <|> (oneOf "~-" >> liftM Neg valueExpr)
          <|> liftM Var identifier
          <?> "value or identifier"
+
+boolExpr :: Parser Exp
+boolExpr = try (reserved "tt" >> return (B True))
+       <|> try (reserved "ff" >> return (B False))
+       <?> "boolean value"
+
+infExpr :: Parser Exp
+infExpr = try (reserved "inf" >> return Inf)
 
 arrayExpr :: Parser Exp
 arrayExpr = liftM Vc $ brackets (sepBy expr comma)
