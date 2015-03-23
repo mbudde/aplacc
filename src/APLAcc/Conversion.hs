@@ -172,6 +172,7 @@ functions = Map.fromList
   , ( "mini",    \Nothing                    t -> binOp (prel "min") IntT    t )
   , ( "maxi",    \Nothing                    t -> binOp (prel "max") IntT    t )
   , ( "andi",    \Nothing                    t -> binOp (prim "andi") IntT   t )
+  , ( "ori",     \Nothing                    t -> binOp (prim "ori") IntT    t )
   , ( "xori",    \Nothing                    t -> binOp (prim "xori") IntT   t )
   , ( "shri",    \Nothing                    t -> binOp (acc "shiftR") IntT  t )
   , ( "shli",    \Nothing                    t -> binOp (acc "shiftL") IntT  t )

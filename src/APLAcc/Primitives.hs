@@ -46,7 +46,7 @@ module APLAcc.Primitives (
 import Prelude hiding (take, drop, reverse, zipWith, sum)
 import Control.Monad (liftM, mapM)
 import Control.Exception (evaluate)
-import Data.Bits (xor, (.&.))
+import qualified Data.Bits
 import Data.Default
 import Data.List (intercalate)
 import System.CPUTime
@@ -124,9 +124,10 @@ b2i = Acc.boolToInt
 signd :: Exp Double -> Exp Int
 signd = Acc.truncate . signum
 
-xori, andi :: Exp Int -> Exp Int -> Exp Int
-xori = xor
-andi = (.&.)
+andi, ori, xori :: Exp Int -> Exp Int -> Exp Int
+andi = (Data.Bits..&.)
+ori = (Data.Bits..|.)
+xori = Data.Bits.xor
 
 residue :: (Elt a, Acc.IsIntegral a) => Exp a -> Exp a -> Exp a
 residue a b = Acc.cond (a Acc.==* 0) b (b `mod` a)
