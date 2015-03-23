@@ -220,6 +220,8 @@ functions = Map.fromList
   , ( "first",   \(Just ([t], [r]))          _ -> (prim "first",    [accArg r t], Exp t) )
   , ( "firstV",  \Nothing                    _ -> (prim "firstV",   [accArg 1 IntT], Exp IntT) )
   , ( "power",   \(Just ([t], [r]))          _ -> (prim "power",    [funcArg (Acc r t) (Acc r t), expArg IntT, accArg r t], Acc r t) )
+  , ( "powerScl",\Nothing                    t -> let bt = A.baseType t in
+                                                  (prim "power",    [funcArg (Acc 0 bt) (Acc 0 bt), expArg IntT, accArg 0 bt], Acc 0 bt) )
   , ( "rav",     \(Just ([t], [r]))          _ -> (acc "flatten",   [accArg r t], Acc 1 t) )
   , ( "mem",     \Nothing                    t -> (mem,             [flip convertExp t], t) )
 
@@ -304,7 +306,9 @@ functions = Map.fromList
         funcArg (Exp BoolT) _ (T.Var "orb")  = return $ A.Var $ Accelerate $ Symbol "||*"
         funcArg (Exp BoolT) _ (T.Var "xorb") = return $ A.Var $ Accelerate $ Symbol "/=*"
         funcArg (Exp BoolT) _ (T.Var "notb") = return $ A.Var $ Accelerate $ Ident "not"
-        funcArg _ t2 e@(T.Fn{}) = convertExp e t2
+        funcArg t1 t2 (T.Fn x t3 e) = do
+          e' <- local (Map.insert x t1) (convertExp e t2)
+          return $ A.Fn x t1 e'
         funcArg t1 t2 name = error $ show name ++ " not implemented as function for " ++ show t1 ++ " -> " ++ show t2
 
 
