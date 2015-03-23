@@ -290,10 +290,9 @@ functions = Map.fromList
                 permInverse = map fst . sortBy (comparing snd) . zip [1..]
 
         shapeArg :: T.Exp -> Convert A.Exp
-        shapeArg (T.Vc es) =
-          return $ A.lift $ A.InfixApp (Accelerate $ Symbol ":.") ((A.Var $ Accelerate $ Ident "Z") : map toInt es)
-          where toInt (T.I i) = A.TypSig (A.I i) (Plain IntT)
-                toInt _ = error "shape must be list of ints"
+        shapeArg (T.Vc es) = do
+          es' <- mapM (flip convertExp (Exp IntT)) es
+          return $ A.lift $ A.InfixApp (Accelerate $ Symbol ":.") ((A.Var $ Accelerate $ Ident "Z") : es')
         shapeArg e = convertExp e (ShapeT)
 
         funcArg :: A.Type -> A.Type -> T.Exp -> Convert A.Exp
