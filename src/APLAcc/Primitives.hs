@@ -32,6 +32,7 @@ module APLAcc.Primitives (
   cons, consV,
   snoc, snocV,
   sum,
+  now,
   readCharVecFile,
   readVecFile,
   readIntVecFile,
@@ -40,11 +41,12 @@ module APLAcc.Primitives (
 ) where
 
 
+import Prelude hiding (take, drop, reverse, zipWith, sum)
 import Control.Monad (liftM, mapM)
 import Data.Bits (xor, (.&.))
 import Data.Default
 import Data.List (intercalate)
-import Prelude hiding (take, drop, reverse, zipWith, sum)
+import System.CPUTime
 import qualified Data.Array.Accelerate as Acc
 import Data.Array.Accelerate (
   Acc, Exp, Elt, Shape, Slice, Plain, Unlift,
@@ -356,6 +358,11 @@ sum g a b =
 
 
 -- Input/output primitives
+
+now :: Int -> IO (Exp Int)
+now x =
+  do t <- getCPUTime
+     return $ Acc.constant $ fromIntegral $ t `div` 1000000000
 
 readCharVecFile :: String -> IO (Acc (Vector Char))
 readCharVecFile file =

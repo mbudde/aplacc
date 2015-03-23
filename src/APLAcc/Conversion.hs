@@ -50,6 +50,7 @@ cancelLift :: A.Type -> A.Exp -> (A.Type, A.Exp)
 cancelLift (Exp t1) (A.App (Accelerate (Ident "constant")) [A.TypSig e (Plain t2)]) | t1 == t2 = (Plain t1, e)
 cancelLift t e = (t, e)
 
+isIOPrimitive "nowi" = True
 isIOPrimitive "readFile" = True
 isIOPrimitive "readIntVecFile" = True
 isIOPrimitive "readDoubleVecFile" = True
@@ -222,7 +223,7 @@ functions = Map.fromList
   , ( "rav",     \(Just ([t], [r]))          _ -> (acc "flatten",   [accArg r t], Acc 1 t) )
   , ( "mem",     \Nothing                    t -> (mem,             [flip convertExp t], t) )
 
-  , ( "nowi",              \Nothing          _ -> (prim "now",               [plainArg IntT], IO_ (Plain IntT)) )
+  , ( "nowi",              \Nothing          _ -> (prim "now",               [plainArg IntT],  IO_ (Exp IntT)) )
   , ( "readFile",          \Nothing          _ -> (prim "readCharVecFile",   [plainArg CharT], IO_ (Acc 1 CharT)) )
   , ( "readIntVecFile",    \Nothing          _ -> (prim "readIntVecFile",    [plainArg CharT], IO_ (Acc 1 IntT)) )
   , ( "readDoubleVecFile", \Nothing          _ -> (prim "readDoubleVecFile", [plainArg CharT], IO_ (Acc 1 DoubleT)) )
