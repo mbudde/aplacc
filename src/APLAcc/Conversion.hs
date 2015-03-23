@@ -248,6 +248,8 @@ functions = Map.fromList
   , ( "power",   \(Just ([t], [r]))          _ -> (prim "power",    [funcArg (Acc r t) (Acc r t), expArg IntT, accArg r t], Acc r t) )
   , ( "powerScl",\Nothing                    t -> let bt = A.baseType t in
                                                   (prim "power",    [funcArg (Acc 0 bt) (Acc 0 bt), expArg IntT, accArg 0 bt], Acc 0 bt) )
+  , ( "condScl", \Nothing                    t -> let bt = A.baseType t in
+                                                  (prim "condScl",  [funcArg (Acc 0 bt) (Acc 0 bt), expArg BoolT, accArg 0 bt], Acc 0 bt) )
   , ( "rav",     \(Just ([t], [r]))          _ -> (acc "flatten",   [accArg r t], Acc 1 t) )
   , ( "mem",     \Nothing              (IO_ t) -> (mem,             [flip convertExp t], IO_ t) )
 

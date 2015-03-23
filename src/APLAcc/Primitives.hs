@@ -19,6 +19,7 @@ module APLAcc.Primitives (
   shape, shapeV,
   shFromVec,
   power,
+  condScl,
   reshape0, reshape,
   reverse,
   rotate, rotateV,
@@ -173,6 +174,8 @@ power fn n arr = unpack snd $
   where unpack :: (Acc.Arrays b) => ((Acc (Scalar Int), Acc a) -> Acc b) -> Acc (Scalar Int, a) -> Acc b
         unpack f x = let y = Acc.unlift x in f y
 
+condScl :: (Elt e) => (Acc (Scalar e) -> Acc (Scalar e)) -> Exp Bool -> Acc (Scalar e) -> Acc (Scalar e)
+condScl fn b val = b Acc.?| (fn val, val)
 
 shape :: (Shape sh, Elt e, IndexShape (Exp sh))
       => Acc (Array sh e) -> Acc (Vector Int)
