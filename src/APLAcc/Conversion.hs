@@ -68,6 +68,7 @@ allPlain _ = return False
 
 isIOPrimitive "nowi" = True
 isIOPrimitive "mem" = True
+isIOPrimitive "memScl" = True
 isIOPrimitive "readFile" = True
 isIOPrimitive "readIntVecFile" = True
 isIOPrimitive "readDoubleVecFile" = True
@@ -252,7 +253,12 @@ functions = Map.fromList
   , ( "condScl", \Nothing                    t -> let bt = A.baseType t in
                                                   (prim "condScl",  [funcArg (Acc 0 bt) (Acc 0 bt), expArg BoolT, accArg 0 bt], Acc 0 bt) )
   , ( "rav",     \(Just ([t], [r]))          _ -> (acc "flatten",   [accArg r t], Acc 1 t) )
-  , ( "mem",     \Nothing              (IO_ t) -> (mem,             [flip convertExp t], IO_ t) )
+  , ( "mem",     \Nothing                    t -> case t of
+                                                    IO_ t' -> (mem, [flip convertExp t'], IO_ t')
+                                                    _      -> (run, [flip convertExp t], t) )
+  , ( "memScl",  \Nothing                    t -> case t of
+                                                    IO_ t' -> (memScl, [flip convertExp (Exp (A.baseType t'))], IO_ (Exp (A.baseType t')))
+                                                    _      -> (run, [flip convertExp t], t) )
 
   , ( "nowi",              \Nothing          _ -> (prim "now",               [plainArg IntT],  IO_ (Exp IntT)) )
   , ( "readFile",          \Nothing          _ -> (prim "readCharVecFile",   [plainArg CharT], IO_ (Acc 1 CharT)) )
@@ -275,6 +281,9 @@ functions = Map.fromList
         cmpOp f bty _         = (f, [expArg bty,   expArg bty],   Exp BoolT)
 
         mem args = A.App (Primitive $ Ident "mem") (A.Var (Backend $ Ident "run") : args)
+        memScl args = A.App (Primitive $ Ident "memScl") (A.Var (Backend $ Ident "run") : args)
+
+        run = A.use . A.App (Backend $ Ident "run")
 
         plainArg :: A.BType -> T.Exp -> Convert A.Exp
         plainArg t = flip convertExp (Plain t)

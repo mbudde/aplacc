@@ -34,7 +34,7 @@ module APLAcc.Primitives (
   snoc, snocV,
   sum,
   now,
-  mem,
+  mem, memScl,
   readCharVecFile,
   readVecFile,
   readIntVecFile,
@@ -364,6 +364,9 @@ sum g a b =
 
 mem :: (Acc.Arrays a) => (Acc a -> a) -> Acc a -> IO (Acc a)
 mem run acc = fmap Acc.use (evaluate $ run acc)
+
+memScl :: (Elt e) => (Acc (Scalar e) -> Scalar e) -> Exp e -> IO (Exp e)
+memScl run exp = fmap (Acc.the . Acc.use) (evaluate $ run $ Acc.unit exp)
 
 -- Input/output primitives
 
