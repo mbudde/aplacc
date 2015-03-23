@@ -63,6 +63,7 @@ allPlain (T.I _ : es) = allPlain es
 allPlain (T.D _ : es) = allPlain es
 allPlain (T.B _ : es) = allPlain es
 allPlain (T.C _ : es) = allPlain es
+allPlain [] = return True
 allPlain _ = return False
 
 isIOPrimitive "nowi" = True
@@ -139,7 +140,7 @@ convertExp (T.Vc []) (Acc 1 t) =
   return $ A.Var $ Primitive $ Ident "zilde"
 
 convertExp (T.Vc (e:es)) (Acc 1 t) = do
-  isPlain <- allPlain es
+  isPlain <- allPlain (e:es)
   if isPlain
     then do es' <- mapM (`convertExp` Plain t) (e:es)
             return $ A.TypSig (A.use $ A.fromList (length es') (A.List es')) (Acc 1 t)
