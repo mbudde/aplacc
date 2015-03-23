@@ -220,6 +220,7 @@ functions = Map.fromList
   , ( "firstV",  \Nothing                    _ -> (prim "firstV",   [accArg 1 IntT], Exp IntT) )
   , ( "power",   \(Just ([t], [r]))          _ -> (prim "power",    [funcArg (Acc r t) (Acc r t), expArg IntT, accArg r t], Acc r t) )
   , ( "rav",     \(Just ([t], [r]))          _ -> (acc "flatten",   [accArg r t], Acc 1 t) )
+  , ( "mem",     \Nothing                    t -> (mem,             [flip convertExp t], t) )
 
   , ( "nowi",              \Nothing          _ -> (prim "now",               [plainArg IntT], IO_ (Plain IntT)) )
   , ( "readFile",          \Nothing          _ -> (prim "readCharVecFile",   [plainArg CharT], IO_ (Acc 1 CharT)) )
@@ -240,6 +241,8 @@ functions = Map.fromList
 
         cmpOp f bty (Plain _) = (f, [plainArg bty, plainArg bty], Plain BoolT)
         cmpOp f bty _         = (f, [expArg bty,   expArg bty],   Exp BoolT)
+
+        mem = A.use . A.App (Backend $ Ident "run")
 
         plainArg :: A.BType -> T.Exp -> Convert A.Exp
         plainArg t = flip convertExp (Plain t)
@@ -309,7 +312,6 @@ convertOp name@('p':'r':_) _ [arg] (IO_ t) =
   do e' <- convertExp arg t
      return (A.App (Primitive $ Ident name) [A.Var (Backend $ Ident "run"), e'], IO_ t)
 convertOp ('p':'r':_) _ [arg] t = convertExp arg t >>= \x -> return (x, t)
-convertOp "mem" _ [arg] t = convertExp arg t >>= \x -> return (x, t)
 convertOp name inst args t =
   case Map.lookup name functions of
     Just f  -> do let (g, argTyps, retTyp) = f inst t
