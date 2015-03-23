@@ -50,6 +50,21 @@ cancelLift :: A.Type -> A.Exp -> (A.Type, A.Exp)
 cancelLift (Exp t1) (A.App (Accelerate (Ident "constant")) [A.TypSig e (Plain t2)]) | t1 == t2 = (Plain t1, e)
 cancelLift t e = (t, e)
 
+allPlain :: [T.Exp] -> Convert Bool
+allPlain (T.Var name : es) =
+  do env <- ask
+     case Map.lookup name env of
+       Nothing -> case name of
+                    "pi" -> return False
+                    _    -> error $ name ++ " not found in env"
+       Just (Plain _) -> allPlain es
+       _ -> return False
+allPlain (T.I _ : es) = allPlain es
+allPlain (T.D _ : es) = allPlain es
+allPlain (T.B _ : es) = allPlain es
+allPlain (T.C _ : es) = allPlain es
+allPlain _ = return False
+
 isIOPrimitive "nowi" = True
 isIOPrimitive "readFile" = True
 isIOPrimitive "readIntVecFile" = True
@@ -120,9 +135,18 @@ convertExp (T.Vc [T.Var x]) (Acc 1 t) = do
   e' <- convertExp (T.Var x) (Exp t)
   return $ A.App (A.Primitive $ A.Ident "unitvec") [A.unit e']
 
-convertExp (T.Vc es) (Acc 1 t) = do
-  es' <- mapM (`convertExp` Plain t) es
-  return $ A.TypSig (A.use $ A.fromList (length es') (A.List es')) (Acc 1 t)
+convertExp (T.Vc []) (Acc 1 t) =
+  return $ A.Var $ Primitive $ Ident "zilde"
+
+convertExp (T.Vc (e:es)) (Acc 1 t) = do
+  isPlain <- allPlain es
+  if isPlain
+    then do es' <- mapM (`convertExp` Plain t) (e:es)
+            return $ A.TypSig (A.use $ A.fromList (length es') (A.List es')) (Acc 1 t)
+    else do e' <- convertExp e (Acc 1 t)
+            es' <- convertExp (T.Vc es) (Acc 1 t)
+            return $ cat e' es'
+  where cat x y = A.App (Primitive $ Ident "catV") [x, y]
 
 convertExp (T.Vc es) (Plain t) = do
   es' <- mapM (`convertExp` Plain t) es
