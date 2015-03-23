@@ -67,6 +67,7 @@ allPlain [] = return True
 allPlain _ = return False
 
 isIOPrimitive "nowi" = True
+isIOPrimitive "mem" = True
 isIOPrimitive "readFile" = True
 isIOPrimitive "readIntVecFile" = True
 isIOPrimitive "readDoubleVecFile" = True
@@ -248,7 +249,7 @@ functions = Map.fromList
   , ( "powerScl",\Nothing                    t -> let bt = A.baseType t in
                                                   (prim "power",    [funcArg (Acc 0 bt) (Acc 0 bt), expArg IntT, accArg 0 bt], Acc 0 bt) )
   , ( "rav",     \(Just ([t], [r]))          _ -> (acc "flatten",   [accArg r t], Acc 1 t) )
-  , ( "mem",     \Nothing                    t -> (mem,             [flip convertExp t], t) )
+  , ( "mem",     \Nothing              (IO_ t) -> (mem,             [flip convertExp t], IO_ t) )
 
   , ( "nowi",              \Nothing          _ -> (prim "now",               [plainArg IntT],  IO_ (Exp IntT)) )
   , ( "readFile",          \Nothing          _ -> (prim "readCharVecFile",   [plainArg CharT], IO_ (Acc 1 CharT)) )
@@ -270,7 +271,7 @@ functions = Map.fromList
         cmpOp f bty (Plain _) = (f, [plainArg bty, plainArg bty], Plain BoolT)
         cmpOp f bty _         = (f, [expArg bty,   expArg bty],   Exp BoolT)
 
-        mem = A.use . A.App (Backend $ Ident "run")
+        mem args = A.App (Primitive $ Ident "mem") (A.Var (Backend $ Ident "run") : args)
 
         plainArg :: A.BType -> T.Exp -> Convert A.Exp
         plainArg t = flip convertExp (Plain t)

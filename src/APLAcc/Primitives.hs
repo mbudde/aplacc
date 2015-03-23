@@ -33,6 +33,7 @@ module APLAcc.Primitives (
   snoc, snocV,
   sum,
   now,
+  mem,
   readCharVecFile,
   readVecFile,
   readIntVecFile,
@@ -43,6 +44,7 @@ module APLAcc.Primitives (
 
 import Prelude hiding (take, drop, reverse, zipWith, sum)
 import Control.Monad (liftM, mapM)
+import Control.Exception (evaluate)
 import Data.Bits (xor, (.&.))
 import Data.Default
 import Data.List (intercalate)
@@ -356,6 +358,8 @@ sum g a b =
       sh2 = Acc.unindex1 $ Acc.shape b
   in if sh1 == sh2 then Acc.zipWith (+) a b else zilde
 
+mem :: (Acc.Arrays a) => (Acc a -> a) -> Acc a -> IO (Acc a)
+mem run acc = fmap Acc.use (evaluate $ run acc)
 
 -- Input/output primitives
 
