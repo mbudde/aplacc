@@ -384,8 +384,10 @@ readCharVecFile file =
 readVecFile :: (Read a, Elt a) => String -> IO (Acc (Vector a))
 readVecFile file =
   do contents <- Prelude.readFile file
-     let values =  map read $ lines contents
+     let values =  concatMap (map read . splitComma) $ lines contents
      return $ Acc.use $ Acc.fromList (Z :. (length values) :: Acc.DIM1) values
+  where splitComma "" = []
+        splitComma s = let (w, s') = break (== ',') s in w : splitComma s'
 
 readIntVecFile :: String -> IO (Acc (Vector Int))
 readIntVecFile = readVecFile
