@@ -247,9 +247,9 @@ functions = Map.fromList
   -- FIXME: first should take a default element
   , ( "first",   \(Just ([t], [r]))          _ -> (prim "first",    [accArg r t], Exp t) )
   , ( "firstV",  \Nothing                    _ -> (prim "firstV",   [accArg 1 IntT], Exp IntT) )
-  , ( "power",   \(Just ([t], [r]))          _ -> (prim "power",    [funcArg (Acc r t) (Acc r t), expArg IntT, accArg r t], Acc r t) )
+  , ( "power",   \(Just ([t], [r]))          _ -> (power,           [funcArg (Acc r t) (Acc r t), plainArg IntT, accArg r t], Acc r t) )
   , ( "powerScl",\Nothing                    t -> let bt = A.baseType t in
-                                                  (prim "power",    [funcArg (Acc 0 bt) (Acc 0 bt), expArg IntT, accArg 0 bt], Acc 0 bt) )
+                                                  (power,           [funcArg (Acc 0 bt) (Acc 0 bt), plainArg IntT, accArg 0 bt], Acc 0 bt) )
   , ( "condScl", \Nothing                    t -> let bt = A.baseType t in
                                                   (prim "condScl",  [funcArg (Acc 0 bt) (Acc 0 bt), expArg BoolT, accArg 0 bt], Acc 0 bt) )
   , ( "rav",     \(Just ([t], [r]))          _ -> (acc "flatten",   [accArg r t], Acc 1 t) )
@@ -280,6 +280,7 @@ functions = Map.fromList
         cmpOp f bty (Plain _) = (f, [plainArg bty, plainArg bty], Plain BoolT)
         cmpOp f bty _         = (f, [expArg bty,   expArg bty],   Exp BoolT)
 
+        power args = A.App (Primitive $ Ident "power") (A.Var (Backend $ Ident "run1") : args)
         mem args = A.App (Primitive $ Ident "mem") (A.Var (Backend $ Ident "run") : args)
         memScl args = A.App (Primitive $ Ident "memScl") (A.Var (Backend $ Ident "run") : args)
 
