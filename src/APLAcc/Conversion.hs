@@ -280,7 +280,7 @@ functions = Map.fromList
         cmpOp f bty (Plain _) = (f, [plainArg bty, plainArg bty], Plain BoolT)
         cmpOp f bty _         = (f, [expArg bty,   expArg bty],   Exp BoolT)
 
-        power args = A.App (Primitive $ Ident "power") (A.Var (Backend $ Ident "run1") : A.Var (Backend $ Ident "run0"): args)
+        power args = A.App (Primitive $ Ident "power") (A.Var (Backend $ Ident "run1") : A.Var (Backend $ Ident "run"): args)
         mem args = A.App (Primitive $ Ident "mem") (A.Var (Backend $ Ident "run") : args)
         memScl args = A.App (Primitive $ Ident "memScl") (A.Var (Backend $ Ident "run") : args)
 
