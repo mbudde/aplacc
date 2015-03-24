@@ -172,8 +172,9 @@ power :: forall a. (Acc.Arrays a)
       -> Acc a
 power run1 run fn n arr =
   powerRec n (run arr)
-  where powerRec m inArr | m <= 0 = Acc.use inArr
-        powerRec m inArr = powerRec (m-1) (run1 fn inArr)
+  where accFn = run1 fn
+        powerRec m inArr | m <= 0 = Acc.use inArr
+        powerRec m inArr = powerRec (m-1) (accFn inArr)
 
 
 condScl :: (Elt e) => (Acc (Scalar e) -> Acc (Scalar e)) -> Exp Bool -> Acc (Scalar e) -> Acc (Scalar e)
