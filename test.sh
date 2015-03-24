@@ -3,6 +3,7 @@
 shopt -s nullglob
 
 toplevel=$(dirname $0)
+aplacc_args=
 verbose=
 write_output=
 files=()
@@ -13,6 +14,8 @@ while [ $# != 0 ]; do
     case "$1" in
         -v)
             verbose=1 ;;
+        -c)
+            aplacc_args="$aplacc_args -c" ;;
         -w)
             write_output=1 ;;
         -a|--all)
@@ -98,7 +101,7 @@ for f in "${files[@]}"; do
         cat "$f"
         echo -e "\033[33m>>> [$f] Running aplacc\033[0m"
     fi
-    hsoutput=$($toplevel/dist/build/aplacc/aplacc --tail "$f")
+    hsoutput=$($toplevel/dist/build/aplacc/aplacc --tail $aplacc_args "$f")
     if [ $? != 0 ]; then
         echo -e "\033[31;1m<<< [$f] aplacc failed\033[0m"
         move_to "$f" "$toplevel/tests/failing"
