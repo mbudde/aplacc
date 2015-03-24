@@ -165,14 +165,15 @@ reduce = Acc.fold
 
 power :: forall a. (Acc.Arrays a)
       => ((Acc a -> Acc a) -> a -> a)
+      -> (Acc a -> a)
       -> (Acc a -> Acc a)
       -> Int
       -> Acc a
       -> Acc a
-power run1 fn n arr =
-  powerRec n (run1 (\_ -> arr) (undefined))
-  where powerRec 0 inArr = Acc.use inArr
-        powerRec n inArr = powerRec (n-1) (run1 fn inArr)
+power run1 run fn n arr =
+  powerRec n (run arr)
+  where powerRec m inArr | m <= 0 = Acc.use inArr
+        powerRec m inArr = powerRec (m-1) (run1 fn inArr)
 
 
 condScl :: (Elt e) => (Acc (Scalar e) -> Acc (Scalar e)) -> Exp Bool -> Acc (Scalar e) -> Acc (Scalar e)
