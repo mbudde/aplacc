@@ -18,7 +18,7 @@ module APLAcc.Primitives (
   reduce,
   shape, shapeV,
   shFromVec,
-  power,
+  power, power2,
   bench,
   condScl,
   reshape0, reshape,
