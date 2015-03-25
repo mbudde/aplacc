@@ -245,7 +245,7 @@ functions = Map.fromList
   , ( "snocV",   \(Just ([t], [_]))          _ -> (prim "snocV",    [accArg 1 t, expArg t], Acc 1 t) )
   , ( "zipWith", \(Just ([t1, t2, t3], [r])) _ -> (prim "zipWith",  [funcArg (Exp t1) (Exp t3), accArg r t1, accArg r t2], Acc r t3) )
   , ( "rotate",  \(Just ([t], [r]))          _ -> (prim "rotate",   [expArg IntT, accArg r t], Acc r t) )
-  , ( "rotateV", \Nothing                    _ -> (prim "rotateV",  [expArg IntT, accArg 1 IntT], Acc 1 IntT) )
+  , ( "rotateV", \(Just ([t], [r]))          _ -> (prim "rotateV",  [expArg IntT, accArg 1 t], Acc 1 t) )
   , ( "vrotate", \(Just ([t], [r]))          _ -> (prim "vrotate",  [expArg IntT, accArg r t], Acc r t) )
   , ( "vrotateV",\(Just ([t], [_]))          _ -> (prim "rotateV",  [expArg IntT, accArg 1 t], Acc 1 t) )
   , ( "transp",  \(Just ([t], [r]))          _ -> (prim "transp",   [accArg r t], Acc r t) )
