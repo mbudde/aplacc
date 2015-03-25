@@ -163,7 +163,7 @@ reduce :: (Shape ix, Elt a)
        -> Acc (Array ix a)
 reduce = Acc.fold
 
-power :: forall a. (Acc.Arrays a)
+power, power2 :: forall a. (Acc.Arrays a)
       => ((Acc a -> Acc a) -> a -> a)
       -> (Acc a -> a)
       -> (Acc a -> Acc a)
@@ -176,6 +176,12 @@ power run1 run fn n arr =
         powerRec m inArr | m <= 0 = Acc.use inArr
         powerRec m inArr = powerRec (m-1) (accFn inArr)
 
+power2 run1 run fn n arr = unpack snd $
+  Acc.awhile (unpack (\(m, _) -> Acc.unit $ Acc.the m Acc.>* 0))
+             (unpack (\(m, a) -> Acc.lift $ (each (\k -> k-1) m, fn a)))
+             (Acc.lift (Acc.unit $ Acc.constant n, arr))
+  where unpack :: (Acc.Arrays b) => ((Acc (Scalar Int), Acc a) -> Acc b) -> Acc (Scalar Int, a) -> Acc b
+        unpack f x = let y = Acc.unlift x in f y
 
 condScl :: (Elt e) => (Acc (Scalar e) -> Acc (Scalar e)) -> Exp Bool -> Acc (Scalar e) -> Acc (Scalar e)
 condScl fn b val = b Acc.?| (fn val, val)
