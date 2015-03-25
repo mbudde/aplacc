@@ -19,6 +19,7 @@ module APLAcc.Primitives (
   shape, shapeV,
   shFromVec,
   power,
+  bench,
   condScl,
   reshape0, reshape,
   reverse,
@@ -182,6 +183,28 @@ power2 run1 run fn n arr = unpack snd $
              (Acc.lift (Acc.unit $ Acc.constant n, arr))
   where unpack :: (Acc.Arrays b) => ((Acc (Scalar Int), Acc a) -> Acc b) -> Acc (Scalar Int, a) -> Acc b
         unpack f x = let y = Acc.unlift x in f y
+
+bench :: (Acc.Arrays a, Show a)
+      => ((Acc a -> Acc a) -> a -> a)
+      -> (Acc a -> a)
+      -> (Acc a -> Acc a)
+      -> Int
+      -> Acc a
+      -> IO (Acc a)
+bench run1 run fn n input =
+  do let accFn = run1 fn
+     input' <- evaluate $ run input
+     evaluate $ accFn input'
+     start <- now
+     result <- evaluate $ iter n accFn input'
+     end <- now
+     putStrLn $ "Iterations: " ++ show n
+     putStrLn $ "Result:     " ++ show result
+     putStrLn $ "Avg timing: " ++ show ((fromIntegral (end - start)) / (fromIntegral n))
+     return $ Acc.use result
+  where iter 0 accFn r = r
+        iter m accFn r = iter (m-1) accFn (accFn r)
+        now = getCPUTime >>= return . fromIntegral . (`div` 1000000000)
 
 condScl :: (Elt e) => (Acc (Scalar e) -> Acc (Scalar e)) -> Exp Bool -> Acc (Scalar e) -> Acc (Scalar e)
 condScl fn b val = b Acc.?| (fn val, val)

@@ -32,7 +32,7 @@ data QName
 data Stmt
   = LetStmt T.Ident Type Exp
   | Bind T.Ident Type Exp
-  | Return Exp
+  | Return Bool Exp
 
 data Exp
   = Var QName

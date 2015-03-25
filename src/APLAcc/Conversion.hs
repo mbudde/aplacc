@@ -66,6 +66,7 @@ allPlain (T.C _ : es) = allPlain es
 allPlain [] = return True
 allPlain _ = return False
 
+isIOPrimitive "bench" = True
 isIOPrimitive "nowi" = True
 isIOPrimitive "mem" = True
 isIOPrimitive "memScl" = True
@@ -90,9 +91,13 @@ convertStmt (T.Let x t1 e1 e2) = do
   stmts <- local (Map.insert x t3) $ convertStmt e2
   return $ A.LetStmt x t3 e3 : stmts
 
+convertStmt e@(T.Op opname _ _) | isIOPrimitive opname = do
+  e' <- convertExp e (IO_ (Acc 0 DoubleT))
+  return [A.Return True $ e']
+
 convertStmt e = do
   e' <- convertExp e (Acc 0 DoubleT)
-  return [A.Return $ e']
+  return [A.Return False $ e']
 
 
 convertExp :: T.Exp -> A.Type -> Convert A.Exp
@@ -245,11 +250,10 @@ functions = Map.fromList
   -- FIXME: first should take a default element
   , ( "first",   \(Just ([t], [r]))          _ -> (prim "first",    [accArg r t], Exp t) )
   , ( "firstV",  \Nothing                    _ -> (prim "firstV",   [accArg 1 IntT], Exp IntT) )
+  , ( "bench",   \(Just ([t], []))           _ -> (bench,           [funcArg (Acc 0 t) (Acc 0 t), plainArg IntT, accArg 0 t], IO_ (Acc 0 t)) )
   , ( "power",   \(Just ([t], [r]))          _ -> (power,           [funcArg (Acc r t) (Acc r t), plainArg IntT, accArg r t], Acc r t) )
-  , ( "powerScl",\Nothing                    t -> let bt = A.baseType t in
-                                                  (power,           [funcArg (Acc 0 bt) (Acc 0 bt), plainArg IntT, accArg 0 bt], Acc 0 bt) )
-  , ( "condScl", \Nothing                    t -> let bt = A.baseType t in
-                                                  (prim "condScl",  [funcArg (Acc 0 bt) (Acc 0 bt), expArg BoolT, accArg 0 bt], Acc 0 bt) )
+  , ( "powerScl",\(Just ([t], []))           _ -> (power,           [funcArg (Acc 0 t) (Acc 0 t), plainArg IntT, accArg 0 t], Acc 0 t) )
+  , ( "condScl", \(Just ([t], []))           _ -> (prim "condScl",  [funcArg (Acc 0 t) (Acc 0 t), expArg BoolT, accArg 0 t], Acc 0 t) )
   , ( "rav",     \(Just ([t], [r]))          _ -> (acc "flatten",   [accArg r t], Acc 1 t) )
   , ( "mem",     \Nothing                    t -> case t of
                                                     IO_ t' -> (mem, [flip convertExp t'], IO_ t')
@@ -278,6 +282,7 @@ functions = Map.fromList
         cmpOp f bty (Plain _) = (f, [plainArg bty, plainArg bty], Plain BoolT)
         cmpOp f bty _         = (f, [expArg bty,   expArg bty],   Exp BoolT)
 
+        bench args = A.App (Primitive $ Ident "bench") (A.Var (Backend $ Ident "run1") : A.Var (Backend $ Ident "run"): args)
         power args = A.App (Primitive $ Ident "power") (A.Var (Backend $ Ident "run1") : A.Var (Backend $ Ident "run"): args)
         mem args = A.App (Primitive $ Ident "mem") (A.Var (Backend $ Ident "run") : args)
         memScl args = A.App (Primitive $ Ident "memScl") (A.Var (Backend $ Ident "run") : args)

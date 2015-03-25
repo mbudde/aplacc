@@ -161,7 +161,8 @@ outputStmt (A.LetStmt ident typ e) =
               _              -> ExpTypeSig noLoc (outputExp e) (outputType typ)
   in  LetStmt (BDecls [ PatBind noLoc (PVar $ Ident ident) (UnGuardedRhs e') (BDecls []) ])
 outputStmt (A.Bind ident typ e) = Generator noLoc (PVar $ Ident ident) (outputExp e)
-outputStmt (A.Return e) = Qualifier $ App (Var $ qualPrelude $ Ident "return") (outputExp e)
+outputStmt (A.Return True e) = Qualifier $ outputExp e
+outputStmt (A.Return False e) = Qualifier $ App (Var $ qualPrelude $ Ident "return") (outputExp e)
 
 outputExp :: A.Exp -> Exp
 outputExp (A.Var n) = Var $ qname n 
