@@ -65,4 +65,7 @@ fromInt x = App (Prelude $ Ident "fromIntegral") [x]
 unitvec x = App (Primitive $ Ident "unitvec") [x]
 shFromVec x = App (Primitive $ Ident "shFromVec") [x]
 first x = App (Primitive $ Ident "first") [x]
+
+bind e f = InfixApp (Prelude $ Symbol ">>=") [e, f]
 ret x = App (Prelude $ Ident "return") [x]
+

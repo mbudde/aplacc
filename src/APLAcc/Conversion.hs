@@ -39,6 +39,9 @@ typeCast (Acc 0 t1)  (Acc 1 t2)       | t1 == t2 = A.unitvec
 typeCast (Acc 1 t1)  (Acc 0 t2)       = typeCast (Exp t1) (Acc 0 t2) . A.first
 typeCast (Acc 1 IntT) (ShapeT)        = cancelShape
 
+typeCast (IO_ t1) (IO_ t2) | t1 /= t2 = bindRet $ typeCast t1 t2 (A.Var $ UnQual $ Ident "x")
+  where bindRet e2 e1 = A.bind e1 (A.Fn "x" t1 (A.ret e2))
+
 typeCast t1 t2 | t1 == t2 = id
 typeCast t1 t2 = \e -> error $ "cannot type cast " ++ show e ++ " from " ++ show t1 ++ " to " ++ show t2
 
