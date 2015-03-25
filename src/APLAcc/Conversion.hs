@@ -125,9 +125,7 @@ convertExp (T.Let x t1 e1 e2) t2 = do
   e2' <- local (Map.insert x t3) $ convertExp e2 t2
   return $ A.Let x t3 e3 e2'
 
-convertExp (T.Op name instDecl args) t = do
-  (e, t2) <- convertOp name instDecl args t
-  return $ typeCast t2 t e
+convertExp (T.Op name instDecl args) t = convertOp name instDecl args t
 
 convertExp (T.Fn x t1 e) t2 = do
   let t1' = convertType t1
@@ -350,16 +348,16 @@ functions = Map.fromList
         funcArg t1 t2 name = error $ show name ++ " not implemented as function for " ++ show t1 ++ " -> " ++ show t2
 
 
-convertOp :: T.Ident -> Maybe T.InstDecl -> [T.Exp] -> A.Type -> Convert (A.Exp, A.Type)
+convertOp :: T.Ident -> Maybe T.InstDecl -> [T.Exp] -> A.Type -> Convert A.Exp
 convertOp name@('p':'r':_) _ [arg] (IO_ t) =
   do e' <- convertExp arg t
-     return (A.App (Primitive $ Ident name) [A.Var (Backend $ Ident "run"), e'], IO_ t)
-convertOp ('p':'r':_) _ [arg] t = convertExp arg t >>= \x -> return (x, t)
+     return $ A.App (Primitive $ Ident name) [A.Var (Backend $ Ident "run"), e']
+convertOp ('p':'r':_) _ [arg] t = convertExp arg t >>= \x -> return x
 convertOp name inst args t =
   case Map.lookup name functions of
     Just f  -> do let (g, argTyps, retTyp) = f inst t
                   e <- liftM g (convertArgs argTyps args)
-                  return (e, retTyp)
+                  return $ typeCast retTyp t e
     Nothing -> error $ name ++ "{" ++ show inst ++ "} not implemented"
 
 
