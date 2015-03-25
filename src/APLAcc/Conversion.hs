@@ -339,6 +339,12 @@ functions = Map.fromList
         funcArg (Exp DoubleT) _ (T.Var "divd") = return $ A.Var $ Prelude $ Symbol "/"
         funcArg (Exp DoubleT) _ (T.Var "mind") = return $ A.Var $ Prelude $ Ident "min"
         funcArg (Exp DoubleT) _ (T.Var "maxd") = return $ A.Var $ Prelude $ Ident "max"
+        funcArg (Exp DoubleT) _ (T.Var "abs") = return $ A.Var $ Prelude $ Ident "abs"
+        funcArg (Exp DoubleT) _ (T.Var "log") = return $ A.Var $ Prelude $ Ident "log"
+        funcArg (Exp DoubleT) _ (T.Var "exp") = return $ A.Var $ Prelude $ Ident "exp"
+        funcArg (Exp DoubleT) _ (T.Var "sin") = return $ A.Var $ Prelude $ Ident "sin"
+        funcArg (Exp DoubleT) _ (T.Var "cos") = return $ A.Var $ Prelude $ Ident "cos"
+        funcArg (Exp DoubleT) _ (T.Var "tan") = return $ A.Var $ Prelude $ Ident "tan"
 
         funcArg (Exp CharT) _ (T.Var "eqc") = return $ A.Var $ Accelerate $ Symbol "==*"
 
