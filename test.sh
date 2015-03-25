@@ -36,7 +36,7 @@ while [ $# != 0 ]; do
             break ;;
         *)
             if [ -d "$1" ]; then
-                files+=(${1%%/*}/*.tail)
+                files+=(${1%/}/*.tail)
             else
                 files+=($1)
             fi
