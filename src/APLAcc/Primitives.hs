@@ -32,7 +32,7 @@ module APLAcc.Primitives (
   zipWith,
   cat, catV,
   cons, consV,
-  snoc, snocV,
+  snoc, snocV, snocSh,
   sum,
   now,
   mem, memScl,
@@ -382,6 +382,9 @@ snoc a1 a2 = a1 Acc.++ extend a2
 
 snocV :: (Elt e) => Acc (Vector e) -> Exp e -> Acc (Vector e)
 snocV arr e = snoc arr (Acc.unit e)
+
+snocSh :: (Shape ix, Slice ix) => Exp ix -> Exp Int -> Exp (ix :. Int)
+snocSh ix n = Acc.lift $ ix :. n
 
 sum :: (Elt e, Acc.IsNum e)
     => (Exp e -> Exp e -> Exp e)
