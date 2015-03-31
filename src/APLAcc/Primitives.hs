@@ -198,9 +198,9 @@ bench run1 run fn n input =
      start <- now
      result <- evaluate $ iter n accFn input'
      end <- now
-     putStrLn $ "Iterations: " ++ show n
-     putStrLn $ "Result:     " ++ show result
-     putStrLn $ "Avg timing: " ++ show ((fromIntegral (end - start)) / (fromIntegral n))
+     putStrLn $ "ITERATIONS: " ++ show n
+     putStrLn $ "RESULT: " ++ show result
+     putStrLn $ "AVGTIMING: " ++ show ((fromIntegral (end - start)) / (fromIntegral n))
      return $ Acc.use result
   where iter 0 accFn r = r
         iter m accFn r = iter (m-1) accFn (accFn r)
