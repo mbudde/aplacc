@@ -29,7 +29,7 @@ executable aplacc
   hs-source-dirs:    src
   build-depends:     base >= 4.6.0,
                      containers,
-                     mtl,
+                     mtl >= 2.2.1,
                      parsec == 3.1.*,
                      accelerate >= 0.14.0.0,
                      pretty == 1.*,

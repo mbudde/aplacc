@@ -1,5 +1,7 @@
 module APLAcc.Conversion (convertProgram) where
 
+import Control.Monad
+import Control.Monad.Except
 import Control.Monad.Reader
 import qualified Data.Map as Map
 import Data.List (sortBy, isPrefixOf)
@@ -10,40 +12,53 @@ import qualified APLAcc.SimpleAcc.AST as A
 import APLAcc.SimpleAcc.AST (Type(..), BType(..), Name(..), QName(..))
 import APLAcc.SimpleAcc.ToHaskell () -- Show instances for SimpleAcc.AST
 
+type ConvertError = String
+type ConvertResult = Either ConvertError
 
 type Env = Map.Map T.Ident A.Type
 
 emptyEnv :: Env
 emptyEnv = Map.empty
 
-type Convert a = Reader Env a
+type Convert a = ReaderT Env (Except ConvertError) a
 
-runConvert = runReader
+runConvert m env = runExcept $ runReaderT m env
 
-convertProgram :: T.Program -> A.Program
+convertProgram :: T.Program -> ConvertResult A.Program
 convertProgram p = runConvert (convertStmt p) emptyEnv
 
-typeCast :: A.Type -- from
-         -> A.Type -- to
-         -> A.Exp -> A.Exp
-typeCast (Plain t1)   (Exp t2)        | t1 == t2 = A.constant . flip A.TypSig (Plain t1)
-typeCast (Plain t1)   (Acc r t2)      | t1 == t2 = typeCast (Exp t1) (Acc r t1) . typeCast (Plain t1) (Exp t1)
+tryTypeCast :: A.Type -- from
+            -> A.Type -- to
+            -> Maybe (A.Exp -> A.Exp)
+tryTypeCast (Plain t1)   (Exp t2)        | t1 == t2 = Just $ A.constant . flip A.TypSig (Plain t1)
+tryTypeCast (Plain t1)   (Acc r t2)      | t1 == t2 = liftM2 (.) (tryTypeCast (Exp t1) (Acc r t1)) (tryTypeCast (Plain t1) (Exp t1))
 
-typeCast (Exp t1)    (Acc 0 t2)       = A.unit . typeCast (Exp t1) (Exp t2)
-typeCast (Exp t1)    (Acc 1 t2)       = A.unitvec . typeCast (Exp t1) (Acc 0 t2)
+tryTypeCast (Exp t1)    (Acc 0 t2)       = liftM (A.unit .) $ tryTypeCast (Exp t1) (Exp t2)
+tryTypeCast (Exp t1)    (Acc 1 t2)       = liftM (A.unitvec .) $ tryTypeCast (Exp t1) (Acc 0 t2)
 
-typeCast (Acc 0 t1)  (Plain t2)       = typeCast (Exp t1) (Plain t2) . A.the
-typeCast (Acc 0 t1)  (Exp t2)         | t1 == t2 = A.the
-typeCast (Acc 1 t1)  (Exp t2)         | t1 == t2 = A.first
-typeCast (Acc 0 t1)  (Acc 1 t2)       | t1 == t2 = A.unitvec
-typeCast (Acc 1 t1)  (Acc 0 t2)       = typeCast (Exp t1) (Acc 0 t2) . A.first
-typeCast (Acc 1 IntT) (ShapeT)        = cancelShape
+tryTypeCast (Acc 0 t1)  (Plain t2)       = liftM (. A.the) $ tryTypeCast (Exp t1) (Plain t2)
+tryTypeCast (Acc 0 t1)  (Exp t2)         | t1 == t2 = Just A.the
+tryTypeCast (Acc 1 t1)  (Exp t2)         | t1 == t2 = Just A.first
+tryTypeCast (Acc 0 t1)  (Acc 1 t2)       | t1 == t2 = Just A.unitvec
+tryTypeCast (Acc 1 t1)  (Acc 0 t2)       = liftM (. A.first) $ tryTypeCast (Exp t1) (Acc 0 t2)
+tryTypeCast (Acc 1 IntT) (ShapeT)        = Just cancelShape
 
-typeCast (IO_ t1) (IO_ t2) | t1 /= t2 = bindRet $ typeCast t1 t2 (A.Var $ UnQual $ Ident "x")
+tryTypeCast (IO_ t1) (IO_ t2) | t1 /= t2 =
+  do f <- tryTypeCast t1 t2
+     return $ bindRet (f $ A.Var $ UnQual $ Ident "x")
   where bindRet e2 e1 = A.bind e1 (A.Fn "x" t1 (A.ret e2))
 
-typeCast t1 t2 | t1 == t2 = id
-typeCast t1 t2 = \e -> error $ "cannot type cast " ++ show e ++ " from " ++ show t1 ++ " to " ++ show t2
+tryTypeCast t1 t2 | t1 == t2 = Just $ id
+tryTypeCast t1 t2 = Nothing
+
+typeCast :: A.Type -- from
+            -> A.Type -- to
+            -> A.Exp
+            -> Convert A.Exp
+typeCast fromT toT e =
+  case tryTypeCast fromT toT of
+    Just f -> return $ f e
+    Nothing -> throwError $ "cannot type cast " ++ show e ++ " from " ++ show fromT ++ " to " ++ show toT
 
 cancelShape :: A.Exp -> A.Exp
 cancelShape (A.App (Primitive (Ident "shape")) [e]) = A.App (Accelerate $ Ident "shape") [e]
@@ -59,7 +74,7 @@ allPlain (T.Var name : es) =
      case Map.lookup name env of
        Nothing -> case name of
                     "pi" -> return False
-                    _    -> error $ name ++ " not found in env"
+                    _    -> throwError $ name ++ " not found in env"
        Just (Plain _) -> allPlain es
        _ -> return False
 allPlain (T.I _ : es) = allPlain es
@@ -81,13 +96,13 @@ isIOPrimitive _ = False
 
 convertStmt :: T.Exp -> Convert [A.Stmt]
 convertStmt (T.Let x t1 e1@(T.Op opname _ _) e2) | isIOPrimitive opname = do
-  let t1' = convertType t1
+  t1' <- convertType t1
   e1' <- convertExp e1 (IO_ t1')
   stmts <- local (Map.insert x t1') $ convertStmt e2
   return $ A.Bind x t1' e1' : stmts
 
 convertStmt (T.Let x t1 e1 e2) = do
-  let t1' = convertType t1
+  t1' <- convertType t1
   e1' <- convertExp e1 t1'
   -- If the e1 has been lifted to Exp then drop the lift and store as Plain
   let (t3, e3) = cancelLift t1' e1'
@@ -107,26 +122,26 @@ convertExp :: T.Exp -> A.Type -> Convert A.Exp
 convertExp (T.Var "zilde") (Acc 1 _) = return $ A.Var $ Primitive $ Ident "zilde"
 convertExp (T.Var name) t = do
   env <- ask
-  return $ case Map.lookup name env of
+  case Map.lookup name env of
     Nothing -> case name of
-                 "pi" -> A.Var $ Prelude $ Ident "pi"
-                 _    -> error $ name ++ " not found in env"
+                 "pi" -> return $ A.Var $ Prelude $ Ident "pi"
+                 _    -> throwError $ name ++ " not found in env"
     Just t2 -> typeCast t2 t $ A.Var $ UnQual $ Ident name
 
-convertExp (T.I i) t = return $ typeCast (Plain IntT) t $ A.I i
-convertExp (T.D d) t = return $ typeCast (Plain DoubleT) t $ A.D d
-convertExp (T.B b) t = return $ typeCast (Plain BoolT) t $ A.B b
-convertExp (T.C c) t = return $ typeCast (Plain CharT) t $ A.C c
-convertExp (T.Inf) t = return $ typeCast (Plain DoubleT) t $ A.Var $ Primitive $ Ident "infinity"
+convertExp (T.I i) t = typeCast (Plain IntT) t $ A.I i
+convertExp (T.D d) t = typeCast (Plain DoubleT) t $ A.D d
+convertExp (T.B b) t = typeCast (Plain BoolT) t $ A.B b
+convertExp (T.C c) t = typeCast (Plain CharT) t $ A.C c
+convertExp (T.Inf) t = typeCast (Plain DoubleT) t $ A.Var $ Primitive $ Ident "infinity"
 
 convertExp (T.Neg e) t = do
   let t' = Exp $ A.baseType t
   e' <- convertExp e t'
   let (t2, e2) = cancelLift t' e'
-  return $ typeCast t2 t $ A.Neg e2
+  typeCast t2 t $ A.Neg e2
 
 convertExp (T.Let x t1 e1 e2) t2 = do
-  let t1' = convertType t1
+  t1' <- convertType t1
   e1' <- convertExp e1 t1'
   -- If the e1 has been lifted to Exp then drop the lift and store as Plain
   let (t3, e3) = cancelLift t1' e1'
@@ -136,7 +151,7 @@ convertExp (T.Let x t1 e1 e2) t2 = do
 convertExp (T.Op name instDecl args) t = convertOp name instDecl args t
 
 convertExp (T.Fn x t1 e) t2 = do
-  let t1' = convertType t1
+  t1' <- convertType t1
   e' <- local (Map.insert x t1') (convertExp e t2)
   return $ A.Fn x t1' e'
 
@@ -161,15 +176,15 @@ convertExp (T.Vc es) (Plain t) = do
   es' <- mapM (`convertExp` Plain t) es
   return $ A.List es'
 
-convertExp e t = error $ "failed to convert exp " ++ show e ++ " to type " ++ show t
+convertExp e t = throwError $ "failed to convert exp " ++ show e ++ " to type " ++ show t
 
-convertType :: T.Type -> A.Type
-convertType (T.ArrT t (T.R 0)) = Exp t
-convertType (T.ArrT t (T.R r)) = Acc r t
-convertType (T.VecT t (T.R len)) = Acc 1 t
-convertType (T.ST t _) = Exp t
-convertType (T.SVT t _) = Acc 1 t
-convertType _ = error "convertType - not implemented"
+convertType :: T.Type -> Convert A.Type
+convertType (T.ArrT t (T.R 0)) = return $ Exp t
+convertType (T.ArrT t (T.R r)) = return $ Acc r t
+convertType (T.VecT t (T.R len)) = return $ Acc 1 t
+convertType (T.ST t _) = return $ Exp t
+convertType (T.SVT t _) = return $ Acc 1 t
+convertType _ = throwError "convertType - not implemented"
 
 functions :: Map.Map String (Maybe T.InstDecl -> A.Type -> ([A.Exp] -> A.Exp, [T.Exp -> Convert A.Exp], A.Type))
 functions = Map.fromList
@@ -304,11 +319,12 @@ functions = Map.fromList
         accArg n t = flip convertExp (Acc n t)
 
         transp2Arg :: T.Exp -> Convert A.Exp
-        transp2Arg e = let perm = intList e
-                       in  return $ A.Tuple [A.IdxFn perm, A.IdxFn $ permInverse perm]
-          where unwrapInt (T.I i) = i
-                unwrapInt e = error $ "list of ints expected, found " ++ show e
-                intList (T.Vc es) = map unwrapInt es
+        transp2Arg e = do perm <- intList e
+                          return $ A.Tuple [A.IdxFn perm, A.IdxFn $ permInverse perm]
+          where unwrapInt (T.I i) = return i
+                unwrapInt e = throwError $ "expected int in argument to transp2, got " ++ show e
+                intList (T.Vc es) = mapM unwrapInt es
+                intList e = throwError $ "expected list in argument to transp2, got " ++ show e
                 permInverse = map fst . sortBy (comparing snd) . zip [1..]
 
         shapeArg :: T.Exp -> Convert A.Exp
@@ -361,7 +377,7 @@ functions = Map.fromList
         funcArg t1 t2 (T.Fn x t3 e) = do
           e' <- local (Map.insert x t1) (convertExp e t2)
           return $ A.Fn x t1 e'
-        funcArg t1 t2 name = error $ show name ++ " not implemented as function for " ++ show t1 ++ " -> " ++ show t2
+        funcArg t1 t2 name = throwError $ show name ++ " not implemented as function for " ++ show t1 ++ " -> " ++ show t2
 
 
 convertOp :: T.Ident -> Maybe T.InstDecl -> [T.Exp] -> A.Type -> Convert A.Exp
@@ -373,8 +389,8 @@ convertOp name inst args t =
   case Map.lookup name functions of
     Just f  -> do let (g, argTyps, retTyp) = f inst t
                   e <- liftM g (convertArgs argTyps args)
-                  return $ typeCast retTyp t e
-    Nothing -> error $ name ++ "{" ++ show inst ++ "} not implemented"
+                  typeCast retTyp t e
+    Nothing -> throwError $ name ++ "{" ++ show inst ++ "} not implemented"
 
 
 convertArgs :: [T.Exp -> Convert A.Exp] -> [T.Exp] -> Convert [A.Exp]

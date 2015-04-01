@@ -48,10 +48,15 @@ main =
                            then hGetContents h
                            else compileApl opts h
              tailProg <- parseString tailText file
-             let hsText = toHs opts $ convertProgram tailProg
-             when (verbose opts) $ putErrLn "\ESC[33m[ Accelerate output ]\ESC[0m"
-             when (verbose opts || not (runProgram opts)) $ putStrLn hsText
-             when (runProgram opts) $ runGhc opts hsText
+             case convertProgram tailProg of
+               Left err -> do putErrLn "aplacc: error while compiling"
+                              putErrLn err
+                              exitFailure
+               Right p  ->
+                 do let hsText = toHs opts p
+                    when (verbose opts) $ putErrLn "\ESC[33m[ Accelerate output ]\ESC[0m"
+                    when (verbose opts || not (runProgram opts)) $ putStrLn hsText
+                    when (runProgram opts) $ runGhc opts hsText
 
 compileApl :: OutputOpts -> Handle -> IO String
 compileApl opts handle =
