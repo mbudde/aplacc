@@ -192,9 +192,12 @@ bench :: (Acc.Arrays a, Show a)
       -> Acc a
       -> IO (Acc a)
 bench run1 run fn n input =
-  do let accFn = run1 fn
+  do start <- now
+     let accFn = run1 fn
      input' <- evaluate $ run input
      evaluate $ accFn input'
+     end <- now
+     putStrLn $ "WARMUP: " ++ show (fromIntegral (end - start))
      start <- now
      result <- evaluate $ iter n accFn input'
      end <- now
