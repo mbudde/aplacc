@@ -18,7 +18,7 @@ module APLAcc.Primitives (
   reduce,
   shape, shapeV,
   shFromVec,
-  power, power2,
+  power, power2, power3,
   bench,
   condScl,
   reshape0, reshape,
@@ -45,6 +45,7 @@ module APLAcc.Primitives (
 
 
 import Prelude hiding (take, drop, reverse, zipWith, sum)
+import qualified Prelude
 import Control.Monad (liftM, mapM)
 import Control.Exception (evaluate)
 import qualified Data.Bits
@@ -164,7 +165,7 @@ reduce :: (Shape ix, Elt a)
        -> Acc (Array ix a)
 reduce = Acc.fold
 
-power, power2 :: forall a. (Acc.Arrays a)
+power, power2, power3 :: forall a. (Acc.Arrays a)
       => ((Acc a -> Acc a) -> a -> a)
       -> (Acc a -> a)
       -> (Acc a -> Acc a)
@@ -177,7 +178,11 @@ power run1 run fn n arr =
         powerRec m inArr | m <= 0 = Acc.use inArr
         powerRec m inArr = powerRec (m-1) (accFn inArr)
 
-power2 run1 run fn n arr = unpack snd $
+power2 _    _   _  0 arr = arr
+power2 run1 run fn n arr =
+  Acc.use $ run $ foldl1 (Acc.>->) (Prelude.take n $ repeat fn) arr
+
+power3 run1 run fn n arr = unpack snd $
   Acc.awhile (unpack (\(m, _) -> Acc.unit $ Acc.the m Acc.>* 0))
              (unpack (\(m, a) -> Acc.lift $ (each (\k -> k-1) m, fn a)))
              (Acc.lift (Acc.unit $ Acc.constant n, arr))
