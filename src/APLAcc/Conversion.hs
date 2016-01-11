@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module APLAcc.Conversion (convertProgram) where
 
 import Control.Monad
